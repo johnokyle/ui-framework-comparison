@@ -12,7 +12,7 @@ The project compares functional coverage, native versus application-owned capabi
 
 ## Current status
 
-This repository now contains versioned specifications, canonical fixture manifests, schemas, validation tooling, and a common stable-ID runtime smoke harness. The three implementation repositories have clean Git baselines and are linked above; they are currently private and are attached as pinned submodules under `implementations/`.
+This repository now contains versioned specifications, canonical fixture manifests, schemas, validation tooling, and a common stable-ID runtime smoke harness. The three implementation repositories have clean Git baselines and are linked above; they are currently private and are attached as pinned submodules under `implementations/`. Each implementation publishes the licensed baseline as the annotated `comparison-baseline-2026-11-21` tag.
 
 Normalized headless/model fixture evidence covers all 73 parent artifacts across Slint, QML, and Bevy + egui. A development runtime smoke run also passed semantic navigation, unknown-ID non-mutation, and clean-shutdown checks in all three Release applications. These checks do not establish equivalent rendering, OS-level interaction, accessibility, or performance.
 

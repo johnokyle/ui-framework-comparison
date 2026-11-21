@@ -9,7 +9,7 @@ This register records limitations from the initial static audit, subsequent Bevy
   - `implementations/slint` uses [Slint](https://github.com/johnokyle/slint-ui-test) at `7c1b4151b9b4d7e716683a8681a548d3220318a2`.
   - `implementations/qml` uses [QML](https://github.com/johnokyle/qml-ui-test) at `3561683acde306bdb65233c337d2bec3eba455c5`.
   - `implementations/bevy-egui` uses [Bevy + egui](https://github.com/johnokyle/bevy-egui-test) at `4f1c89556206c8f1efd61d420062eb4039c454b6`.
-- The parent gitlinks identify exact revisions even if implementation branches advance. Because the implementation repositories are private, public parent clones cannot initialize the submodules without the corresponding GitHub access.
+- Each implementation remote publishes the annotated `comparison-baseline-2026-11-21` tag at its corresponding pinned commit. The tags name the licensed baselines; parent gitlinks remain authoritative even if implementation branches advance. Because the implementation repositories are private, public parent clones cannot initialize the submodules without the corresponding GitHub access.
 
 ## Licensing
 
