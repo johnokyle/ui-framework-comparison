@@ -1,0 +1,1022 @@
+{
+  "schema_version": "1.0.0",
+  "id": "stock",
+  "revision": 1,
+  "title": "ACME stock OHLCV, sessions and indicators",
+  "classification": "numerical",
+  "generator": {
+    "name": "common-fixture-generator",
+    "revision": 1
+  },
+  "entity_identity": {
+    "rule": "bar_id and event_id are stable source identifiers; marker_id is stable after canonical (bar_index,kind,label,detail) sorting.",
+    "ordering": "Source ordinal order is canonical; display sorting, clustering, filtering, and LOD never change source identity."
+  },
+  "rng": {
+    "algorithm": "SplitMix64",
+    "state": "Unsigned 64-bit state initialized to seed modulo 2^64. next_u64 first adds 0x9E3779B97F4A7C15 modulo 2^64.",
+    "output": "z=state; z=(z xor (z>>30))*0xBF58476D1CE4E5B9 mod 2^64; z=(z xor (z>>27))*0x94D049BB133111EB mod 2^64; return z xor (z>>31).",
+    "uniform": "(next_u64() >> 11) * 2^-53, producing IEEE binary64 in [0,1).",
+    "below": "below(n)=next_u64() modulo n for integer n>=1; no rejection sampling.",
+    "normal": "u1=max(uniform(),1e-12); u2=uniform(); return sqrt(-2*ln(u1))*cos(2*pi*u2). Consume exactly two outputs, discard the sine component, and do not cache normals.",
+    "seed": "20260820 daily; 20260821 intraday; each variant has an independent stream",
+    "draw_order": [
+      "Daily: one normal then spread/high/low/volume uniforms in order per bar. Intraday uses the same draw order and a separately seeded stream. Live uses next-bar normal then spread/high/low/volume uniforms after all source draws."
+    ]
+  },
+  "normalization": {
+    "encoding": "UTF-8 without BOM",
+    "document": "One compact JSON object with keys artifact_id, columns, rows; columns contains column IDs and rows contains arrays in manifest column order.",
+    "object_keys": "JSON object keys sorted by Unicode code point; no insignificant whitespace; separators are ',' and ':'.",
+    "array_order": "Arrays and rows retain manifest/generator order; no sorting unless a formula explicitly requires it.",
+    "numbers": "IEEE 754 binary64 results are formatted as base-10 fixed-point with exactly 9 digits after the decimal point, round-to-nearest ties-to-even; no exponent notation.",
+    "integers": "JSON integers use base-10 without leading zeroes and are not converted to floating point.",
+    "negative_zero": "IEEE -0.0 and any nonzero value rounding to zero at 9 decimals serialize as 0.000000000.",
+    "nonfinite": "NaN, +Infinity, and -Infinity are rejected before serialization; null is the only missing/warm-up representation.",
+    "nulls": "Missing values serialize as JSON null, never NaN, an empty string, or a sentinel number.",
+    "booleans": "JSON true and false only.",
+    "strings": "JSON string escaping per RFC 8259; non-ASCII characters are emitted directly as UTF-8; no locale conversion or Unicode normalization.",
+    "dates": "ISO 8601 YYYY-MM-DD strings. Business calendars skip Saturday/Sunday and make no holiday claim.",
+    "datetimes": "ISO 8601 UTC strings YYYY-MM-DDTHH:MM:SSZ; synthetic intraday sessions are 09:30 through 16:00 exclusive, 390 one-minute bars, weekdays only.",
+    "line_endings": "No carriage returns; exactly one LF (0x0A) follows the closing JSON brace; no other trailing bytes."
+  },
+  "numeric_oracle": {
+    "calculation": "Compute with IEEE 754 binary64 (and explicit binary32 only for Browser 2 trend) without intermediate 9-decimal rounding. Normalize only for content serialization.",
+    "absolute_tolerance": 1e-09,
+    "relative_tolerance": 1e-09,
+    "display_formatting": "Display precision, currency symbols, grouping, and locale are separate. Formula tests may use these tolerances; content hashes require exact normalized bytes."
+  },
+  "formulas": {
+    "daily_bars": "price0=100; regime=.0009*sin(i/250); drift=.00015+regime; vol=.008+.005*abs(cos(i/97)); r=drift+vol*N; open=previous close; close=max(1,open*(1+r)); spread=vol*open*(.3+.7*u); high=max(open,close)+spread*u; low=max(.5,min(open,close)-spread*u); volume=8e6*(1+2.5*abs(r)/vol)*(.6+.8*u).",
+    "intraday_bars": "Daily formula with independent seed; drift and regime divided by 390, vol divided by sqrt(390), and volume scale 8e6/390. Timestamps are synthetic UTC weekdays at 09:30+minute_of_session, minute 0..389; no holiday or exchange-calendar claim.",
+    "live": "open=max(1,previous close); close=max(1,open*(1+drift+vol*N)); spread=vol*open*(.3+.7*u); high/low and volume use the source helper order; daily drift=.0002 vol=.009, intraday drift=.0002/390 vol=.009/sqrt(390).",
+    "sma_ema_bollinger": "SMA20 and EMA20 seed with first 20 closes at index 19; EMA k=2/21 and recurses x*k+previous*(1-k). Bollinger mid=SMA20 and bands=mid+/-2*sqrt(population variance) using two-pass squared deviations /20; all null before index 19.",
+    "vwap": "At each session_id change reset cumulative sums. typical=(high+low+close)/3; session_vwap=sum(typical*volume)/sum(volume). Daily has one bar per session; intraday resets at minute_of_session 0.",
+    "rsi_atr": "Wilder period 14. RSI first appears at index 14 from mean gains/losses of deltas 1..14, then (13*previous+current)/14. Zero loss gives RSI 100 unless both gain and loss are zero, which gives 50. ATR index 0 null; true range uses current high/low and previous close; first ATR at index 14 is arithmetic mean TR1..14 then Wilder recursion.",
+    "macd": "EMA12/EMA26 are SMA-seeded independently. MACD line is null before index 25, then EMA12-EMA26. Signal is EMA9 over compacted nonnull MACD values, first at source index 33. Histogram=line-signal when both nonnull.",
+    "markers_live": "SMA20/50 crossover signals use strict post-cross comparison and strength=clamp(abs(fast-slow)/slow*40,.25,1). Patterns are fixed demonstration ranges, not recognition. Reset Demo Data restores source and resets live stream; Reset View preserves source/annotations as scenario-defined."
+  },
+  "variants": [
+    {
+      "id": "daily",
+      "selection": "default",
+      "dimensions": {
+        "symbol": "ACME",
+        "bars": 1260,
+        "session_bars": 1,
+        "timezone": "UTC",
+        "live_events": 16
+      },
+      "artifacts": [
+        {
+          "id": "stock.bars.daily.1260",
+          "description": "ACME daily OHLCV source bars.",
+          "row_count": 1260,
+          "columns": [
+            {
+              "id": "bar_id",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "date",
+              "type": "date",
+              "nullable": false
+            },
+            {
+              "id": "open",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "high",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "low",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "close",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "volume",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "ACME-daily-000000",
+                "2021-01-04",
+                100.0,
+                100.352671512,
+                97.899002756,
+                98.125676307,
+                45285831.31754629
+              ]
+            },
+            {
+              "selector": "row[13]",
+              "row": [
+                "ACME-daily-000013",
+                "2021-01-21",
+                101.972740447,
+                103.895710391,
+                101.76409078,
+                103.686310758,
+                44418300.7442045
+              ]
+            },
+            {
+              "selector": "row[19]",
+              "row": [
+                "ACME-daily-000019",
+                "2021-01-29",
+                106.572808961,
+                107.35306776,
+                105.375729964,
+                105.842681961,
+                23484696.637283564
+              ]
+            },
+            {
+              "selector": "row[49]",
+              "row": [
+                "ACME-daily-000049",
+                "2021-03-12",
+                97.931142908,
+                98.524454986,
+                96.028689372,
+                96.450134949,
+                41322439.94061791
+              ]
+            },
+            {
+              "selector": "row[1259]",
+              "row": [
+                "ACME-daily-001259",
+                "2025-10-31",
+                134.395387105,
+                137.127828751,
+                133.805668872,
+                136.267940017,
+                37355541.3755528
+              ]
+            }
+          ],
+          "sha256": "9e2541f17ca2c74c399cdfd064d016db3f29b91a2df18c760fe1f926087e08df"
+        },
+        {
+          "id": "stock.indicators.daily.1260",
+          "description": "Indicator series with explicit warm-up nulls.",
+          "row_count": 1260,
+          "columns": [
+            {
+              "id": "bar_id",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "sma20",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "ema20",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "bollinger_mid",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "bollinger_upper",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "bollinger_lower",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "session_vwap",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "wilder_rsi14",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "wilder_atr14",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "macd_12_26",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "macd_signal9",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "macd_histogram",
+              "type": "number",
+              "nullable": true
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "ACME-daily-000000",
+                null,
+                null,
+                null,
+                null,
+                null,
+                98.792450192,
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            {
+              "selector": "row[13]",
+              "row": [
+                "ACME-daily-000013",
+                null,
+                null,
+                null,
+                null,
+                null,
+                103.115370643,
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            {
+              "selector": "row[14]",
+              "row": [
+                "ACME-daily-000014",
+                null,
+                null,
+                null,
+                null,
+                null,
+                103.284171713,
+                63.615580322,
+                2.135838242,
+                null,
+                null,
+                null
+              ]
+            },
+            {
+              "selector": "row[19]",
+              "row": [
+                "ACME-daily-000019",
+                101.730450213,
+                101.730450213,
+                101.730450213,
+                108.878552623,
+                94.582347804,
+                106.190493229,
+                64.493840305,
+                2.236671157,
+                null,
+                null,
+                null
+              ]
+            },
+            {
+              "selector": "row[25]",
+              "row": [
+                "ACME-daily-000025",
+                103.115688961,
+                101.587379958,
+                103.115688961,
+                108.116935601,
+                98.114442321,
+                98.438704958,
+                41.080060779,
+                2.646499723,
+                0.413909642,
+                null,
+                null
+              ]
+            },
+            {
+              "selector": "row[33]",
+              "row": [
+                "ACME-daily-000033",
+                101.231961316,
+                99.243089839,
+                101.231961316,
+                108.701319836,
+                93.762602796,
+                95.514457865,
+                38.653841467,
+                2.170742037,
+                -1.296922305,
+                -0.456426985,
+                -0.84049532
+              ]
+            },
+            {
+              "selector": "row[49]",
+              "row": [
+                "ACME-daily-000049",
+                96.060060526,
+                96.86343522,
+                96.060060526,
+                98.603455927,
+                93.516665125,
+                97.001093103,
+                46.840696057,
+                1.658562383,
+                -0.627355203,
+                -1.021990634,
+                0.394635431
+              ]
+            },
+            {
+              "selector": "row[1259]",
+              "row": [
+                "ACME-daily-001259",
+                139.512850551,
+                138.216152836,
+                139.512850551,
+                147.383900813,
+                131.64180029,
+                135.733812547,
+                42.150070382,
+                2.650879407,
+                -2.064490372,
+                -1.719587537,
+                -0.344902835
+              ]
+            }
+          ],
+          "sha256": "a6318172b8aba1b2c1d435123542641160be6aad0be15ca24a5c662944d46856"
+        },
+        {
+          "id": "stock.markers.daily.1260",
+          "description": "Signals, fixed demonstration pattern boundaries, and deterministic events in stable order.",
+          "row_count": 91,
+          "columns": [
+            {
+              "id": "marker_id",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "bar_index",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "kind",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "label",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "detail",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "value",
+              "type": "number",
+              "nullable": true
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "ACME-daily-marker-00000",
+                20,
+                "event",
+                "dividend",
+                "Dividend $0.35/share",
+                null
+              ]
+            },
+            {
+              "selector": "row[90]",
+              "row": [
+                "ACME-daily-marker-00090",
+                1237,
+                "event",
+                "earnings",
+                "Earnings: EPS beat +7.0%",
+                null
+              ]
+            }
+          ],
+          "sha256": "c4320c3983193c6facbc308d98445b06ac28bcbcae0811f66a63c0945f59d650"
+        },
+        {
+          "id": "stock.live.daily.16",
+          "description": "Sixteen bars from the continuation RNG state; timestamps advance through synthetic sessions.",
+          "row_count": 16,
+          "columns": [
+            {
+              "id": "event_id",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "tick",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "date",
+              "type": "date",
+              "nullable": false
+            },
+            {
+              "id": "open",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "high",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "low",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "close",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "volume",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "ACME-daily-live-000",
+                0,
+                "2025-11-03",
+                136.267940017,
+                136.658096071,
+                136.121795002,
+                136.572465186,
+                6061256.731840297
+              ]
+            },
+            {
+              "selector": "row[15]",
+              "row": [
+                "ACME-daily-live-015",
+                15,
+                "2025-11-24",
+                139.97336262,
+                140.611213255,
+                138.320450999,
+                138.506661835,
+                5044738.917156622
+              ]
+            }
+          ],
+          "sha256": "37c243d56cd8ada2b6b593f5be883903b51dc48d3f4521eac7122d228a9d90af"
+        }
+      ]
+    },
+    {
+      "id": "intraday",
+      "selection": "on-demand",
+      "dimensions": {
+        "symbol": "ACME",
+        "bars": 20000,
+        "session_bars": 390,
+        "timezone": "UTC",
+        "live_events": 16
+      },
+      "artifacts": [
+        {
+          "id": "stock.bars.intraday.20000",
+          "description": "ACME intraday OHLCV source bars.",
+          "row_count": 20000,
+          "columns": [
+            {
+              "id": "bar_id",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "session_id",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "timestamp",
+              "type": "datetime",
+              "nullable": false
+            },
+            {
+              "id": "minute_of_session",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "open",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "high",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "low",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "close",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "volume",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "ACME-intraday-000000",
+                "2021-01-04-session",
+                "2021-01-04T09:30:00Z",
+                0,
+                100.0,
+                100.020534699,
+                99.991015665,
+                99.997806743,
+                29320.330406345
+              ]
+            },
+            {
+              "selector": "row[13]",
+              "row": [
+                "ACME-intraday-000013",
+                "2021-01-04-session",
+                "2021-01-04T09:43:00Z",
+                13,
+                99.821617389,
+                99.869008449,
+                99.752147249,
+                99.81054826,
+                30102.639571833
+              ]
+            },
+            {
+              "selector": "row[19]",
+              "row": [
+                "ACME-intraday-000019",
+                "2021-01-04-session",
+                "2021-01-04T09:49:00Z",
+                19,
+                99.712655053,
+                99.774843489,
+                99.604361296,
+                99.653208846,
+                60250.077763534
+              ]
+            },
+            {
+              "selector": "row[389]",
+              "row": [
+                "ACME-intraday-000389",
+                "2021-01-04-session",
+                "2021-01-04T15:59:00Z",
+                389,
+                98.796178034,
+                98.822779691,
+                98.761931002,
+                98.781833427,
+                28614.366028405
+              ]
+            },
+            {
+              "selector": "row[19999]",
+              "row": [
+                "ACME-intraday-019999",
+                "2021-03-16-session",
+                "2021-03-16T11:19:00Z",
+                109,
+                104.036467186,
+                104.111901495,
+                104.004662928,
+                104.109141278,
+                65342.435815839
+              ]
+            }
+          ],
+          "sha256": "8e702a35662c668f5ac5ef380c2eae96cb15408fa7d2538907eebb6e78526639"
+        },
+        {
+          "id": "stock.indicators.intraday.20000",
+          "description": "Indicator series with explicit warm-up nulls.",
+          "row_count": 20000,
+          "columns": [
+            {
+              "id": "bar_id",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "sma20",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "ema20",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "bollinger_mid",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "bollinger_upper",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "bollinger_lower",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "session_vwap",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "wilder_rsi14",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "wilder_atr14",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "macd_12_26",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "macd_signal9",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "macd_histogram",
+              "type": "number",
+              "nullable": true
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "ACME-intraday-000000",
+                null,
+                null,
+                null,
+                null,
+                null,
+                100.003119035,
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            {
+              "selector": "row[13]",
+              "row": [
+                "ACME-intraday-000013",
+                null,
+                null,
+                null,
+                null,
+                null,
+                99.862104349,
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            {
+              "selector": "row[14]",
+              "row": [
+                "ACME-intraday-000014",
+                null,
+                null,
+                null,
+                null,
+                null,
+                99.861445645,
+                40.924805379,
+                0.104177387,
+                null,
+                null,
+                null
+              ]
+            },
+            {
+              "selector": "row[19]",
+              "row": [
+                "ACME-intraday-000019",
+                99.823175429,
+                99.823175429,
+                99.823175429,
+                100.127036528,
+                99.519314329,
+                99.824184753,
+                34.290005045,
+                0.10798858,
+                null,
+                null,
+                null
+              ]
+            },
+            {
+              "selector": "row[25]",
+              "row": [
+                "ACME-intraday-000025",
+                99.670864338,
+                99.680377381,
+                99.670864338,
+                99.923030163,
+                99.418698512,
+                99.761849708,
+                26.784179816,
+                0.106849159,
+                -0.158089262,
+                null,
+                null
+              ]
+            },
+            {
+              "selector": "row[33]",
+              "row": [
+                "ACME-intraday-000033",
+                99.502901228,
+                99.487654525,
+                99.502901228,
+                99.842095374,
+                99.163707081,
+                99.678914121,
+                29.312089693,
+                0.099078844,
+                -0.159800196,
+                -0.167320895,
+                0.007520699
+              ]
+            },
+            {
+              "selector": "row[389]",
+              "row": [
+                "ACME-intraday-000389",
+                99.010620978,
+                98.994756684,
+                99.010620978,
+                99.202914587,
+                98.818327369,
+                99.395988008,
+                27.287891861,
+                0.079913028,
+                -0.082377653,
+                -0.062911798,
+                -0.019465855
+              ]
+            },
+            {
+              "selector": "row[19999]",
+              "row": [
+                "ACME-intraday-019999",
+                103.936204669,
+                103.958301468,
+                103.936204669,
+                104.131601089,
+                103.740808249,
+                103.60643495,
+                63.456080719,
+                0.093152788,
+                0.068491089,
+                0.054672649,
+                0.01381844
+              ]
+            }
+          ],
+          "sha256": "90de622cbc347d35e5d4c5efceb7b4b845b7c7ca2492433c1746aba47b8db551"
+        },
+        {
+          "id": "stock.markers.intraday.20000",
+          "description": "Signals, fixed demonstration pattern boundaries, and deterministic events in stable order.",
+          "row_count": 1179,
+          "columns": [
+            {
+              "id": "marker_id",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "bar_index",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "kind",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "label",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "detail",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "value",
+              "type": "number",
+              "nullable": true
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "ACME-intraday-marker-00000",
+                20,
+                "event",
+                "dividend",
+                "Dividend $0.35/share",
+                null
+              ]
+            },
+            {
+              "selector": "row[1178]",
+              "row": [
+                "ACME-intraday-marker-01178",
+                19991,
+                "event",
+                "dividend",
+                "Dividend $0.40/share",
+                null
+              ]
+            }
+          ],
+          "sha256": "2cf93e5af80a996f98dd92ea5be1f24be534a15a777600964093143aaa43aefe"
+        },
+        {
+          "id": "stock.live.intraday.16",
+          "description": "Sixteen bars from the continuation RNG state; timestamps advance through synthetic sessions.",
+          "row_count": 16,
+          "columns": [
+            {
+              "id": "event_id",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "tick",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "session_id",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "timestamp",
+              "type": "datetime",
+              "nullable": false
+            },
+            {
+              "id": "minute_of_session",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "open",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "high",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "low",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "close",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "volume",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "ACME-intraday-live-000",
+                0,
+                "2021-03-16-session",
+                "2021-03-16T11:20:00Z",
+                110,
+                104.109141278,
+                104.118590354,
+                103.992082039,
+                103.998344269,
+                25920.927159564
+              ]
+            },
+            {
+              "selector": "row[15]",
+              "row": [
+                "ACME-intraday-live-015",
+                15,
+                "2021-03-16-session",
+                "2021-03-16T11:35:00Z",
+                125,
+                103.977492391,
+                104.002534057,
+                103.939493869,
+                103.958215627,
+                18785.658143277
+              ]
+            }
+          ],
+          "sha256": "afa4d5831be29ede709b888d83db76d2bb5cb47d9ddace8d513b12d446e860c8"
+        }
+      ]
+    }
+  ],
+  "extensions": [],
+  "separation_notes": [],
+  "references": []
+}

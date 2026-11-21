@@ -1,0 +1,48 @@
+name: Comparison task
+description: Track cross-framework specification, evidence, or benchmark work
+title: "[Comparison] "
+labels: []
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What comparison question or evidence gap does this address?
+    validations:
+      required: true
+  - type: dropdown
+    id: workstream
+    attributes:
+      label: Workstream
+      options:
+        - Publication readiness
+        - Capability parity
+        - Shared fixtures
+        - Functional validation
+        - Benchmarking
+        - Reporting
+    validations:
+      required: true
+  - type: checkboxes
+    id: frameworks
+    attributes:
+      label: Affected implementations
+      options:
+        - label: Slint
+        - label: QML
+        - label: Bevy + egui
+        - label: Parent repository only
+  - type: input
+    id: scenario
+    attributes:
+      label: Scenario ID and revision
+      description: Use not-applicable when no scenario is involved.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Required evidence and acceptance criteria
+      description: Identify source commits, raw data, screenshots, tests, or documentation required to close the task.
+    validations:
+      required: true

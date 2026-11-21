@@ -1,0 +1,1665 @@
+{
+  "schema_version": "1.0.0",
+  "id": "analytical",
+  "revision": 1,
+  "title": "Analytical chart derived-series oracles",
+  "classification": "numerical",
+  "generator": {
+    "name": "common-fixture-generator",
+    "revision": 1
+  },
+  "entity_identity": {
+    "rule": "Analytical identity is source_index plus date; static tables use their explicit rank/fold/month/class keys.",
+    "ordering": "Source ordinal order is canonical; display sorting, clustering, filtering, and LOD never change source identity."
+  },
+  "rng": {
+    "algorithm": "SplitMix64",
+    "state": "Unsigned 64-bit state initialized to seed modulo 2^64. next_u64 first adds 0x9E3779B97F4A7C15 modulo 2^64.",
+    "output": "z=state; z=(z xor (z>>30))*0xBF58476D1CE4E5B9 mod 2^64; z=(z xor (z>>27))*0x94D049BB133111EB mod 2^64; return z xor (z>>31).",
+    "uniform": "(next_u64() >> 11) * 2^-53, producing IEEE binary64 in [0,1).",
+    "below": "below(n)=next_u64() modulo n for integer n>=1; no rejection sampling.",
+    "normal": "u1=max(uniform(),1e-12); u2=uniform(); return sqrt(-2*ln(u1))*cos(2*pi*u2). Consume exactly two outputs, discard the sine component, and do not cache normals.",
+    "seed": "20260819",
+    "draw_order": [
+      "For each size independently: generate all benchmark normals, then all strategy normals. Static streams use seed XOR 0xBEEF (optimization), 0xACC (accuracy), and 0xA7718 (attribution). Correlation Results consumes Browser 3, not this stream."
+    ]
+  },
+  "normalization": {
+    "encoding": "UTF-8 without BOM",
+    "document": "One compact JSON object with keys artifact_id, columns, rows; columns contains column IDs and rows contains arrays in manifest column order.",
+    "object_keys": "JSON object keys sorted by Unicode code point; no insignificant whitespace; separators are ',' and ':'.",
+    "array_order": "Arrays and rows retain manifest/generator order; no sorting unless a formula explicitly requires it.",
+    "numbers": "IEEE 754 binary64 results are formatted as base-10 fixed-point with exactly 9 digits after the decimal point, round-to-nearest ties-to-even; no exponent notation.",
+    "integers": "JSON integers use base-10 without leading zeroes and are not converted to floating point.",
+    "negative_zero": "IEEE -0.0 and any nonzero value rounding to zero at 9 decimals serialize as 0.000000000.",
+    "nonfinite": "NaN, +Infinity, and -Infinity are rejected before serialization; null is the only missing/warm-up representation.",
+    "nulls": "Missing values serialize as JSON null, never NaN, an empty string, or a sentinel number.",
+    "booleans": "JSON true and false only.",
+    "strings": "JSON string escaping per RFC 8259; non-ASCII characters are emitted directly as UTF-8; no locale conversion or Unicode normalization.",
+    "dates": "ISO 8601 YYYY-MM-DD strings. Business calendars skip Saturday/Sunday and make no holiday claim.",
+    "datetimes": "ISO 8601 UTC strings YYYY-MM-DDTHH:MM:SSZ; synthetic intraday sessions are 09:30 through 16:00 exclusive, 390 one-minute bars, weekdays only.",
+    "line_endings": "No carriage returns; exactly one LF (0x0A) follows the closing JSON brace; no other trailing bytes."
+  },
+  "numeric_oracle": {
+    "calculation": "Compute with IEEE 754 binary64 (and explicit binary32 only for Browser 2 trend) without intermediate 9-decimal rounding. Normalize only for content serialization.",
+    "absolute_tolerance": 1e-09,
+    "relative_tolerance": 1e-09,
+    "display_formatting": "Display precision, currency symbols, grouping, and locale are separate. Formula tests may use these tolerances; content hashes require exact normalized bytes."
+  },
+  "formulas": {
+    "returns": "benchmark=0.0004+0.011*N; strategy=0.85*benchmark+0.0002+0.007*N. Dates are weekdays from 2021-01-04 with no holiday claim.",
+    "equity": "equity[0] starts from 100000 then multiplies by (1+return) at each row; high_water includes the current equity and no separate initial-equity row; drawdown_pct=100*(equity/high_water-1); strategy_return_pct=100*strategy; SMA20 uses rolling left-to-right sum and null before index 19.",
+    "risk": "At index>=59 use the inclusive 60-value window. Volatility and tracking error use sample denominator 59 and sqrt(252)*100. VaR95 is sorted_window[floor(59*0.05)]*100. ES95 averages the first ceil(60*0.05)=3 sorted values*100. Beta=sum cross deviations/sum benchmark squared deviations, null if denominator zero. Risk artifact stores selected oracles; adapters compute the full series from this formula.",
+    "optimization": "objective[i]=1.83+1.4*exp(-i/45)+0.09*N; initial 240 values, then three values per live tick; best_so_far is running maximum.",
+    "accuracy": "Four 12-value metric streams in accuracy,precision,recall,F1 order: clamp(base+drift*i+0.02*N,0.5,0.99)*100 with bases .68,.65,.61,.63 and drifts .008,.009,.011,.010. Confusion draws then proceed actual row-major, predicted column-major: diagonal 800+below(400), off-diagonal below(160).",
+    "attribution": "For month then Tech,Health,Financials,Energy,Other: ((u-0.42)*3)/(zero_based_group+1.5), in percent.",
+    "startup_lod": "Only days-500 is default. 100000 and 1000000 (and other nondefault sizes) construct only on explicit selection. Full source remains authoritative; rendering LOD must preserve extrema and is not included in content hashes."
+  },
+  "variants": [
+    {
+      "id": "days-500",
+      "selection": "default",
+      "dimensions": {
+        "source_points": 500,
+        "initial_equity": 100000,
+        "base_date": "2021-01-04",
+        "risk_window": 60
+      },
+      "artifacts": [
+        {
+          "id": "analytical.returns.500",
+          "description": "Authoritative source returns in business-day order.",
+          "row_count": 500,
+          "columns": [
+            {
+              "id": "source_index",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "date",
+              "type": "date",
+              "nullable": false
+            },
+            {
+              "id": "benchmark_return",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "strategy_return",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                0,
+                "2021-01-04",
+                -0.001361739,
+                0.012115288
+              ]
+            },
+            {
+              "selector": "row[499]",
+              "row": [
+                499,
+                "2022-12-02",
+                -0.006005546,
+                -0.000459205
+              ]
+            }
+          ],
+          "sha256": "b0061200958c243b27cadf50d9490c0003a79adc038dc51c70e92b8b386bee6e"
+        },
+        {
+          "id": "analytical.core.500",
+          "description": "Full-resolution equity, drawdown, returns and SMA20 derived series.",
+          "row_count": 500,
+          "columns": [
+            {
+              "id": "source_index",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "date",
+              "type": "date",
+              "nullable": false
+            },
+            {
+              "id": "strategy_equity",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "benchmark_equity",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "high_water",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "drawdown_pct",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "strategy_return_pct",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "sma20_return_pct",
+              "type": "number",
+              "nullable": true
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                0,
+                "2021-01-04",
+                101211.528782394,
+                99863.826064093,
+                101211.528782394,
+                0.0,
+                1.211528782,
+                null
+              ]
+            },
+            {
+              "selector": "row[499]",
+              "row": [
+                499,
+                "2022-12-02",
+                122362.182604934,
+                113349.679871822,
+                130161.844523859,
+                -5.992279802,
+                -0.045920547,
+                -0.254108535
+              ]
+            }
+          ],
+          "sha256": "c08613c514731796ab95da539ac31b1d56873660b68b766cac8074c470891afd"
+        },
+        {
+          "id": "analytical.risk-oracles.500",
+          "description": "Selected full-window 60-day risk oracles, including warm-up nulls.",
+          "row_count": 8,
+          "columns": [
+            {
+              "id": "source_index",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "date",
+              "type": "date",
+              "nullable": false
+            },
+            {
+              "id": "annualized_volatility_pct",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "var95_pct",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "es95_pct",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "beta",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "tracking_error_pct",
+              "type": "number",
+              "nullable": true
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                0,
+                "2021-01-04",
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            {
+              "selector": "row[1]",
+              "row": [
+                18,
+                "2021-01-28",
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            {
+              "selector": "row[2]",
+              "row": [
+                19,
+                "2021-01-29",
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            {
+              "selector": "row[3]",
+              "row": [
+                58,
+                "2021-03-25",
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            {
+              "selector": "row[4]",
+              "row": [
+                59,
+                "2021-03-26",
+                18.041002241,
+                -2.010062667,
+                -2.46467814,
+                0.902602727,
+                11.058677926
+              ]
+            },
+            {
+              "selector": "row[7]",
+              "row": [
+                499,
+                "2022-12-02",
+                15.921779399,
+                -2.084867282,
+                -2.123072058,
+                0.745126495,
+                10.338930731
+              ]
+            }
+          ],
+          "sha256": "bb7ec9303867b9e030fbb044d7413400ac0ca9a64b01764ea100bad1680ceb0a"
+        },
+        {
+          "id": "analytical.features.10",
+          "description": "Signed feature importance sorted descending.",
+          "row_count": 10,
+          "columns": [
+            {
+              "id": "rank",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "name",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "value",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                0,
+                "Momentum 12-1",
+                0.42
+              ]
+            },
+            {
+              "selector": "row[9]",
+              "row": [
+                9,
+                "Growth (SGR)",
+                -0.14
+              ]
+            }
+          ],
+          "sha256": "6f9551ee8d577ff1caa49899f54519c70b09db4468f8692437d6d26379af4a33"
+        },
+        {
+          "id": "analytical.optimization.240",
+          "description": "Initial deterministic optimization sequence.",
+          "row_count": 240,
+          "columns": [
+            {
+              "id": "iteration",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "objective",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "best_so_far",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                0,
+                3.235229878,
+                3.235229878
+              ]
+            },
+            {
+              "selector": "row[239]",
+              "row": [
+                239,
+                1.949963356,
+                3.268022069
+              ]
+            }
+          ],
+          "sha256": "dc1c1600dc1fc5d71a0d03c9cee3ace595f1b356db91b1362ba8e425e67f3dcc"
+        },
+        {
+          "id": "analytical.optimization-live.48",
+          "description": "Sixteen 500 ms ticks, three appended iterations per tick.",
+          "row_count": 48,
+          "columns": [
+            {
+              "id": "iteration",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "objective",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "best_so_far",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                240,
+                1.851554789,
+                3.268022069
+              ]
+            },
+            {
+              "selector": "row[47]",
+              "row": [
+                287,
+                1.884601557,
+                3.268022069
+              ]
+            }
+          ],
+          "sha256": "03488658f839cdac6baad816789ee9b4cc2206f2d09f00f311f380e1198feca1"
+        },
+        {
+          "id": "analytical.accuracy.12",
+          "description": "Twelve-fold model metric series.",
+          "row_count": 12,
+          "columns": [
+            {
+              "id": "fold",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "accuracy_pct",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "precision_pct",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "recall_pct",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "f1_pct",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                1,
+                68.963588813,
+                66.010634788,
+                61.205916858,
+                63.730807206
+              ]
+            },
+            {
+              "selector": "row[11]",
+              "row": [
+                12,
+                74.416051302,
+                74.795656793,
+                71.430156997,
+                74.167730094
+              ]
+            }
+          ],
+          "sha256": "1689e89f40a27ab65173dff94eaa39b2b7e02b68d3ca6bdff4995818d7e418d5"
+        },
+        {
+          "id": "analytical.confusion.3x3",
+          "description": "Three-class confusion matrix; rows actual, columns predicted.",
+          "row_count": 3,
+          "columns": [
+            {
+              "id": "actual_class",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "predicted_0",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "predicted_1",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "predicted_2",
+              "type": "integer",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                0,
+                840,
+                12,
+                93
+              ]
+            },
+            {
+              "selector": "row[2]",
+              "row": [
+                2,
+                141,
+                108,
+                909
+              ]
+            }
+          ],
+          "sha256": "cc6ebcff83004571427748aa39698fd3937dacc39a7ff751f7750c8c1978b6bb"
+        },
+        {
+          "id": "analytical.attribution.12x5",
+          "description": "Twelve months of signed group attribution percentages.",
+          "row_count": 12,
+          "columns": [
+            {
+              "id": "month",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "tech",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "health",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "financials",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "energy",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "other",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                1,
+                0.080981768,
+                0.033890333,
+                0.300750149,
+                -0.267419679,
+                -0.18754902
+              ]
+            },
+            {
+              "selector": "row[11]",
+              "row": [
+                12,
+                -0.216348109,
+                -0.061298497,
+                0.07664499,
+                -0.129419378,
+                0.034484047
+              ]
+            }
+          ],
+          "sha256": "baf98d4adedf8082e75f6583051da28a5a5a58aa4c4af678b73b8e2071bf3011"
+        },
+        {
+          "id": "analytical.correlation-results.250",
+          "description": "Rolling SPY/QQQ correlation referencing Browser 3 returns.",
+          "row_count": 250,
+          "columns": [
+            {
+              "id": "source_index",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "date",
+              "type": "date",
+              "nullable": false
+            },
+            {
+              "id": "spy_qqq_correlation_60",
+              "type": "number",
+              "nullable": true
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                0,
+                "2021-01-04",
+                null
+              ]
+            },
+            {
+              "selector": "row[249]",
+              "row": [
+                249,
+                "2021-12-17",
+                0.762951454
+              ]
+            }
+          ],
+          "sha256": "97a05cd9c34310dee91fa760ce6e4f7846c0addbe764723cec5808fab4f7ef7c"
+        }
+      ]
+    },
+    {
+      "id": "days-2500",
+      "selection": "on-demand",
+      "dimensions": {
+        "source_points": 2500,
+        "initial_equity": 100000,
+        "base_date": "2021-01-04",
+        "risk_window": 60
+      },
+      "artifacts": [
+        {
+          "id": "analytical.returns.2500",
+          "description": "Authoritative source returns in business-day order.",
+          "row_count": 2500,
+          "columns": [
+            {
+              "id": "source_index",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "date",
+              "type": "date",
+              "nullable": false
+            },
+            {
+              "id": "benchmark_return",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "strategy_return",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                0,
+                "2021-01-04",
+                -0.001361739,
+                0.008140368
+              ]
+            },
+            {
+              "selector": "row[2499]",
+              "row": [
+                2499,
+                "2030-08-02",
+                0.012929127,
+                0.008262261
+              ]
+            }
+          ],
+          "sha256": "1ba92e92b858a82c71cacc0d9ff3637bda6e9795dfac268427e7d829c4d72fb7"
+        },
+        {
+          "id": "analytical.core.2500",
+          "description": "Full-resolution equity, drawdown, returns and SMA20 derived series.",
+          "row_count": 2500,
+          "columns": [
+            {
+              "id": "source_index",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "date",
+              "type": "date",
+              "nullable": false
+            },
+            {
+              "id": "strategy_equity",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "benchmark_equity",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "high_water",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "drawdown_pct",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "strategy_return_pct",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "sma20_return_pct",
+              "type": "number",
+              "nullable": true
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                0,
+                "2021-01-04",
+                100814.036822894,
+                99863.826064093,
+                100814.036822894,
+                0.0,
+                0.814036823,
+                null
+              ]
+            },
+            {
+              "selector": "row[2499]",
+              "row": [
+                2499,
+                "2030-08-02",
+                270543.552025959,
+                199695.764115515,
+                302154.963361909,
+                -10.461986454,
+                0.826226125,
+                0.037006888
+              ]
+            }
+          ],
+          "sha256": "a4bb2ee4f357317ec48457bbd97cf0665432aefbb89c98f590e4ca8a7a4d3f49"
+        },
+        {
+          "id": "analytical.risk-oracles.2500",
+          "description": "Selected full-window 60-day risk oracles, including warm-up nulls.",
+          "row_count": 8,
+          "columns": [
+            {
+              "id": "source_index",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "date",
+              "type": "date",
+              "nullable": false
+            },
+            {
+              "id": "annualized_volatility_pct",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "var95_pct",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "es95_pct",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "beta",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "tracking_error_pct",
+              "type": "number",
+              "nullable": true
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                0,
+                "2021-01-04",
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            {
+              "selector": "row[1]",
+              "row": [
+                18,
+                "2021-01-28",
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            {
+              "selector": "row[2]",
+              "row": [
+                19,
+                "2021-01-29",
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            {
+              "selector": "row[3]",
+              "row": [
+                58,
+                "2021-03-25",
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            {
+              "selector": "row[4]",
+              "row": [
+                59,
+                "2021-03-26",
+                16.267537114,
+                -1.714985539,
+                -2.064990214,
+                0.868499745,
+                8.869062557
+              ]
+            },
+            {
+              "selector": "row[7]",
+              "row": [
+                2499,
+                "2030-08-02",
+                17.604587199,
+                -2.250827296,
+                -2.390380407,
+                0.747199612,
+                13.330151733
+              ]
+            }
+          ],
+          "sha256": "a4b001d824a7702666bf28bad430e237e3ac5edfb36970078bca56a533fe4ee8"
+        }
+      ]
+    },
+    {
+      "id": "days-20000",
+      "selection": "on-demand",
+      "dimensions": {
+        "source_points": 20000,
+        "initial_equity": 100000,
+        "base_date": "2021-01-04",
+        "risk_window": 60
+      },
+      "artifacts": [
+        {
+          "id": "analytical.returns.20000",
+          "description": "Authoritative source returns in business-day order.",
+          "row_count": 20000,
+          "columns": [
+            {
+              "id": "source_index",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "date",
+              "type": "date",
+              "nullable": false
+            },
+            {
+              "id": "benchmark_return",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "strategy_return",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                0,
+                "2021-01-04",
+                -0.001361739,
+                0.007938489
+              ]
+            },
+            {
+              "selector": "row[19999]",
+              "row": [
+                19999,
+                "2097-08-30",
+                0.006766743,
+                0.009167914
+              ]
+            }
+          ],
+          "sha256": "7b346e357df5eb4cdad6abc9997c4cf14cffdb4a7fec2511e3d9cda590498528"
+        },
+        {
+          "id": "analytical.core.20000",
+          "description": "Full-resolution equity, drawdown, returns and SMA20 derived series.",
+          "row_count": 20000,
+          "columns": [
+            {
+              "id": "source_index",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "date",
+              "type": "date",
+              "nullable": false
+            },
+            {
+              "id": "strategy_equity",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "benchmark_equity",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "high_water",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "drawdown_pct",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "strategy_return_pct",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "sma20_return_pct",
+              "type": "number",
+              "nullable": true
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                0,
+                "2021-01-04",
+                100793.848898218,
+                99863.826064093,
+                100793.848898218,
+                0.0,
+                0.793848898,
+                null
+              ]
+            },
+            {
+              "selector": "row[19999]",
+              "row": [
+                19999,
+                "2097-08-30",
+                290343078.9696936,
+                23553310.36333285,
+                319664728.461111,
+                -9.172625842,
+                0.916791364,
+                0.074167604
+              ]
+            }
+          ],
+          "sha256": "e2090dd991ce09172c1b1d356aa13769f7e64cbffcc740cf2dadcec503212199"
+        },
+        {
+          "id": "analytical.risk-oracles.20000",
+          "description": "Selected full-window 60-day risk oracles, including warm-up nulls.",
+          "row_count": 8,
+          "columns": [
+            {
+              "id": "source_index",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "date",
+              "type": "date",
+              "nullable": false
+            },
+            {
+              "id": "annualized_volatility_pct",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "var95_pct",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "es95_pct",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "beta",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "tracking_error_pct",
+              "type": "number",
+              "nullable": true
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                0,
+                "2021-01-04",
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            {
+              "selector": "row[1]",
+              "row": [
+                18,
+                "2021-01-28",
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            {
+              "selector": "row[2]",
+              "row": [
+                19,
+                "2021-01-29",
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            {
+              "selector": "row[3]",
+              "row": [
+                58,
+                "2021-03-25",
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            {
+              "selector": "row[4]",
+              "row": [
+                59,
+                "2021-03-26",
+                17.020522151,
+                -1.741954107,
+                -2.340940849,
+                0.884311299,
+                9.784988015
+              ]
+            },
+            {
+              "selector": "row[7]",
+              "row": [
+                19999,
+                "2097-08-30",
+                15.348763935,
+                -2.018447214,
+                -2.320958118,
+                0.80368049,
+                8.945328156
+              ]
+            }
+          ],
+          "sha256": "7e6c0d2e323429c5dfaa28f3300b6bef8b5826034b8471843a554ae63ca2e4ab"
+        }
+      ]
+    },
+    {
+      "id": "days-100000",
+      "selection": "on-demand",
+      "dimensions": {
+        "source_points": 100000,
+        "initial_equity": 100000,
+        "base_date": "2021-01-04",
+        "risk_window": 60
+      },
+      "artifacts": [
+        {
+          "id": "analytical.returns.100000",
+          "description": "Authoritative source returns in business-day order.",
+          "row_count": 100000,
+          "columns": [
+            {
+              "id": "source_index",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "date",
+              "type": "date",
+              "nullable": false
+            },
+            {
+              "id": "benchmark_return",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "strategy_return",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                0,
+                "2021-01-04",
+                -0.001361739,
+                -0.002514623
+              ]
+            },
+            {
+              "selector": "row[99999]",
+              "row": [
+                99999,
+                "2404-04-23",
+                0.00871383,
+                0.011682219
+              ]
+            }
+          ],
+          "sha256": "ec1ae7a49f9010a19f7f2f8413d3021f1ff823adcad62ebe8938dc5e2d44c7a7"
+        },
+        {
+          "id": "analytical.core.100000",
+          "description": "Full-resolution equity, drawdown, returns and SMA20 derived series.",
+          "row_count": 100000,
+          "columns": [
+            {
+              "id": "source_index",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "date",
+              "type": "date",
+              "nullable": false
+            },
+            {
+              "id": "strategy_equity",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "benchmark_equity",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "high_water",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "drawdown_pct",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "strategy_return_pct",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "sma20_return_pct",
+              "type": "number",
+              "nullable": true
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                0,
+                "2021-01-04",
+                99748.537747208,
+                99863.826064093,
+                99748.537747208,
+                0.0,
+                -0.251462253,
+                null
+              ]
+            },
+            {
+              "selector": "row[99999]",
+              "row": [
+                99999,
+                "2404-04-23",
+                6.933413968407219e+24,
+                4.0564653052008686e+19,
+                1.0942854620305637e+25,
+                -36.639805526,
+                1.168221878,
+                0.010673698
+              ]
+            }
+          ],
+          "sha256": "dcbc257adc720c1a35f98a2b654ecdb22881af5f72ba84f14b3bfaa74414cf60"
+        },
+        {
+          "id": "analytical.risk-oracles.100000",
+          "description": "Selected full-window 60-day risk oracles, including warm-up nulls.",
+          "row_count": 8,
+          "columns": [
+            {
+              "id": "source_index",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "date",
+              "type": "date",
+              "nullable": false
+            },
+            {
+              "id": "annualized_volatility_pct",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "var95_pct",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "es95_pct",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "beta",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "tracking_error_pct",
+              "type": "number",
+              "nullable": true
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                0,
+                "2021-01-04",
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            {
+              "selector": "row[1]",
+              "row": [
+                18,
+                "2021-01-28",
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            {
+              "selector": "row[2]",
+              "row": [
+                19,
+                "2021-01-29",
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            {
+              "selector": "row[3]",
+              "row": [
+                58,
+                "2021-03-25",
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            {
+              "selector": "row[4]",
+              "row": [
+                59,
+                "2021-03-26",
+                15.936227118,
+                -1.685375779,
+                -2.047288856,
+                0.785601025,
+                10.479872474
+              ]
+            },
+            {
+              "selector": "row[7]",
+              "row": [
+                99999,
+                "2404-04-23",
+                21.516524084,
+                -2.277475235,
+                -2.482595016,
+                0.97996537,
+                11.961392872
+              ]
+            }
+          ],
+          "sha256": "4c40bb8b8edd3424fa9ccbb36026e9c8306324a892e55aba32a0dcbf4f7025f9"
+        }
+      ]
+    },
+    {
+      "id": "days-1000000",
+      "selection": "on-demand",
+      "dimensions": {
+        "source_points": 1000000,
+        "initial_equity": 100000,
+        "base_date": "2021-01-04",
+        "risk_window": 60
+      },
+      "artifacts": [
+        {
+          "id": "analytical.returns.1000000",
+          "description": "Authoritative source returns in business-day order.",
+          "row_count": 1000000,
+          "columns": [
+            {
+              "id": "source_index",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "date",
+              "type": "date",
+              "nullable": false
+            },
+            {
+              "id": "benchmark_return",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "strategy_return",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                0,
+                "2021-01-04",
+                -0.001361739,
+                -2.144e-06
+              ]
+            },
+            {
+              "selector": "row[999999]",
+              "row": [
+                999999,
+                "5854-01-27",
+                0.0243949,
+                0.022314831
+              ]
+            }
+          ],
+          "sha256": "f10d3edab57dbd4ad2dc6f9a14a495e9c79b5383142fb43203b1d5bff87dd8f9"
+        },
+        {
+          "id": "analytical.core.1000000",
+          "description": "Full-resolution equity, drawdown, returns and SMA20 derived series.",
+          "row_count": 1000000,
+          "columns": [
+            {
+              "id": "source_index",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "date",
+              "type": "date",
+              "nullable": false
+            },
+            {
+              "id": "strategy_equity",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "benchmark_equity",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "high_water",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "drawdown_pct",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "strategy_return_pct",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "sma20_return_pct",
+              "type": "number",
+              "nullable": true
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                0,
+                "2021-01-04",
+                99999.785600201,
+                99863.826064093,
+                99999.785600201,
+                0.0,
+                -0.0002144,
+                null
+              ]
+            },
+            {
+              "selector": "row[999999]",
+              "row": [
+                999999,
+                "5854-01-27",
+                5.188919757335019e+212,
+                1.368596189415554e+154,
+                6.447571195195843e+212,
+                -19.52132671,
+                2.231483123,
+                0.25534596
+              ]
+            }
+          ],
+          "sha256": "155e7d1edc9295d14a569a50439eb3fbf6a806a877732fb66c9d965af65bdbc0"
+        },
+        {
+          "id": "analytical.risk-oracles.1000000",
+          "description": "Selected full-window 60-day risk oracles, including warm-up nulls.",
+          "row_count": 8,
+          "columns": [
+            {
+              "id": "source_index",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "date",
+              "type": "date",
+              "nullable": false
+            },
+            {
+              "id": "annualized_volatility_pct",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "var95_pct",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "es95_pct",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "beta",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "tracking_error_pct",
+              "type": "number",
+              "nullable": true
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                0,
+                "2021-01-04",
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            {
+              "selector": "row[1]",
+              "row": [
+                18,
+                "2021-01-28",
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            {
+              "selector": "row[2]",
+              "row": [
+                19,
+                "2021-01-29",
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            {
+              "selector": "row[3]",
+              "row": [
+                58,
+                "2021-03-25",
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            {
+              "selector": "row[4]",
+              "row": [
+                59,
+                "2021-03-26",
+                17.403164778,
+                -1.634010662,
+                -2.725735597,
+                0.872186331,
+                10.725536114
+              ]
+            },
+            {
+              "selector": "row[7]",
+              "row": [
+                999999,
+                "5854-01-27",
+                20.888405118,
+                -2.576208974,
+                -2.755005444,
+                0.88616727,
+                12.392942722
+              ]
+            }
+          ],
+          "sha256": "80338db864c4f44f7d54c87a8a6976c5bcbeaf0a326ccdac31a8b73bac1d2b5b"
+        }
+      ]
+    }
+  ],
+  "extensions": [],
+  "separation_notes": [],
+  "references": [
+    {
+      "family": "browser3",
+      "artifact_ids": [
+        "browser3.returns.250"
+      ],
+      "reason": "Correlation Results is SPY/QQQ rolling correlation of the same Browser 3 source returns."
+    }
+  ]
+}

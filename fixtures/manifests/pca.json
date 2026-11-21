@@ -1,0 +1,133 @@
+{
+  "schema_version": "1.0.0",
+  "id": "pca",
+  "revision": 1,
+  "title": "Synthetic PCA-like rendering manifold",
+  "classification": "rendering",
+  "generator": {
+    "name": "common-fixture-generator",
+    "revision": 1
+  },
+  "entity_identity": {
+    "rule": "The first column is the stable entity/record ID unless entity_identity states otherwise.",
+    "ordering": "Source ordinal order is canonical; display sorting, clustering, filtering, and LOD never change source identity."
+  },
+  "rng": {
+    "algorithm": "SplitMix64",
+    "state": "Unsigned 64-bit state initialized to seed modulo 2^64. next_u64 first adds 0x9E3779B97F4A7C15 modulo 2^64.",
+    "output": "z=state; z=(z xor (z>>30))*0xBF58476D1CE4E5B9 mod 2^64; z=(z xor (z>>27))*0x94D049BB133111EB mod 2^64; return z xor (z>>31).",
+    "uniform": "(next_u64() >> 11) * 2^-53, producing IEEE binary64 in [0,1).",
+    "below": "below(n)=next_u64() modulo n for integer n>=1; no rejection sampling.",
+    "normal": "u1=max(uniform(),1e-12); u2=uniform(); return sqrt(-2*ln(u1))*cos(2*pi*u2). Consume exactly two outputs, discard the sine component, and do not cache normals.",
+    "seed": "20260829",
+    "draw_order": [
+      "Per point consume three normals in pc1,pc2,pc3 order. Sector is index modulo 6."
+    ]
+  },
+  "normalization": {
+    "encoding": "UTF-8 without BOM",
+    "document": "One compact JSON object with keys artifact_id, columns, rows; columns contains column IDs and rows contains arrays in manifest column order.",
+    "object_keys": "JSON object keys sorted by Unicode code point; no insignificant whitespace; separators are ',' and ':'.",
+    "array_order": "Arrays and rows retain manifest/generator order; no sorting unless a formula explicitly requires it.",
+    "numbers": "IEEE 754 binary64 results are formatted as base-10 fixed-point with exactly 9 digits after the decimal point, round-to-nearest ties-to-even; no exponent notation.",
+    "integers": "JSON integers use base-10 without leading zeroes and are not converted to floating point.",
+    "negative_zero": "IEEE -0.0 and any nonzero value rounding to zero at 9 decimals serialize as 0.000000000.",
+    "nonfinite": "NaN, +Infinity, and -Infinity are rejected before serialization; null is the only missing/warm-up representation.",
+    "nulls": "Missing values serialize as JSON null, never NaN, an empty string, or a sentinel number.",
+    "booleans": "JSON true and false only.",
+    "strings": "JSON string escaping per RFC 8259; non-ASCII characters are emitted directly as UTF-8; no locale conversion or Unicode normalization.",
+    "dates": "ISO 8601 YYYY-MM-DD strings. Business calendars skip Saturday/Sunday and make no holiday claim.",
+    "datetimes": "ISO 8601 UTC strings YYYY-MM-DDTHH:MM:SSZ; synthetic intraday sessions are 09:30 through 16:00 exclusive, 390 one-minute bars, weekdays only.",
+    "line_endings": "No carriage returns; exactly one LF (0x0A) follows the closing JSON brace; no other trailing bytes."
+  },
+  "numeric_oracle": {
+    "calculation": "Compute with IEEE 754 binary64 (and explicit binary32 only for Browser 2 trend) without intermediate 9-decimal rounding. Normalize only for content serialization.",
+    "absolute_tolerance": 1e-09,
+    "relative_tolerance": 1e-09,
+    "display_formatting": "Display precision, currency symbols, grouping, and locale are separate. Formula tests may use these tolerances; content hashes require exact normalized bytes."
+  },
+  "formulas": {
+    "coordinates": "t=sector_index; pc1=.9*N+.5*(t-2.5); pc2=.7*N+.4*sin(2.1*t); pc3=.5*N+.3*cos(1.3*t). IDs P001..P500 and sector names follow factor sector order.",
+    "separation": "These are explicitly synthetic coordinates. They are not eigenvectors, computed PCA scores, or explained-variance evidence. Computed PCA is a separate numerical extension."
+  },
+  "variants": [
+    {
+      "id": "synthetic-500",
+      "selection": "default",
+      "dimensions": {
+        "points": 500,
+        "dimensions": 3,
+        "sectors": 6
+      },
+      "artifacts": [
+        {
+          "id": "pca.synthetic.500",
+          "description": "Five hundred fixed synthetic coordinates.",
+          "row_count": 500,
+          "columns": [
+            {
+              "id": "symbol",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "sector_index",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "sector",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "pc1",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "pc2",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "pc3",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "P001",
+                0,
+                "Technology",
+                -1.555578781,
+                -0.127494814,
+                0.039319404
+              ]
+            },
+            {
+              "selector": "row[499]",
+              "row": [
+                "P500",
+                1,
+                "Health",
+                -0.201330879,
+                0.303337126,
+                0.942994608
+              ]
+            }
+          ],
+          "sha256": "f3034a4de9a0540a9a56493485923f6b1fe78435a97899331d428bf8a9653713"
+        }
+      ]
+    }
+  ],
+  "extensions": [],
+  "separation_notes": [
+    "Never label this rendering fixture as a computed decomposition; computed PCA requires separate inputs and numerical oracles."
+  ],
+  "references": []
+}

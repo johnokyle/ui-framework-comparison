@@ -1,0 +1,584 @@
+{
+  "schema_version": "1.0.0",
+  "id": "browser3",
+  "revision": 1,
+  "title": "Browser 3 returns and correlation oracles",
+  "classification": "numerical",
+  "generator": {
+    "name": "common-fixture-generator",
+    "revision": 1
+  },
+  "entity_identity": {
+    "rule": "The first column is the stable entity/record ID unless entity_identity states otherwise.",
+    "ordering": "Source ordinal order is canonical; display sorting, clustering, filtering, and LOD never change source identity."
+  },
+  "rng": {
+    "algorithm": "SplitMix64",
+    "state": "Unsigned 64-bit state initialized to seed modulo 2^64. next_u64 first adds 0x9E3779B97F4A7C15 modulo 2^64.",
+    "output": "z=state; z=(z xor (z>>30))*0xBF58476D1CE4E5B9 mod 2^64; z=(z xor (z>>27))*0x94D049BB133111EB mod 2^64; return z xor (z>>31).",
+    "uniform": "(next_u64() >> 11) * 2^-53, producing IEEE binary64 in [0,1).",
+    "below": "below(n)=next_u64() modulo n for integer n>=1; no rejection sampling.",
+    "normal": "u1=max(uniform(),1e-12); u2=uniform(); return sqrt(-2*ln(u1))*cos(2*pi*u2). Consume exactly two outputs, discard the sine component, and do not cache normals.",
+    "seed": "20260819",
+    "draw_order": [
+      "Generate all 250 market normals, then all 250 tech normals; then for symbol SPY..XLE generate 250 idiosyncratic normals. Live continuation draws one market and one tech normal, then eight idiosyncratic normals per event."
+    ]
+  },
+  "normalization": {
+    "encoding": "UTF-8 without BOM",
+    "document": "One compact JSON object with keys artifact_id, columns, rows; columns contains column IDs and rows contains arrays in manifest column order.",
+    "object_keys": "JSON object keys sorted by Unicode code point; no insignificant whitespace; separators are ',' and ':'.",
+    "array_order": "Arrays and rows retain manifest/generator order; no sorting unless a formula explicitly requires it.",
+    "numbers": "IEEE 754 binary64 results are formatted as base-10 fixed-point with exactly 9 digits after the decimal point, round-to-nearest ties-to-even; no exponent notation.",
+    "integers": "JSON integers use base-10 without leading zeroes and are not converted to floating point.",
+    "negative_zero": "IEEE -0.0 and any nonzero value rounding to zero at 9 decimals serialize as 0.000000000.",
+    "nonfinite": "NaN, +Infinity, and -Infinity are rejected before serialization; null is the only missing/warm-up representation.",
+    "nulls": "Missing values serialize as JSON null, never NaN, an empty string, or a sentinel number.",
+    "booleans": "JSON true and false only.",
+    "strings": "JSON string escaping per RFC 8259; non-ASCII characters are emitted directly as UTF-8; no locale conversion or Unicode normalization.",
+    "dates": "ISO 8601 YYYY-MM-DD strings. Business calendars skip Saturday/Sunday and make no holiday claim.",
+    "datetimes": "ISO 8601 UTC strings YYYY-MM-DDTHH:MM:SSZ; synthetic intraday sessions are 09:30 through 16:00 exclusive, 390 one-minute bars, weekdays only.",
+    "line_endings": "No carriage returns; exactly one LF (0x0A) follows the closing JSON brace; no other trailing bytes."
+  },
+  "numeric_oracle": {
+    "calculation": "Compute with IEEE 754 binary64 (and explicit binary32 only for Browser 2 trend) without intermediate 9-decimal rounding. Normalize only for content serialization.",
+    "absolute_tolerance": 1e-09,
+    "relative_tolerance": 1e-09,
+    "display_formatting": "Display precision, currency symbols, grouping, and locale are separate. Formula tests may use these tolerances; content hashes require exact normalized bytes."
+  },
+  "formulas": {
+    "returns": "market[d]=0.0003+0.010*N; tech[d]=0.0002+0.008*N; r[i][d]=beta[i]*market[d]+(0.8*tech[d] if tech member)+idio[i]*N. Parameters in order: (1,.004,F),(1.2,.007,T),(1.1,.008,F),(.9,.005,F),(1.1,.010,T),(1,.008,T),(1.4,.014,T),(.8,.011,F).",
+    "statistics": "mean uses left-to-right sum/n. covariance=sum((a-ma)*(b-mb))/(n-1). correlation=cov/sqrt(var_a*var_b), clamped [-1,1]. Diagonal correlation exactly 1. Annualized volatility=sqrt(sample variance)*sqrt(252). beta(a,b)=cov(a,b)/var(b). Matrices compute upper triangle then mirror exactly.",
+    "clustering": "Average linkage over all cross pairs with distance=1-correlation. Scan active pairs lexicographically and replace best only on strict smaller distance. New node replaces removed pair by appending; leaf member traversal is stack-based pushing left then right (right leaf visited first).",
+    "live": "At each 500 ms tick drop source day 0, append the event values, and recompute the 250-day statistics without changing selected symbol identities."
+  },
+  "variants": [
+    {
+      "id": "8x250",
+      "selection": "default",
+      "dimensions": {
+        "symbols": 8,
+        "observations": 250,
+        "matrix_rows": 8,
+        "matrix_columns": 8,
+        "live_events": 16
+      },
+      "artifacts": [
+        {
+          "id": "browser3.returns.250",
+          "description": "Observation-major factor-model returns.",
+          "row_count": 250,
+          "columns": [
+            {
+              "id": "observation_id",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "date",
+              "type": "date",
+              "nullable": false
+            },
+            {
+              "id": "spy",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "qqq",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "iwm",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "dia",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "aapl",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "msft",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "nvda",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "xle",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "b3-000",
+                "2021-01-04",
+                0.006168571,
+                -0.004573582,
+                0.000698976,
+                -0.001529161,
+                0.003304679,
+                0.002830335,
+                -0.003937002,
+                -0.006405882
+              ]
+            },
+            {
+              "selector": "row[249]",
+              "row": [
+                "b3-249",
+                "2021-12-17",
+                -0.002506916,
+                -0.001026842,
+                0.012811217,
+                -0.006341148,
+                -0.01277282,
+                -0.020538692,
+                -0.008295825,
+                0.011258802
+              ]
+            }
+          ],
+          "sha256": "3edde23b68562e887aca4795400380d390c444f95db6b6294f8a7c0f52b05411"
+        },
+        {
+          "id": "browser3.correlation.8x8",
+          "description": "Symmetric Pearson sample correlation matrix.",
+          "row_count": 8,
+          "columns": [
+            {
+              "id": "symbol",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "spy",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "qqq",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "iwm",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "dia",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "aapl",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "msft",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "nvda",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "xle",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "SPY",
+                1.0,
+                0.683680674,
+                0.727883974,
+                0.812350494,
+                0.622628819,
+                0.65456374,
+                0.549079915,
+                0.530161264
+              ]
+            },
+            {
+              "selector": "row[7]",
+              "row": [
+                "XLE",
+                0.530161264,
+                0.440337241,
+                0.387467797,
+                0.478383682,
+                0.320298026,
+                0.386693388,
+                0.347060982,
+                1.0
+              ]
+            }
+          ],
+          "sha256": "7d8ca033abd011555d4ca7e6a478034e2612a379be1d6d88d2ede2e4b1a33f06"
+        },
+        {
+          "id": "browser3.covariance.8x8",
+          "description": "Symmetric sample covariance matrix using denominator 249.",
+          "row_count": 8,
+          "columns": [
+            {
+              "id": "symbol",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "spy",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "qqq",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "iwm",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "dia",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "aapl",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "msft",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "nvda",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "xle",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "SPY",
+                0.000111367,
+                0.000100764,
+                9.7448e-05,
+                8.4519e-05,
+                0.00011051,
+                9.8895e-05,
+                0.000111573,
+                7.8037e-05
+              ]
+            },
+            {
+              "selector": "row[7]",
+              "row": [
+                "XLE",
+                7.8037e-05,
+                8.5778e-05,
+                6.8562e-05,
+                6.5785e-05,
+                7.5139e-05,
+                7.7219e-05,
+                9.3211e-05,
+                0.000194551
+              ]
+            }
+          ],
+          "sha256": "3f4cb4d11be4acc31a6decab884beaaf15073a7d384920ce358ecd2b0fc353f9"
+        },
+        {
+          "id": "browser3.annualized-volatility.8",
+          "description": "Per-symbol annualized sample volatility.",
+          "row_count": 8,
+          "columns": [
+            {
+              "id": "symbol",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "annualized_volatility",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "SPY",
+                0.167524492
+              ]
+            },
+            {
+              "selector": "row[7]",
+              "row": [
+                "XLE",
+                0.221419799
+              ]
+            }
+          ],
+          "sha256": "93a91af7faf8a9199e70ef804fcf828e98ddefe93319a2da427f64544139229b"
+        },
+        {
+          "id": "browser3.beta.8x8",
+          "description": "Beta of row symbol versus column symbol.",
+          "row_count": 8,
+          "columns": [
+            {
+              "id": "symbol",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "spy",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "qqq",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "iwm",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "dia",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "aapl",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "msft",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "nvda",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "xle",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "SPY",
+                1.0,
+                0.516604003,
+                0.605490667,
+                0.869536348,
+                0.390674115,
+                0.482488549,
+                0.300930571,
+                0.401115876
+              ]
+            },
+            {
+              "selector": "row[7]",
+              "row": [
+                "XLE",
+                0.401115876,
+                0.440902754,
+                0.352413208,
+                0.338137957,
+                0.386216392,
+                0.396911368,
+                0.479111835,
+                1.0
+              ]
+            }
+          ],
+          "sha256": "5ffd15f50d5b8fb0862c98a5ebb5112b72f87dcc9f0b79ea795673aac8c28f5e"
+        },
+        {
+          "id": "browser3.cluster-order.8",
+          "description": "Canonical average-linkage display order.",
+          "row_count": 8,
+          "columns": [
+            {
+              "id": "display_order",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "symbol",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "source_index",
+              "type": "integer",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                0,
+                "MSFT",
+                5
+              ]
+            },
+            {
+              "selector": "row[7]",
+              "row": [
+                7,
+                "XLE",
+                7
+              ]
+            }
+          ],
+          "sha256": "153bfee51b99959b5d26c278c75d042cfb3528946e2bd469188206ac2aba7176"
+        },
+        {
+          "id": "browser3.live.16",
+          "description": "Sixteen continuation events from the post-generation RNG state.",
+          "row_count": 16,
+          "columns": [
+            {
+              "id": "event_id",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "tick",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "date",
+              "type": "date",
+              "nullable": false
+            },
+            {
+              "id": "spy",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "qqq",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "iwm",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "dia",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "aapl",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "msft",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "nvda",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "xle",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "b3-live-000",
+                0,
+                "2021-12-20",
+                0.011942973,
+                0.017089783,
+                0.013797961,
+                0.006574799,
+                0.009227612,
+                0.011782192,
+                -0.009289933,
+                0.028305376
+              ]
+            },
+            {
+              "selector": "row[15]",
+              "row": [
+                "b3-live-015",
+                15,
+                "2022-01-10",
+                -0.012550551,
+                -0.024805612,
+                -0.006035219,
+                -0.018135014,
+                -0.021645962,
+                -0.010920204,
+                -0.007945386,
+                -0.00939494
+              ]
+            }
+          ],
+          "sha256": "b04ad06f62abaa1070bf22dedb6154cc6bce5c6a0c59740622e200e286656138"
+        }
+      ]
+    }
+  ],
+  "extensions": [],
+  "separation_notes": [],
+  "references": []
+}

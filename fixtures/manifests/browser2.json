@@ -1,0 +1,482 @@
+{
+  "schema_version": "1.0.0",
+  "id": "browser2",
+  "revision": 1,
+  "title": "Browser 2 advanced editable grid",
+  "classification": "rendering",
+  "generator": {
+    "name": "common-fixture-generator",
+    "revision": 1
+  },
+  "entity_identity": {
+    "rule": "Stable ID b2-{source_ordinal:06d} is derived from source row position and is not a twentieth displayed column.",
+    "ordering": "Source ordinal order is canonical; display sorting, clustering, filtering, and LOD never change source identity."
+  },
+  "rng": {
+    "algorithm": "SplitMix64",
+    "state": "Unsigned 64-bit state initialized to seed modulo 2^64. next_u64 first adds 0x9E3779B97F4A7C15 modulo 2^64.",
+    "output": "z=state; z=(z xor (z>>30))*0xBF58476D1CE4E5B9 mod 2^64; z=(z xor (z>>27))*0x94D049BB133111EB mod 2^64; return z xor (z>>31).",
+    "uniform": "(next_u64() >> 11) * 2^-53, producing IEEE binary64 in [0,1).",
+    "below": "below(n)=next_u64() modulo n for integer n>=1; no rejection sampling.",
+    "normal": "u1=max(uniform(),1e-12); u2=uniform(); return sqrt(-2*ln(u1))*cos(2*pi*u2). Consume exactly two outputs, discard the sine component, and do not cache normals.",
+    "seed": "20260819",
+    "draw_order": [
+      "Per source row: symbol length/letters; adjective/noun; price; entry-price uniform; age below; initial trend uniform then seven (uniform, binary32 update) pairs; sector; change; volume; nullable RSI; signal; score; shares; target weight; enabled; strategy; listed year/month/day; update hour/minute; notes."
+    ]
+  },
+  "normalization": {
+    "encoding": "UTF-8 without BOM",
+    "document": "One compact JSON object with keys artifact_id, columns, rows; columns contains column IDs and rows contains arrays in manifest column order.",
+    "object_keys": "JSON object keys sorted by Unicode code point; no insignificant whitespace; separators are ',' and ':'.",
+    "array_order": "Arrays and rows retain manifest/generator order; no sorting unless a formula explicitly requires it.",
+    "numbers": "IEEE 754 binary64 results are formatted as base-10 fixed-point with exactly 9 digits after the decimal point, round-to-nearest ties-to-even; no exponent notation.",
+    "integers": "JSON integers use base-10 without leading zeroes and are not converted to floating point.",
+    "negative_zero": "IEEE -0.0 and any nonzero value rounding to zero at 9 decimals serialize as 0.000000000.",
+    "nonfinite": "NaN, +Infinity, and -Infinity are rejected before serialization; null is the only missing/warm-up representation.",
+    "nulls": "Missing values serialize as JSON null, never NaN, an empty string, or a sentinel number.",
+    "booleans": "JSON true and false only.",
+    "strings": "JSON string escaping per RFC 8259; non-ASCII characters are emitted directly as UTF-8; no locale conversion or Unicode normalization.",
+    "dates": "ISO 8601 YYYY-MM-DD strings. Business calendars skip Saturday/Sunday and make no holiday claim.",
+    "datetimes": "ISO 8601 UTC strings YYYY-MM-DDTHH:MM:SSZ; synthetic intraday sessions are 09:30 through 16:00 exclusive, 390 one-minute bars, weekdays only.",
+    "line_endings": "No carriage returns; exactly one LF (0x0A) follows the closing JSON brace; no other trailing bytes."
+  },
+  "numeric_oracle": {
+    "calculation": "Compute with IEEE 754 binary64 (and explicit binary32 only for Browser 2 trend) without intermediate 9-decimal rounding. Normalize only for content serialization.",
+    "absolute_tolerance": 1e-09,
+    "relative_tolerance": 1e-09,
+    "display_formatting": "Display precision, currency symbols, grouping, and locale are separate. Formula tests may use these tolerances; content hashes require exact normalized bytes."
+  },
+  "formulas": {
+    "generation": "Matches the Slint field formulas and order. entry=price*(0.6+0.7*u); target_weight_pct=20*u; pl_pct=100*(price-entry)/entry; enabled=below(10)>1; score is [0,1).",
+    "trend": "Seven values use explicit IEEE binary32 after each conversion/add/multiply/clamp: v=clamp(v+(f32(u)-0.5)*0.3,0,1), then serialize as binary64 fixed9.",
+    "identity_edit": "Stable ID b2-{source_ordinal:06d} is the zero-based source row. Target Weight is editable only when enabled=true. Variants share prefixes and IDs.",
+    "activation": "100000 rows are on-demand only and MUST NOT be constructed by default/startup. Switching size drops incompatible display mappings and preserves only valid common source IDs."
+  },
+  "variants": [
+    {
+      "id": "1000x19",
+      "selection": "default",
+      "dimensions": {
+        "rows": 1000,
+        "columns": 19
+      },
+      "artifacts": [
+        {
+          "id": "browser2.rows.1000",
+          "description": "Editable 19-column rows; nested trend has exactly seven binary32 values.",
+          "row_count": 1000,
+          "columns": [
+            {
+              "id": "symbol",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "company",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "sector",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "price",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "change_pct",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "volume",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "rsi",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "signal",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "score",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "shares",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "entry_price",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "target_weight_pct",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "pl_pct",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "enabled",
+              "type": "boolean",
+              "nullable": false
+            },
+            {
+              "id": "strategy",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "listed",
+              "type": "date",
+              "nullable": false
+            },
+            {
+              "id": "last_update",
+              "type": "datetime",
+              "nullable": false
+            },
+            {
+              "id": "notes",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "trend",
+              "type": "number[]",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "IM",
+                "Omega Brands",
+                "Health Care",
+                350.883314722,
+                0.353622957,
+                1092183,
+                21.82554393,
+                "Strong Buy",
+                0.124296331,
+                544531,
+                304.731717178,
+                6.572379112,
+                15.144993101,
+                true,
+                "Breakout",
+                "2015-05-14",
+                "2026-08-15T09:54:00Z",
+                "Upgrade pending",
+                [
+                  0.497173309,
+                  0.551851332,
+                  0.419259548,
+                  0.468252093,
+                  0.486602813,
+                  0.615905821,
+                  0.645894051
+                ]
+              ]
+            },
+            {
+              "selector": "row[123]",
+              "row": [
+                "WA",
+                "River Dynamics",
+                "Energy",
+                298.487205408,
+                5.748397911,
+                18575327,
+                55.23834094,
+                "Strong Buy",
+                0.788787459,
+                1465451,
+                180.665782432,
+                3.918019654,
+                65.215128947,
+                true,
+                "Breakout",
+                "2013-07-04",
+                "2026-08-11T12:44:00Z",
+                "Watch closely",
+                [
+                  0.196227014,
+                  0.158214509,
+                  0.213056102,
+                  0.164308548,
+                  0.114878371,
+                  0.056171402,
+                  0.081312746
+                ]
+              ]
+            },
+            {
+              "selector": "row[999]",
+              "row": [
+                "DZI",
+                "Summit Energy",
+                "Materials",
+                230.295493143,
+                -5.492169799,
+                31813498,
+                52.329989694,
+                "Hold",
+                0.95182316,
+                1598397,
+                173.390855536,
+                14.255035343,
+                32.818707441,
+                false,
+                "Pairs",
+                "2013-06-23",
+                "2026-08-12T14:44:00Z",
+                "Watch closely",
+                [
+                  0.688019335,
+                  0.660581946,
+                  0.589718223,
+                  0.613209188,
+                  0.538188994,
+                  0.563158333,
+                  0.440058678
+                ]
+              ]
+            }
+          ],
+          "sha256": "8cf509f2987e58969368d8ed0f29fb559eb500f0206366bf760a8f581243454e"
+        }
+      ]
+    },
+    {
+      "id": "100000x19",
+      "selection": "on-demand",
+      "dimensions": {
+        "rows": 100000,
+        "columns": 19
+      },
+      "artifacts": [
+        {
+          "id": "browser2.rows.100000",
+          "description": "Editable 19-column rows; nested trend has exactly seven binary32 values.",
+          "row_count": 100000,
+          "columns": [
+            {
+              "id": "symbol",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "company",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "sector",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "price",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "change_pct",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "volume",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "rsi",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "signal",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "score",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "shares",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "entry_price",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "target_weight_pct",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "pl_pct",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "enabled",
+              "type": "boolean",
+              "nullable": false
+            },
+            {
+              "id": "strategy",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "listed",
+              "type": "date",
+              "nullable": false
+            },
+            {
+              "id": "last_update",
+              "type": "datetime",
+              "nullable": false
+            },
+            {
+              "id": "notes",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "trend",
+              "type": "number[]",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "IM",
+                "Omega Brands",
+                "Health Care",
+                350.883314722,
+                0.353622957,
+                1092183,
+                21.82554393,
+                "Strong Buy",
+                0.124296331,
+                544531,
+                304.731717178,
+                6.572379112,
+                15.144993101,
+                true,
+                "Breakout",
+                "2015-05-14",
+                "2026-08-15T09:54:00Z",
+                "Upgrade pending",
+                [
+                  0.497173309,
+                  0.551851332,
+                  0.419259548,
+                  0.468252093,
+                  0.486602813,
+                  0.615905821,
+                  0.645894051
+                ]
+              ]
+            },
+            {
+              "selector": "row[123]",
+              "row": [
+                "WA",
+                "River Dynamics",
+                "Energy",
+                298.487205408,
+                5.748397911,
+                18575327,
+                55.23834094,
+                "Strong Buy",
+                0.788787459,
+                1465451,
+                180.665782432,
+                3.918019654,
+                65.215128947,
+                true,
+                "Breakout",
+                "2013-07-04",
+                "2026-08-11T12:44:00Z",
+                "Watch closely",
+                [
+                  0.196227014,
+                  0.158214509,
+                  0.213056102,
+                  0.164308548,
+                  0.114878371,
+                  0.056171402,
+                  0.081312746
+                ]
+              ]
+            },
+            {
+              "selector": "row[99999]",
+              "row": [
+                "UGKW",
+                "Cedar Motors",
+                "Industrials",
+                97.269277856,
+                -2.508742839,
+                37842934,
+                55.963193107,
+                "Hold",
+                0.076098836,
+                800119,
+                80.477116599,
+                6.030060295,
+                20.865759072,
+                false,
+                "Momentum",
+                "2015-03-15",
+                "2026-08-12T15:09:00Z",
+                "Rebalance soon",
+                [
+                  0.0,
+                  0.0,
+                  0.024681278,
+                  0.0,
+                  0.132772356,
+                  0.014669888,
+                  0.044611566
+                ]
+              ]
+            }
+          ],
+          "sha256": "05f499878994002986d929106bd39e03104f2ad1712c8eb04f134a1bb7c09d3e"
+        }
+      ]
+    }
+  ],
+  "extensions": [],
+  "separation_notes": [],
+  "references": []
+}

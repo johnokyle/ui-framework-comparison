@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "id": "volatility-surface-stress",
+  "revision": 1,
+  "tier": "core",
+  "status": "draft",
+  "title": "500 by 500 volatility-surface interaction",
+  "description": "Display the largest common candidate surface and execute a reproducible orbit, pan, zoom, hover, and reset sequence.",
+  "implementations": {
+    "slint": {
+      "repository": "slint-ui-comparison",
+      "page_id": "quant.vol-surface",
+      "support": "unverified",
+      "provision": ["CUSTOM"],
+      "notes": "Application-owned software 3-D renderer with raster image and vector overlays."
+    },
+    "qml": {
+      "repository": "qml-ui-comparison",
+      "page_id": "quant.volsurface",
+      "support": "unverified",
+      "provision": ["NATIVE", "CUSTOM"],
+      "notes": "Qt Graphs and application model/rendering integration; exact maximum workload requires verification."
+    },
+    "bevy-egui": {
+      "repository": "bevy-egui-ui-comparison",
+      "page_id": "QuantitativeVisualizationTab::VolatilitySurface",
+      "support": "unverified",
+      "provision": ["COMPOSED", "CUSTOM"],
+      "notes": "Bevy 3-D scene embedded in egui through a fixed-size offscreen texture."
+    }
+  },
+  "fixture": {
+    "mode": "implementation-generator",
+    "id": "volatility-surface-500x500",
+    "revision": 1,
+    "sha256": null,
+    "notes": "Draft only: a shared surface-value generator and content hash are required before activation."
+  },
+  "workload": {
+    "rows": 500,
+    "columns": 500,
+    "render_mode": "surface",
+    "animation": false
+  },
+  "environment": {
+    "viewport": { "width": 1600, "height": 1000, "scale_factor": 1.0 },
+    "theme": "dark",
+    "build_profile": "release",
+    "warm_up_seconds": 30
+  },
+  "actions": [
+    {
+      "id": "select-surface",
+      "input": "Navigate by the mapped implementation page ID and select the 500 by 500 workload.",
+      "expected": "The requested surface is visible and its source grid dimensions are reported."
+    },
+    {
+      "id": "camera-interaction",
+      "input": "Perform the versioned orbit, pan, zoom, hover, and reset action sequence.",
+      "expected": "The camera and hover state respond without errors and reset restores the documented initial camera."
+    }
+  ],
+  "measurements": [
+    "frame_time_ms",
+    "dropped_frames",
+    "cpu_utilization_percent",
+    "scenario_peak_rss_mb"
+  ],
+  "deviations": [
+    "Draft: action coordinates, camera pose, source values, and output hashes are not yet normalized.",
+    "Software and GPU rendering quality must be reported separately from frame timing."
+  ]
+}

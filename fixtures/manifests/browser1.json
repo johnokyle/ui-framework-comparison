@@ -1,0 +1,192 @@
+{
+  "schema_version": "1.0.0",
+  "id": "browser1",
+  "revision": 1,
+  "title": "Browser 1 standard financial grid",
+  "classification": "rendering",
+  "generator": {
+    "name": "common-fixture-generator",
+    "revision": 1
+  },
+  "entity_identity": {
+    "rule": "Stable ID b1-{source_ordinal:06d} is derived from the zero-based row selector and is not an extra displayed column.",
+    "ordering": "Source ordinal order is canonical; display sorting, clustering, filtering, and LOD never change source identity."
+  },
+  "rng": {
+    "algorithm": "SplitMix64",
+    "state": "Unsigned 64-bit state initialized to seed modulo 2^64. next_u64 first adds 0x9E3779B97F4A7C15 modulo 2^64.",
+    "output": "z=state; z=(z xor (z>>30))*0xBF58476D1CE4E5B9 mod 2^64; z=(z xor (z>>27))*0x94D049BB133111EB mod 2^64; return z xor (z>>31).",
+    "uniform": "(next_u64() >> 11) * 2^-53, producing IEEE binary64 in [0,1).",
+    "below": "below(n)=next_u64() modulo n for integer n>=1; no rejection sampling.",
+    "normal": "u1=max(uniform(),1e-12); u2=uniform(); return sqrt(-2*ln(u1))*cos(2*pi*u2). Consume exactly two outputs, discard the sine component, and do not cache normals.",
+    "seed": "20260819",
+    "draw_order": [
+      "Per source row: symbol-length below(3); symbol letters (none for WA at 123); adjective; noun; price uniform; shares-out uniform; sector; change uniform; volume below; RSI missing below(37) then value uniform when present; volatility; signal; score; day/hour/minute/second below draws in that order."
+    ]
+  },
+  "normalization": {
+    "encoding": "UTF-8 without BOM",
+    "document": "One compact JSON object with keys artifact_id, columns, rows; columns contains column IDs and rows contains arrays in manifest column order.",
+    "object_keys": "JSON object keys sorted by Unicode code point; no insignificant whitespace; separators are ',' and ':'.",
+    "array_order": "Arrays and rows retain manifest/generator order; no sorting unless a formula explicitly requires it.",
+    "numbers": "IEEE 754 binary64 results are formatted as base-10 fixed-point with exactly 9 digits after the decimal point, round-to-nearest ties-to-even; no exponent notation.",
+    "integers": "JSON integers use base-10 without leading zeroes and are not converted to floating point.",
+    "negative_zero": "IEEE -0.0 and any nonzero value rounding to zero at 9 decimals serialize as 0.000000000.",
+    "nonfinite": "NaN, +Infinity, and -Infinity are rejected before serialization; null is the only missing/warm-up representation.",
+    "nulls": "Missing values serialize as JSON null, never NaN, an empty string, or a sentinel number.",
+    "booleans": "JSON true and false only.",
+    "strings": "JSON string escaping per RFC 8259; non-ASCII characters are emitted directly as UTF-8; no locale conversion or Unicode normalization.",
+    "dates": "ISO 8601 YYYY-MM-DD strings. Business calendars skip Saturday/Sunday and make no holiday claim.",
+    "datetimes": "ISO 8601 UTC strings YYYY-MM-DDTHH:MM:SSZ; synthetic intraday sessions are 09:30 through 16:00 exclusive, 390 one-minute bars, weekdays only.",
+    "line_endings": "No carriage returns; exactly one LF (0x0A) follows the closing JSON brace; no other trailing bytes."
+  },
+  "numeric_oracle": {
+    "calculation": "Compute with IEEE 754 binary64 (and explicit binary32 only for Browser 2 trend) without intermediate 9-decimal rounding. Normalize only for content serialization.",
+    "absolute_tolerance": 1e-09,
+    "relative_tolerance": 1e-09,
+    "display_formatting": "Display precision, currency symbols, grouping, and locale are separate. Formula tests may use these tolerances; content hashes require exact normalized bytes."
+  },
+  "formulas": {
+    "generation": "price=2+998*u; shares_out=1e6+5e9*u; change_pct=12*(u-0.5); volume=10000+below(50000000); market_cap=price*shares_out; RSI=null when below(37)=0 else 15+70*u; volatility=5+75*u; score=below(101).",
+    "display_columns": "symbol,company,sector,price,change_pct,volume,market_cap,rsi,volatility,signal,score,last_update (labels and widths 90,220,140,100,100,120,130,80,110,110,90,170).",
+    "identity_sort": "Stable ID is b1-{source_ordinal:06d}; WA is b1-000123. Typed sort ties use ascending source ordinal. Null RSI sorts last in both directions; apply direction only to present values.",
+    "special": "The symbol at zero-based source ordinal 123 is WA; the symbol-length draw still occurs and symbol-letter draws are skipped."
+  },
+  "variants": [
+    {
+      "id": "2000x12",
+      "selection": "default",
+      "dimensions": {
+        "rows": 2000,
+        "columns": 12,
+        "wa_source_ordinal": 123
+      },
+      "artifacts": [
+        {
+          "id": "browser1.rows.2000",
+          "description": "Two thousand rows in source order; stable ID derives from row selector.",
+          "row_count": 2000,
+          "columns": [
+            {
+              "id": "symbol",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "company",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "sector",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "price",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "change_pct",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "volume",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "market_cap",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "rsi",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "volatility",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "signal",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "score",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "last_update",
+              "type": "datetime",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "IM",
+                "Omega Brands",
+                "Consumer Discretionary",
+                350.883314722,
+                1.308392312,
+                8080012,
+                673220371491.298,
+                19.06191725,
+                54.748135975,
+                "Strong Sell",
+                23,
+                "2026-08-11T11:54:03Z"
+              ]
+            },
+            {
+              "selector": "row[123]",
+              "row": [
+                "WA",
+                "Meridian Energy",
+                "Technology",
+                190.865366462,
+                2.266984662,
+                30456589,
+                547432309554.74963,
+                27.069111316,
+                72.354929224,
+                "Hold",
+                25,
+                "2026-08-03T12:24:03Z"
+              ]
+            },
+            {
+              "selector": "row[1999]",
+              "row": [
+                "LIA",
+                "Apex Foods",
+                "Technology",
+                331.898954559,
+                3.467964501,
+                29687113,
+                1585349029231.2527,
+                31.426642241,
+                33.62630262,
+                "Sell",
+                52,
+                "2026-08-11T09:36:51Z"
+              ]
+            }
+          ],
+          "sha256": "d984cafc2bd291a77b2b0235c9076b5f3d12b967e220ef21e781d00155eed8ce"
+        }
+      ]
+    }
+  ],
+  "extensions": [],
+  "separation_notes": [],
+  "references": []
+}

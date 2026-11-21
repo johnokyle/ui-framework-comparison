@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "id": "browser-2-large-grid",
+  "revision": 1,
+  "tier": "slint-qml",
+  "status": "draft",
+  "title": "100,000-row editable financial grid",
+  "description": "Exercise the actual 19-column Browser 2 workload with deterministic scrolling, sorting, filtering, selection, editing, and live-update phases.",
+  "implementations": {
+    "slint": {
+      "repository": "slint-ui-comparison",
+      "page_id": "browser.browser2",
+      "support": "unverified",
+      "provision": ["CUSTOM", "EXTERNAL"],
+      "notes": "Custom virtualized grid; clipboard uses arboard. Frozen columns are implemented."
+    },
+    "qml": {
+      "repository": "qml-ui-comparison",
+      "page_id": "browser.browser2",
+      "support": "partial",
+      "provision": ["NATIVE", "COMPOSED", "CUSTOM"],
+      "notes": "Qt TableView with C++ models and custom delegates; frozen columns are not implemented."
+    }
+  },
+  "fixture": {
+    "mode": "implementation-generator",
+    "id": "financial-grid-100000x19",
+    "revision": 1,
+    "sha256": null,
+    "notes": "Draft only: Slint and QML generators are not yet verified to produce identical values."
+  },
+  "workload": {
+    "rows": 100000,
+    "columns": 19,
+    "live_updates": false,
+    "selection_mode": "cell-row-column-range",
+    "clipboard_format": "tsv"
+  },
+  "environment": {
+    "viewport": { "width": 1600, "height": 1000, "scale_factor": 1.0 },
+    "theme": "dark",
+    "build_profile": "release",
+    "warm_up_seconds": 30
+  },
+  "actions": [
+    {
+      "id": "scroll-and-sort",
+      "input": "Navigate by stable page ID, scroll to versioned source-row IDs, then sort a defined column ascending and descending.",
+      "expected": "Visible source-row IDs and sort ordering match the scenario oracle."
+    },
+    {
+      "id": "filter-edit-undo",
+      "input": "Apply a defined filter, edit a validated numeric cell, copy it as TSV, and undo the edit.",
+      "expected": "Row counts, edited value, clipboard content, dirty state, and undo state match the scenario oracle."
+    }
+  ],
+  "measurements": [
+    "scroll_frame_time_ms",
+    "sort_duration_ms",
+    "filter_duration_ms",
+    "scenario_peak_rss_mb"
+  ],
+  "deviations": [
+    "The implemented workload has 19 columns; the older performance-spec wording mentions 25.",
+    "QML frozen-column behavior is absent and must not be silently removed from parity reporting.",
+    "Draft: action oracles, fixture hashes, and clipboard automation are not yet implemented."
+  ]
+}

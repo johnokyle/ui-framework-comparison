@@ -1,0 +1,36 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+.vscode/
+.idea/
+.claude/settings.local.json
+
+# Python tooling
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Native build outputs
+target/
+build/
+cmake-build-*/
+
+# Generated comparison data
+fixtures/generated/
+results/tmp/
+artifacts/
+
+# Large capture formats; publish through artifacts or releases
+*.trace
+*.perf
+*.pftrace
+*.mp4
+*.webm
+
+# OS files
+.DS_Store
+Thumbs.db

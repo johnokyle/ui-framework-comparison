@@ -1,0 +1,537 @@
+{
+  "schema_version": "1.0.0",
+  "id": "pivot",
+  "revision": 1,
+  "title": "Nine-symbol pivot chart and aggregation oracles",
+  "classification": "numerical",
+  "generator": {
+    "name": "common-fixture-generator",
+    "revision": 1
+  },
+  "entity_identity": {
+    "rule": "bar_id is {SYMBOL}-{zero_based_day:04d}; pivot candidate identity is bar_id plus high/low type. Display/range changes never renumber source bars.",
+    "ordering": "Source ordinal order is canonical; display sorting, clustering, filtering, and LOD never change source identity."
+  },
+  "rng": {
+    "algorithm": "SplitMix64",
+    "state": "Unsigned 64-bit state initialized to seed modulo 2^64. next_u64 first adds 0x9E3779B97F4A7C15 modulo 2^64.",
+    "output": "z=state; z=(z xor (z>>30))*0xBF58476D1CE4E5B9 mod 2^64; z=(z xor (z>>27))*0x94D049BB133111EB mod 2^64; return z xor (z>>31).",
+    "uniform": "(next_u64() >> 11) * 2^-53, producing IEEE binary64 in [0,1).",
+    "below": "below(n)=next_u64() modulo n for integer n>=1; no rejection sampling.",
+    "normal": "u1=max(uniform(),1e-12); u2=uniform(); return sqrt(-2*ln(u1))*cos(2*pi*u2). Consume exactly two outputs, discard the sine component, and do not cache normals.",
+    "seed": "20260821 + symbol_source_index*7919 (mod 2^64)",
+    "draw_order": [
+      "Each symbol has an independent stream. Per day: one normal, high uniform, low uniform, volume uniform, in that order."
+    ]
+  },
+  "normalization": {
+    "encoding": "UTF-8 without BOM",
+    "document": "One compact JSON object with keys artifact_id, columns, rows; columns contains column IDs and rows contains arrays in manifest column order.",
+    "object_keys": "JSON object keys sorted by Unicode code point; no insignificant whitespace; separators are ',' and ':'.",
+    "array_order": "Arrays and rows retain manifest/generator order; no sorting unless a formula explicitly requires it.",
+    "numbers": "IEEE 754 binary64 results are formatted as base-10 fixed-point with exactly 9 digits after the decimal point, round-to-nearest ties-to-even; no exponent notation.",
+    "integers": "JSON integers use base-10 without leading zeroes and are not converted to floating point.",
+    "negative_zero": "IEEE -0.0 and any nonzero value rounding to zero at 9 decimals serialize as 0.000000000.",
+    "nonfinite": "NaN, +Infinity, and -Infinity are rejected before serialization; null is the only missing/warm-up representation.",
+    "nulls": "Missing values serialize as JSON null, never NaN, an empty string, or a sentinel number.",
+    "booleans": "JSON true and false only.",
+    "strings": "JSON string escaping per RFC 8259; non-ASCII characters are emitted directly as UTF-8; no locale conversion or Unicode normalization.",
+    "dates": "ISO 8601 YYYY-MM-DD strings. Business calendars skip Saturday/Sunday and make no holiday claim.",
+    "datetimes": "ISO 8601 UTC strings YYYY-MM-DDTHH:MM:SSZ; synthetic intraday sessions are 09:30 through 16:00 exclusive, 390 one-minute bars, weekdays only.",
+    "line_endings": "No carriage returns; exactly one LF (0x0A) follows the closing JSON brace; no other trailing bytes."
+  },
+  "numeric_oracle": {
+    "calculation": "Compute with IEEE 754 binary64 (and explicit binary32 only for Browser 2 trend) without intermediate 9-decimal rounding. Normalize only for content serialization.",
+    "absolute_tolerance": 1e-09,
+    "relative_tolerance": 1e-09,
+    "display_formatting": "Display precision, currency symbols, grouping, and locale are separate. Formula tests may use these tolerances; content hashes require exact normalized bytes."
+  },
+  "formulas": {
+    "generation": "price0=40+30*(symbol%5); drift=.0001+.00006*(symbol%4); base_vol=.006+.002*(symbol%3); regime=.0008*sin(i/220+symbol); vol=base_vol+.004*abs(cos(i/83)); r=drift+regime+vol*N; open=previous close; close=open*(1+r); high=max(open,close)*(1+vol*u*.6); low=min(open,close)*(1-vol*u*.6); volume=(2+30*abs(r)/vol)*(.6+.8*u)*1e6.",
+    "aggregation": "Daily rows are source bars. Weekly groups consecutive source indices floor(i/5), including a final partial group. Monthly groups actual ISO year/month. OHLCV is first open, maximum high, minimum low, last close, sum volume; retain first/last source indices and dates.",
+    "candidates": "Default high/low periods are 3. Candidate i requires i+period<n and compares against every other available bar from max(0,i-period) through i+period. High requires strict > against every neighbor; low strict <. Equal extrema are not candidates. This deliberately replaces Slint's >=/<= and QML's asymmetric tie behavior.",
+    "confirmation_buffers": "A candidate is known at confirmation index i+period. Accept candidates in source order when abs(price-last_accepted_same_type)>=buffer; default buffers 0 accept all candidates. Step series change at confirmation index, not retroactively at candidate index. high/low_confirmed_at records the window oracle.",
+    "zigzag": "Merge accepted highs then lows at each candidate index. Enforce alternating type; same-type runs replace only with strictly higher high or strictly lower low. The artifact applies to daily bars; apply identical formulas after aggregation for weekly/monthly."
+  },
+  "variants": [
+    {
+      "id": "9x1500",
+      "selection": "default",
+      "dimensions": {
+        "symbols": 9,
+        "business_days": 1500,
+        "base_date": "2021-01-04",
+        "weekly_group_days": 5,
+        "high_low_period": 3,
+        "buffers": 0
+      },
+      "artifacts": [
+        {
+          "id": "pivot.daily.9x1500",
+          "description": "Nine independent per-symbol daily OHLCV series.",
+          "row_count": 13500,
+          "columns": [
+            {
+              "id": "symbol",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "bar_id",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "date",
+              "type": "date",
+              "nullable": false
+            },
+            {
+              "id": "open",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "high",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "low",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "close",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "volume",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "SPY",
+                "SPY-0000",
+                "2021-01-04",
+                40.0,
+                40.007248056,
+                39.757367111,
+                39.990439103,
+                2328510.444228277
+              ]
+            },
+            {
+              "selector": "row[1499]",
+              "row": [
+                "SPY",
+                "SPY-1499",
+                "2026-10-02",
+                29.704336943,
+                29.954461201,
+                29.58144476,
+                29.79785289,
+                13862923.710319633
+              ]
+            },
+            {
+              "selector": "row[1500]",
+              "row": [
+                "SPX",
+                "SPX-0000",
+                "2021-01-04",
+                70.0,
+                70.070468487,
+                69.753199118,
+                69.917746326,
+                4882880.912060183
+              ]
+            },
+            {
+              "selector": "row[13499]",
+              "row": [
+                "NVDA",
+                "NVDA-1499",
+                "2026-10-02",
+                252.545997078,
+                253.262984799,
+                249.289916885,
+                249.833321162,
+                17090991.89641617
+              ]
+            }
+          ],
+          "sha256": "6286d2bd477c2e8833a155fc28f2aaf4775d2849bc394fafa17ecccf0c06c8bb"
+        },
+        {
+          "id": "pivot.weekly.9x300",
+          "description": "Consecutive five-business-day aggregation by source index.",
+          "row_count": 2700,
+          "columns": [
+            {
+              "id": "symbol",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "group_id",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "first_date",
+              "type": "date",
+              "nullable": false
+            },
+            {
+              "id": "last_date",
+              "type": "date",
+              "nullable": false
+            },
+            {
+              "id": "first_day",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "last_day",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "open",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "high",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "low",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "close",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "volume",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "SPY",
+                "0",
+                "2021-01-04",
+                "2021-01-08",
+                0,
+                4,
+                40.0,
+                40.555533985,
+                39.757367111,
+                40.099046494,
+                72575370.45688099
+              ]
+            },
+            {
+              "selector": "row[2699]",
+              "row": [
+                "NVDA",
+                "299",
+                "2026-09-28",
+                "2026-10-02",
+                1495,
+                1499,
+                261.227770541,
+                263.014797639,
+                249.289916885,
+                249.833321162,
+                151842450.51699573
+              ]
+            }
+          ],
+          "sha256": "80edbce98898c1b4c9861a73bf9bbc387ae3993b79b65d2df8fd7698eaa0c341"
+        },
+        {
+          "id": "pivot.monthly.9-calendar",
+          "description": "Actual calendar year/month aggregation, not fixed 21-day bins.",
+          "row_count": 630,
+          "columns": [
+            {
+              "id": "symbol",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "month",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "first_date",
+              "type": "date",
+              "nullable": false
+            },
+            {
+              "id": "last_date",
+              "type": "date",
+              "nullable": false
+            },
+            {
+              "id": "first_day",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "last_day",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "open",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "high",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "low",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "close",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "volume",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "SPY",
+                "2021-01",
+                "2021-01-04",
+                "2021-01-29",
+                0,
+                19,
+                40.0,
+                41.131186238,
+                38.487206548,
+                39.862022616,
+                612475598.3202773
+              ]
+            },
+            {
+              "selector": "row[629]",
+              "row": [
+                "NVDA",
+                "2026-10",
+                "2026-10-01",
+                "2026-10-02",
+                1498,
+                1499,
+                251.728976763,
+                254.019705388,
+                249.289916885,
+                249.833321162,
+                25183201.974436868
+              ]
+            }
+          ],
+          "sha256": "32e354dd36f1ba6bd778c5bc837c452cde7ce071f574ce6be641db97f164fcec"
+        },
+        {
+          "id": "pivot.strict-oracles.9x1500",
+          "description": "Strict candidates, buffer acceptance, confirmation indices and no-lookahead steps.",
+          "row_count": 13500,
+          "columns": [
+            {
+              "id": "symbol",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "bar_id",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "candidate_index",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "date",
+              "type": "date",
+              "nullable": false
+            },
+            {
+              "id": "candidate_high",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "candidate_low",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "confirmed_high",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "confirmed_low",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "high_confirmed_at",
+              "type": "integer",
+              "nullable": true
+            },
+            {
+              "id": "low_confirmed_at",
+              "type": "integer",
+              "nullable": true
+            },
+            {
+              "id": "upper_step",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "lower_step",
+              "type": "number",
+              "nullable": true
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "SPY",
+                "SPY-0000",
+                0,
+                "2021-01-04",
+                null,
+                39.757367111,
+                null,
+                39.757367111,
+                null,
+                3,
+                null,
+                null
+              ]
+            },
+            {
+              "selector": "row[13499]",
+              "row": [
+                "NVDA",
+                "NVDA-1499",
+                1499,
+                "2026-10-02",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                273.786404831,
+                259.164179066
+              ]
+            }
+          ],
+          "sha256": "0dfaf92e71eb6818e30514839141b29fe398c9a9bcaaa3fa3a2d9f01e02b34de"
+        },
+        {
+          "id": "pivot.zigzag.9",
+          "description": "Alternating confirmed swing sequence; same-type runs keep the more extreme point.",
+          "row_count": 2013,
+          "columns": [
+            {
+              "id": "symbol",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "sequence",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "candidate_index",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "confirmed_at",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "price",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "is_high",
+              "type": "boolean",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "SPY",
+                0,
+                0,
+                3,
+                39.757367111,
+                false
+              ]
+            },
+            {
+              "selector": "row[2012]",
+              "row": [
+                "NVDA",
+                220,
+                1490,
+                1493,
+                273.786404831,
+                true
+              ]
+            }
+          ],
+          "sha256": "3a60355065b858b49c9c93b7452867d8621b6653d3285ee719c9109c7e54f570"
+        }
+      ]
+    }
+  ],
+  "extensions": [],
+  "separation_notes": [],
+  "references": []
+}

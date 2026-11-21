@@ -1,0 +1,330 @@
+{
+  "schema_version": "1.0.0",
+  "id": "network",
+  "revision": 1,
+  "title": "Deterministic network graphs and initial layouts",
+  "classification": "rendering",
+  "generator": {
+    "name": "common-fixture-generator",
+    "revision": 1
+  },
+  "entity_identity": {
+    "rule": "The first column is the stable entity/record ID unless entity_identity states otherwise.",
+    "ordering": "Source ordinal order is canonical; display sorting, clustering, filtering, and LOD never change source identity."
+  },
+  "rng": {
+    "algorithm": "SplitMix64",
+    "state": "Unsigned 64-bit state initialized to seed modulo 2^64. next_u64 first adds 0x9E3779B97F4A7C15 modulo 2^64.",
+    "output": "z=state; z=(z xor (z>>30))*0xBF58476D1CE4E5B9 mod 2^64; z=(z xor (z>>27))*0x94D049BB133111EB mod 2^64; return z xor (z>>31).",
+    "uniform": "(next_u64() >> 11) * 2^-53, producing IEEE binary64 in [0,1).",
+    "below": "below(n)=next_u64() modulo n for integer n>=1; no rejection sampling.",
+    "normal": "u1=max(uniform(),1e-12); u2=uniform(); return sqrt(-2*ln(u1))*cos(2*pi*u2). Consume exactly two outputs, discard the sine component, and do not cache normals.",
+    "seed": "20260859",
+    "draw_order": [
+      "Generate x/y uniforms for every node first. For each symbol add sector weight, factor weight, and every even symbol's symbol-symbol weight. Top up edges with a,b below draws and a weight uniform only when a!=b. Layout consumes no RNG.",
+      "Run 120 iterations for 100 nodes and 40 for 1000 nodes; iterate repulsion pairs i<j, edges in source order, then node updates in source order."
+    ]
+  },
+  "normalization": {
+    "encoding": "UTF-8 without BOM",
+    "document": "One compact JSON object with keys artifact_id, columns, rows; columns contains column IDs and rows contains arrays in manifest column order.",
+    "object_keys": "JSON object keys sorted by Unicode code point; no insignificant whitespace; separators are ',' and ':'.",
+    "array_order": "Arrays and rows retain manifest/generator order; no sorting unless a formula explicitly requires it.",
+    "numbers": "IEEE 754 binary64 results are formatted as base-10 fixed-point with exactly 9 digits after the decimal point, round-to-nearest ties-to-even; no exponent notation.",
+    "integers": "JSON integers use base-10 without leading zeroes and are not converted to floating point.",
+    "negative_zero": "IEEE -0.0 and any nonzero value rounding to zero at 9 decimals serialize as 0.000000000.",
+    "nonfinite": "NaN, +Infinity, and -Infinity are rejected before serialization; null is the only missing/warm-up representation.",
+    "nulls": "Missing values serialize as JSON null, never NaN, an empty string, or a sentinel number.",
+    "booleans": "JSON true and false only.",
+    "strings": "JSON string escaping per RFC 8259; non-ASCII characters are emitted directly as UTF-8; no locale conversion or Unicode normalization.",
+    "dates": "ISO 8601 YYYY-MM-DD strings. Business calendars skip Saturday/Sunday and make no holiday claim.",
+    "datetimes": "ISO 8601 UTC strings YYYY-MM-DDTHH:MM:SSZ; synthetic intraday sessions are 09:30 through 16:00 exclusive, 390 one-minute bars, weekdays only.",
+    "line_endings": "No carriage returns; exactly one LF (0x0A) follows the closing JSON brace; no other trailing bytes."
+  },
+  "numeric_oracle": {
+    "calculation": "Compute with IEEE 754 binary64 (and explicit binary32 only for Browser 2 trend) without intermediate 9-decimal rounding. Normalize only for content serialization.",
+    "absolute_tolerance": 1e-09,
+    "relative_tolerance": 1e-09,
+    "display_formatting": "Display precision, currency symbols, grouping, and locale are separate. Formula tests may use these tolerances; content hashes require exact normalized bytes."
+  },
+  "formulas": {
+    "nodes_edges": "Reserve six sectors and Beta/Momentum after n-8 symbols. Every symbol links to sector i%6 and factor i%2. Weights: sector .5+.5*u, factor .3+.6*u, symbol .2+.7*u. Duplicate undirected pairs are allowed and remain distinct edge IDs. Edges truncate to max(requested,2*n_symbols), which equals requested canonical sizes.",
+    "layout": "k=sqrt(2.4/n); temp=.06*(1-iteration/iterations); repulsion distance=max(.01,Euclidean), force=k^2/d; attraction force=d^2/k*(.4+.6*w)*.02; update clamp(position+displacement/len*min(temp,len),-1,1). Initial x/y are retained beside final positions.",
+    "budgets": "Initial position and iteration counts are fixture inputs. Interactive drag/select/neighbor highlighting uses stable node IDs. Further layout/filter/statistics controls are extensions."
+  },
+  "variants": [
+    {
+      "id": "100x300",
+      "selection": "default",
+      "dimensions": {
+        "nodes": 100,
+        "edges": 300,
+        "layout_iterations": 120
+      },
+      "artifacts": [
+        {
+          "id": "network.nodes.100",
+          "description": "Node identity, final position, initial position and fixed budget.",
+          "row_count": 100,
+          "columns": [
+            {
+              "id": "node_id",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "label",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "kind",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "x",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "y",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "initial_x",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "initial_y",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "layout_iterations",
+              "type": "integer",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "node-0000",
+                "S01",
+                0,
+                -0.001660765,
+                -1.0,
+                -0.252445566,
+                -0.734666283,
+                120
+              ]
+            },
+            {
+              "selector": "row[99]",
+              "row": [
+                "node-0099",
+                "Momentum",
+                2,
+                -0.048441413,
+                0.064500546,
+                -0.440322456,
+                -0.262400693,
+                120
+              ]
+            }
+          ],
+          "sha256": "2b636fc084e78462e58295a1b620ec26e4744e88c6c9f83a07f8d9adc31fd499"
+        },
+        {
+          "id": "network.edges.300",
+          "description": "Ordered weighted edges with stable IDs.",
+          "row_count": 300,
+          "columns": [
+            {
+              "id": "edge_id",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "source_node_id",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "target_node_id",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "weight",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "edge-0000",
+                "node-0000",
+                "node-0092",
+                0.993835772
+              ]
+            },
+            {
+              "selector": "row[299]",
+              "row": [
+                "edge-0299",
+                "node-0056",
+                "node-0044",
+                0.888573539
+              ]
+            }
+          ],
+          "sha256": "814da454dc6e4cbb8148e2f18f4336ee8ecfe34ed831c06abc0a0314261ad516"
+        }
+      ]
+    },
+    {
+      "id": "1000x5000",
+      "selection": "on-demand",
+      "dimensions": {
+        "nodes": 1000,
+        "edges": 5000,
+        "layout_iterations": 40
+      },
+      "artifacts": [
+        {
+          "id": "network.nodes.1000",
+          "description": "Node identity, final position, initial position and fixed budget.",
+          "row_count": 1000,
+          "columns": [
+            {
+              "id": "node_id",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "label",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "kind",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "x",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "y",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "initial_x",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "initial_y",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "layout_iterations",
+              "type": "integer",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "node-0000",
+                "S01",
+                0,
+                -0.326400167,
+                -1.0,
+                -0.252445566,
+                -0.734666283,
+                40
+              ]
+            },
+            {
+              "selector": "row[999]",
+              "row": [
+                "node-0999",
+                "Momentum",
+                2,
+                0.012839517,
+                0.005365927,
+                0.232697518,
+                0.298960943,
+                40
+              ]
+            }
+          ],
+          "sha256": "00eeebbf7e4ad21315af87f7a732e42f59115fbf57b5538a055dcabfc5b0212a"
+        },
+        {
+          "id": "network.edges.5000",
+          "description": "Ordered weighted edges with stable IDs.",
+          "row_count": 5000,
+          "columns": [
+            {
+              "id": "edge_id",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "source_node_id",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "target_node_id",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "weight",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "edge-0000",
+                "node-0000",
+                "node-0992",
+                0.951503823
+              ]
+            },
+            {
+              "selector": "row[4999]",
+              "row": [
+                "edge-4999",
+                "node-0781",
+                "node-0636",
+                0.500766393
+              ]
+            }
+          ],
+          "sha256": "77ce1f874109e2c64aaec93ee9516a06c1eaff1cca38a716d58a59f3a2c493d9"
+        }
+      ]
+    }
+  ],
+  "extensions": [],
+  "separation_notes": [],
+  "references": []
+}

@@ -1,0 +1,269 @@
+{
+  "schema_version": "1.0.0",
+  "id": "volatility",
+  "revision": 1,
+  "title": "Volatility rendering surfaces",
+  "classification": "rendering",
+  "generator": {
+    "name": "common-fixture-generator",
+    "revision": 1
+  },
+  "entity_identity": {
+    "rule": "The first column is the stable entity/record ID unless entity_identity states otherwise.",
+    "ordering": "Source ordinal order is canonical; display sorting, clustering, filtering, and LOD never change source identity."
+  },
+  "rng": null,
+  "normalization": {
+    "encoding": "UTF-8 without BOM",
+    "document": "One compact JSON object with keys artifact_id, columns, rows; columns contains column IDs and rows contains arrays in manifest column order.",
+    "object_keys": "JSON object keys sorted by Unicode code point; no insignificant whitespace; separators are ',' and ':'.",
+    "array_order": "Arrays and rows retain manifest/generator order; no sorting unless a formula explicitly requires it.",
+    "numbers": "IEEE 754 binary64 results are formatted as base-10 fixed-point with exactly 9 digits after the decimal point, round-to-nearest ties-to-even; no exponent notation.",
+    "integers": "JSON integers use base-10 without leading zeroes and are not converted to floating point.",
+    "negative_zero": "IEEE -0.0 and any nonzero value rounding to zero at 9 decimals serialize as 0.000000000.",
+    "nonfinite": "NaN, +Infinity, and -Infinity are rejected before serialization; null is the only missing/warm-up representation.",
+    "nulls": "Missing values serialize as JSON null, never NaN, an empty string, or a sentinel number.",
+    "booleans": "JSON true and false only.",
+    "strings": "JSON string escaping per RFC 8259; non-ASCII characters are emitted directly as UTF-8; no locale conversion or Unicode normalization.",
+    "dates": "ISO 8601 YYYY-MM-DD strings. Business calendars skip Saturday/Sunday and make no holiday claim.",
+    "datetimes": "ISO 8601 UTC strings YYYY-MM-DDTHH:MM:SSZ; synthetic intraday sessions are 09:30 through 16:00 exclusive, 390 one-minute bars, weekdays only.",
+    "line_endings": "No carriage returns; exactly one LF (0x0A) follows the closing JSON brace; no other trailing bytes."
+  },
+  "numeric_oracle": {
+    "calculation": "Compute with IEEE 754 binary64 (and explicit binary32 only for Browser 2 trend) without intermediate 9-decimal rounding. Normalize only for content serialization.",
+    "absolute_tolerance": 1e-09,
+    "relative_tolerance": 1e-09,
+    "display_formatting": "Display precision, currency symbols, grouping, and locale are separate. Formula tests may use these tolerances; content hashes require exact normalized bytes."
+  },
+  "formulas": {
+    "axes": "For square n in {100,250,500}: moneyness[k]=.7+.6*k/(n-1); maturity[t]=.05+1.95*(t/(n-1))^2. Rows are maturity-major then strike.",
+    "surface": "For stress s in {0,1}: base=.18+.16*s; skew=(.10+.12*s)*(1-m); smile=.35*(m-1)^2; term=.03*(tau-.6)+.004*sin(8*tau); wobble=.004*sin(1.7*k+2.3*t); value=max(.02,base+skew/max(.3,sqrt(tau))+smile+term+wobble). Calm uses s=0 and stressed s=1; no RNG.",
+    "presentation": "Blending, surface/wireframe/color, camera and animation are rendering state. Q-P1 animation is off. Nearest-sample selection uses grid indices, never interpolated replacement values."
+  },
+  "variants": [
+    {
+      "id": "100x100",
+      "selection": "default",
+      "dimensions": {
+        "maturity_points": 100,
+        "strike_points": 100,
+        "states": 2
+      },
+      "artifacts": [
+        {
+          "id": "volatility.surface.100x100",
+          "description": "Two deterministic states on the canonical square grid.",
+          "row_count": 10000,
+          "columns": [
+            {
+              "id": "maturity_index",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "strike_index",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "moneyness",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "maturity",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "calm",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "stressed",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                0,
+                0,
+                0.7,
+                0.05,
+                0.296557673,
+                0.576557673
+              ]
+            },
+            {
+              "selector": "row[9999]",
+              "row": [
+                99,
+                99,
+                1.3,
+                2.0,
+                0.231769793,
+                0.366313949
+              ]
+            }
+          ],
+          "sha256": "a994215e06cd66b681ab2bac6c593585db81e3debc36c83b2a5ea4aa0112d5cd"
+        }
+      ]
+    },
+    {
+      "id": "250x250",
+      "selection": "on-demand",
+      "dimensions": {
+        "maturity_points": 250,
+        "strike_points": 250,
+        "states": 2
+      },
+      "artifacts": [
+        {
+          "id": "volatility.surface.250x250",
+          "description": "Two deterministic states on the canonical square grid.",
+          "row_count": 62500,
+          "columns": [
+            {
+              "id": "maturity_index",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "strike_index",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "moneyness",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "maturity",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "calm",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "stressed",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                0,
+                0,
+                0.7,
+                0.05,
+                0.296557673,
+                0.576557673
+              ]
+            },
+            {
+              "selector": "row[62499]",
+              "row": [
+                249,
+                249,
+                1.3,
+                2.0,
+                0.230675685,
+                0.365219841
+              ]
+            }
+          ],
+          "sha256": "6978274c09b9b59ad62ac682c943e3b350fc3754068b855e4b24c97bb00ab4f1"
+        }
+      ]
+    },
+    {
+      "id": "500x500",
+      "selection": "on-demand",
+      "dimensions": {
+        "maturity_points": 500,
+        "strike_points": 500,
+        "states": 2
+      },
+      "artifacts": [
+        {
+          "id": "volatility.surface.500x500",
+          "description": "Two deterministic states on the canonical square grid.",
+          "row_count": 250000,
+          "columns": [
+            {
+              "id": "maturity_index",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "strike_index",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "moneyness",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "maturity",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "calm",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "stressed",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                0,
+                0,
+                0.7,
+                0.05,
+                0.296557673,
+                0.576557673
+              ]
+            },
+            {
+              "selector": "row[249999]",
+              "row": [
+                499,
+                499,
+                1.3,
+                2.0,
+                0.227591149,
+                0.362135304
+              ]
+            }
+          ],
+          "sha256": "3d651f7fe517069ba59c4fd5be7e489913b6122b64c638264c2f7820972289ea"
+        }
+      ]
+    }
+  ],
+  "extensions": [],
+  "separation_notes": [
+    "This is an analytic rendering surface, not a calibrated implied-volatility model."
+  ],
+  "references": []
+}

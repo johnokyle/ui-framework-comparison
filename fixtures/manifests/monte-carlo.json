@@ -1,0 +1,218 @@
+{
+  "schema_version": "1.0.0",
+  "id": "monte-carlo",
+  "revision": 1,
+  "title": "Monte Carlo rendering paths and summaries",
+  "classification": "rendering",
+  "generator": {
+    "name": "common-fixture-generator",
+    "revision": 1
+  },
+  "entity_identity": {
+    "rule": "The first column is the stable entity/record ID unless entity_identity states otherwise.",
+    "ordering": "Source ordinal order is canonical; display sorting, clustering, filtering, and LOD never change source identity."
+  },
+  "rng": {
+    "algorithm": "SplitMix64",
+    "state": "Unsigned 64-bit state initialized to seed modulo 2^64. next_u64 first adds 0x9E3779B97F4A7C15 modulo 2^64.",
+    "output": "z=state; z=(z xor (z>>30))*0xBF58476D1CE4E5B9 mod 2^64; z=(z xor (z>>27))*0x94D049BB133111EB mod 2^64; return z xor (z>>31).",
+    "uniform": "(next_u64() >> 11) * 2^-53, producing IEEE binary64 in [0,1).",
+    "below": "below(n)=next_u64() modulo n for integer n>=1; no rejection sampling.",
+    "normal": "u1=max(uniform(),1e-12); u2=uniform(); return sqrt(-2*ln(u1))*cos(2*pi*u2). Consume exactly two outputs, discard the sine component, and do not cache normals.",
+    "seed": "20260913",
+    "draw_order": [
+      "Paths are outer loop 0..599 and steps inner loop 0..119, consuming one normal per step. Summary calculations consume no RNG."
+    ]
+  },
+  "normalization": {
+    "encoding": "UTF-8 without BOM",
+    "document": "One compact JSON object with keys artifact_id, columns, rows; columns contains column IDs and rows contains arrays in manifest column order.",
+    "object_keys": "JSON object keys sorted by Unicode code point; no insignificant whitespace; separators are ',' and ':'.",
+    "array_order": "Arrays and rows retain manifest/generator order; no sorting unless a formula explicitly requires it.",
+    "numbers": "IEEE 754 binary64 results are formatted as base-10 fixed-point with exactly 9 digits after the decimal point, round-to-nearest ties-to-even; no exponent notation.",
+    "integers": "JSON integers use base-10 without leading zeroes and are not converted to floating point.",
+    "negative_zero": "IEEE -0.0 and any nonzero value rounding to zero at 9 decimals serialize as 0.000000000.",
+    "nonfinite": "NaN, +Infinity, and -Infinity are rejected before serialization; null is the only missing/warm-up representation.",
+    "nulls": "Missing values serialize as JSON null, never NaN, an empty string, or a sentinel number.",
+    "booleans": "JSON true and false only.",
+    "strings": "JSON string escaping per RFC 8259; non-ASCII characters are emitted directly as UTF-8; no locale conversion or Unicode normalization.",
+    "dates": "ISO 8601 YYYY-MM-DD strings. Business calendars skip Saturday/Sunday and make no holiday claim.",
+    "datetimes": "ISO 8601 UTC strings YYYY-MM-DDTHH:MM:SSZ; synthetic intraday sessions are 09:30 through 16:00 exclusive, 390 one-minute bars, weekdays only.",
+    "line_endings": "No carriage returns; exactly one LF (0x0A) follows the closing JSON brace; no other trailing bytes."
+  },
+  "numeric_oracle": {
+    "calculation": "Compute with IEEE 754 binary64 (and explicit binary32 only for Browser 2 trend) without intermediate 9-decimal rounding. Normalize only for content serialization.",
+    "absolute_tolerance": 1e-09,
+    "relative_tolerance": 1e-09,
+    "display_formatting": "Display precision, currency symbols, grouping, and locale are separate. Formula tests may use these tolerances; content hashes require exact normalized bytes."
+  },
+  "formulas": {
+    "paths": "Initial value before step 0 is exactly 1.0 and is not an emitted step. At each step value*=1+.001+.02*N; artifact stores 120 post-update values per path. These are rendering paths, not a validated GBM log-return benchmark.",
+    "percentiles": "At each step sort 600 values ascending. 5/50/95 percentile uses zero-based index floor(p*(600-1)/100): 29,299,569. No interpolation.",
+    "histogram": "Terminal values use 40 equal-width bins from min to max; bucket=floor((value-min)/max(1e-9,max-min)*40), clamped to 39. Artifact stores bin lower/upper and exact counts.",
+    "lod": "Path selection uses path-000..path-599. Display decimation is presentation-only and must not alter bands or terminal histogram."
+  },
+  "variants": [
+    {
+      "id": "600x120",
+      "selection": "default",
+      "dimensions": {
+        "paths": 600,
+        "steps": 120,
+        "initial_value": 1.0,
+        "histogram_bins": 40
+      },
+      "artifacts": [
+        {
+          "id": "monte-carlo.paths.600x120",
+          "description": "Long-form path/step values in generation order.",
+          "row_count": 72000,
+          "columns": [
+            {
+              "id": "path_id",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "path_index",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "step",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "value",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "path-000",
+                0,
+                0,
+                0.990455671
+              ]
+            },
+            {
+              "selector": "row[71999]",
+              "row": [
+                "path-599",
+                599,
+                119,
+                0.902067582
+              ]
+            }
+          ],
+          "sha256": "a7b6c048ce3b7d04c9b3ec0e6714ed17d7eb855aa6d5fed473acdf7e446907ca"
+        },
+        {
+          "id": "monte-carlo.bands.120",
+          "description": "Fixed nearest-index percentile bands.",
+          "row_count": 120,
+          "columns": [
+            {
+              "id": "step",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "p05",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "p50",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "p95",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                0,
+                0.969546229,
+                1.000780367,
+                1.035094559
+              ]
+            },
+            {
+              "selector": "row[119]",
+              "row": [
+                119,
+                0.755565328,
+                1.109422805,
+                1.53138571
+              ]
+            }
+          ],
+          "sha256": "86e515a2421760fde83999e52cd996028356830416939f9a9e227dadc334b938"
+        },
+        {
+          "id": "monte-carlo.histogram.40",
+          "description": "Terminal-value histogram with forty bins.",
+          "row_count": 40,
+          "columns": [
+            {
+              "id": "bin",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "lower",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "upper",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "count",
+              "type": "integer",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                0,
+                0.577509214,
+                0.615906285,
+                2
+              ]
+            },
+            {
+              "selector": "row[39]",
+              "row": [
+                39,
+                2.074995008,
+                2.113392079,
+                2
+              ]
+            }
+          ],
+          "sha256": "404f3b38b3839c405758d20894270b79ddbc89815714cdff6a8b4a7a95b25704"
+        }
+      ]
+    }
+  ],
+  "extensions": [],
+  "separation_notes": [
+    "Larger GBM populations and numerical distribution benchmarks are separate from this rendering fixture."
+  ],
+  "references": []
+}

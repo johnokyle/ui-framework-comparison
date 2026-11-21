@@ -1,0 +1,376 @@
+{
+  "schema_version": "1.0.0",
+  "id": "factor",
+  "revision": 1,
+  "title": "Factor structure point cloud",
+  "classification": "rendering",
+  "generator": {
+    "name": "common-fixture-generator",
+    "revision": 1
+  },
+  "entity_identity": {
+    "rule": "The first column is the stable entity/record ID unless entity_identity states otherwise.",
+    "ordering": "Source ordinal order is canonical; display sorting, clustering, filtering, and LOD never change source identity."
+  },
+  "rng": {
+    "algorithm": "SplitMix64",
+    "state": "Unsigned 64-bit state initialized to seed modulo 2^64. next_u64 first adds 0x9E3779B97F4A7C15 modulo 2^64.",
+    "output": "z=state; z=(z xor (z>>30))*0xBF58476D1CE4E5B9 mod 2^64; z=(z xor (z>>27))*0x94D049BB133111EB mod 2^64; return z xor (z>>31).",
+    "uniform": "(next_u64() >> 11) * 2^-53, producing IEEE binary64 in [0,1).",
+    "below": "below(n)=next_u64() modulo n for integer n>=1; no rejection sampling.",
+    "normal": "u1=max(uniform(),1e-12); u2=uniform(); return sqrt(-2*ln(u1))*cos(2*pi*u2). Consume exactly two outputs, discard the sine component, and do not cache normals.",
+    "seed": "20260822 (all sizes restart and therefore share prefixes)",
+    "draw_order": [
+      "Per point: beta normal, value normal, momentum normal, cap uniform. Sector is source index modulo 6 and consumes no random value."
+    ]
+  },
+  "normalization": {
+    "encoding": "UTF-8 without BOM",
+    "document": "One compact JSON object with keys artifact_id, columns, rows; columns contains column IDs and rows contains arrays in manifest column order.",
+    "object_keys": "JSON object keys sorted by Unicode code point; no insignificant whitespace; separators are ',' and ':'.",
+    "array_order": "Arrays and rows retain manifest/generator order; no sorting unless a formula explicitly requires it.",
+    "numbers": "IEEE 754 binary64 results are formatted as base-10 fixed-point with exactly 9 digits after the decimal point, round-to-nearest ties-to-even; no exponent notation.",
+    "integers": "JSON integers use base-10 without leading zeroes and are not converted to floating point.",
+    "negative_zero": "IEEE -0.0 and any nonzero value rounding to zero at 9 decimals serialize as 0.000000000.",
+    "nonfinite": "NaN, +Infinity, and -Infinity are rejected before serialization; null is the only missing/warm-up representation.",
+    "nulls": "Missing values serialize as JSON null, never NaN, an empty string, or a sentinel number.",
+    "booleans": "JSON true and false only.",
+    "strings": "JSON string escaping per RFC 8259; non-ASCII characters are emitted directly as UTF-8; no locale conversion or Unicode normalization.",
+    "dates": "ISO 8601 YYYY-MM-DD strings. Business calendars skip Saturday/Sunday and make no holiday claim.",
+    "datetimes": "ISO 8601 UTC strings YYYY-MM-DDTHH:MM:SSZ; synthetic intraday sessions are 09:30 through 16:00 exclusive, 390 one-minute bars, weekdays only.",
+    "line_endings": "No carriage returns; exactly one LF (0x0A) follows the closing JSON brace; no other trailing bytes."
+  },
+  "numeric_oracle": {
+    "calculation": "Compute with IEEE 754 binary64 (and explicit binary32 only for Browser 2 trend) without intermediate 9-decimal rounding. Normalize only for content serialization.",
+    "absolute_tolerance": 1e-09,
+    "relative_tolerance": 1e-09,
+    "display_formatting": "Display precision, currency symbols, grouping, and locale are separate. Formula tests may use these tolerances; content hashes require exact normalized bytes."
+  },
+  "formulas": {
+    "points": "tilt=sector-2.5; beta=max(.05,1+.12*tilt*.3+.35*N); value=.15*tilt+.6*N; momentum=-.08*tilt+.7*N; cap=20*exp(6*u).",
+    "selection": "Symbol S{source_index+1:03d} is stable (larger numbers are not truncated). Sector color and cap point size do not affect numeric identity. 100K is explicitly selected, never a startup default."
+  },
+  "variants": [
+    {
+      "id": "points-240",
+      "selection": "default",
+      "dimensions": {
+        "points": 240,
+        "sectors": 6
+      },
+      "artifacts": [
+        {
+          "id": "factor.points.240",
+          "description": "Stable synthetic factor coordinates.",
+          "row_count": 240,
+          "columns": [
+            {
+              "id": "symbol",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "sector_index",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "sector",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "beta",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "value",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "momentum",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "cap",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "S001",
+                0,
+                "Technology",
+                0.843682589,
+                -0.301573542,
+                0.07330085,
+                43.361114188
+              ]
+            },
+            {
+              "selector": "row[239]",
+              "row": [
+                "S240",
+                5,
+                "Industrials",
+                1.245673207,
+                0.596628221,
+                0.148309142,
+                149.661161384
+              ]
+            }
+          ],
+          "sha256": "c5fd303feaac7568ee8584efea6107a77a260582369a2be0722d26533d20efef"
+        }
+      ]
+    },
+    {
+      "id": "points-1000",
+      "selection": "on-demand",
+      "dimensions": {
+        "points": 1000,
+        "sectors": 6
+      },
+      "artifacts": [
+        {
+          "id": "factor.points.1000",
+          "description": "Stable synthetic factor coordinates.",
+          "row_count": 1000,
+          "columns": [
+            {
+              "id": "symbol",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "sector_index",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "sector",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "beta",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "value",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "momentum",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "cap",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "S001",
+                0,
+                "Technology",
+                0.843682589,
+                -0.301573542,
+                0.07330085,
+                43.361114188
+              ]
+            },
+            {
+              "selector": "row[999]",
+              "row": [
+                "S1000",
+                3,
+                "Energy",
+                1.557835334,
+                0.357540543,
+                -0.694347602,
+                44.071847797
+              ]
+            }
+          ],
+          "sha256": "85cde94bbd7db7647bf8dff3fc695f02b0e43c93cede5f5d1dc85700cb41559f"
+        }
+      ]
+    },
+    {
+      "id": "points-10000",
+      "selection": "on-demand",
+      "dimensions": {
+        "points": 10000,
+        "sectors": 6
+      },
+      "artifacts": [
+        {
+          "id": "factor.points.10000",
+          "description": "Stable synthetic factor coordinates.",
+          "row_count": 10000,
+          "columns": [
+            {
+              "id": "symbol",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "sector_index",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "sector",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "beta",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "value",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "momentum",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "cap",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "S001",
+                0,
+                "Technology",
+                0.843682589,
+                -0.301573542,
+                0.07330085,
+                43.361114188
+              ]
+            },
+            {
+              "selector": "row[9999]",
+              "row": [
+                "S10000",
+                3,
+                "Energy",
+                0.998354231,
+                0.644805429,
+                -0.097544409,
+                141.47550987
+              ]
+            }
+          ],
+          "sha256": "30f0227bed21baffb427491a1c8c969e4cd476f1c32cc74544fb02dac01939f1"
+        }
+      ]
+    },
+    {
+      "id": "points-100000",
+      "selection": "on-demand",
+      "dimensions": {
+        "points": 100000,
+        "sectors": 6
+      },
+      "artifacts": [
+        {
+          "id": "factor.points.100000",
+          "description": "Stable synthetic factor coordinates.",
+          "row_count": 100000,
+          "columns": [
+            {
+              "id": "symbol",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "sector_index",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "sector",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "beta",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "value",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "momentum",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "cap",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "S001",
+                0,
+                "Technology",
+                0.843682589,
+                -0.301573542,
+                0.07330085,
+                43.361114188
+              ]
+            },
+            {
+              "selector": "row[99999]",
+              "row": [
+                "S100000",
+                3,
+                "Energy",
+                1.218792969,
+                -0.153604849,
+                1.089146127,
+                3171.405377247
+              ]
+            }
+          ],
+          "sha256": "a3456c738d88108f9f7591a4848239ff769f414f38351cc1cbfe95c0a80f2f96"
+        }
+      ]
+    }
+  ],
+  "extensions": [
+    "Custom circular-billboard rendering and additional factor controls are implementation extensions."
+  ],
+  "separation_notes": [],
+  "references": []
+}

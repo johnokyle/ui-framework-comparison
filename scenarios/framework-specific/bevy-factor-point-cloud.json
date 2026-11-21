@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "id": "bevy-factor-point-cloud",
+  "revision": 1,
+  "tier": "framework-specific",
+  "status": "draft",
+  "title": "Bevy GPU factor point cloud",
+  "description": "Document the Bevy-specific WGSL circular-billboard renderer using the 100,000-point factor-structure workload and stable-ID selection.",
+  "implementations": {
+    "bevy-egui": {
+      "repository": "bevy-egui-ui-comparison",
+      "page_id": "QuantitativeVisualizationTab::FactorStructure",
+      "support": "unverified",
+      "provision": ["COMPOSED", "CUSTOM"],
+      "notes": "Custom WGSL point rendering in a Bevy scene; this scenario is not scored as a required Slint/QML implementation."
+    }
+  },
+  "fixture": {
+    "mode": "implementation-generator",
+    "id": "factor-structure-100000",
+    "revision": 1,
+    "sha256": null,
+    "notes": "Draft only: fixture identity and stable-ID selection oracle remain to be captured."
+  },
+  "workload": {
+    "points": 100000,
+    "renderer": "wgsl-circular-billboard",
+    "projection": "perspective"
+  },
+  "environment": {
+    "viewport": { "width": 1600, "height": 1000, "scale_factor": 1.0 },
+    "theme": "implementation-default",
+    "build_profile": "release",
+    "warm_up_seconds": 30
+  },
+  "actions": [
+    {
+      "id": "inspect-factor-cloud",
+      "input": "Select the 100,000-point workload, execute the versioned camera sequence, and select a known stable point ID.",
+      "expected": "Submitted/rendered counts and selected point details agree with the authoritative source data."
+    }
+  ],
+  "measurements": [
+    "frame_time_ms",
+    "submitted_points",
+    "rendered_points",
+    "scenario_peak_rss_mb"
+  ],
+  "deviations": [
+    "Framework-specific demonstration; no cross-framework score is produced.",
+    "GPU timing and fixed offscreen-target scaling require additional instrumentation."
+  ]
+}

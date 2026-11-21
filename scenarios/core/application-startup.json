@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "id": "application-startup",
+  "revision": 1,
+  "tier": "core",
+  "status": "draft",
+  "title": "Release startup and idle memory",
+  "description": "Launch the release application into its default shell, observe first-frame and first-interactive milestones, then measure idle memory after the common warm-up.",
+  "implementations": {
+    "slint": {
+      "repository": "slint-ui-comparison",
+      "page_id": "primary.browser/browser.browser1",
+      "support": "unverified",
+      "provision": ["NATIVE", "COMPOSED", "CUSTOM"],
+      "notes": "All browser/chart controllers and quant views are constructed eagerly in the audited implementation."
+    },
+    "qml": {
+      "repository": "qml-ui-comparison",
+      "page_id": "primary.browser/browser.browser1",
+      "support": "unverified",
+      "provision": ["NATIVE", "COMPOSED", "CUSTOM"],
+      "notes": "Page components are declared in the shell; lazy-loading policy requires verification."
+    },
+    "bevy-egui": {
+      "repository": "bevy-egui-ui-comparison",
+      "page_id": "BrowserTab::Browser1",
+      "support": "unverified",
+      "provision": ["NATIVE", "COMPOSED", "CUSTOM"],
+      "notes": "All four 3-D scenes and broad UI state initialize globally in the audited implementation."
+    }
+  },
+  "fixture": {
+    "mode": "implementation-generator",
+    "id": "default-startup-state",
+    "revision": 1,
+    "sha256": null,
+    "notes": "Draft only: default generated application state has not been normalized."
+  },
+  "workload": {
+    "initial_primary_page": "browser",
+    "live_updates": false,
+    "diagnostics_visible": false
+  },
+  "environment": {
+    "viewport": { "width": 1600, "height": 1000, "scale_factor": 1.0 },
+    "theme": "implementation-default",
+    "build_profile": "release",
+    "warm_up_seconds": 30
+  },
+  "actions": [
+    {
+      "id": "launch-default-shell",
+      "input": "Start the process with the normalized viewport and no scenario-specific page override.",
+      "expected": "The default browser shell is rendered and reaches a documented interactive condition without an error."
+    }
+  ],
+  "measurements": [
+    "startup_first_frame_ms",
+    "startup_first_interactive_ms",
+    "idle_rss_mb"
+  ],
+  "deviations": [
+    "Draft: initialization scope and default geometry differ in the audited applications.",
+    "Historical best-of-three startup values are not inputs to this controlled scenario."
+  ]
+}

@@ -1,0 +1,187 @@
+{
+  "schema_version": "1.0.0",
+  "id": "knowledge",
+  "revision": 1,
+  "title": "Versioned knowledge graph and expansion oracle",
+  "classification": "rendering",
+  "generator": {
+    "name": "common-fixture-generator",
+    "revision": 1
+  },
+  "entity_identity": {
+    "rule": "The first column is the stable entity/record ID unless entity_identity states otherwise.",
+    "ordering": "Source ordinal order is canonical; display sorting, clustering, filtering, and LOD never change source identity."
+  },
+  "rng": {
+    "algorithm": "SplitMix64",
+    "state": "Unsigned 64-bit state initialized to seed modulo 2^64. next_u64 first adds 0x9E3779B97F4A7C15 modulo 2^64.",
+    "output": "z=state; z=(z xor (z>>30))*0xBF58476D1CE4E5B9 mod 2^64; z=(z xor (z>>27))*0x94D049BB133111EB mod 2^64; return z xor (z>>31).",
+    "uniform": "(next_u64() >> 11) * 2^-53, producing IEEE binary64 in [0,1).",
+    "below": "below(n)=next_u64() modulo n for integer n>=1; no rejection sampling.",
+    "normal": "u1=max(uniform(),1e-12); u2=uniform(); return sqrt(-2*ln(u1))*cos(2*pi*u2). Consume exactly two outputs, discard the sine component, and do not cache normals.",
+    "seed": "20260873",
+    "draw_order": [
+      "Construct all 24 nodes and 22 relations in company order, then consume one position uniform per node in stable node order."
+    ]
+  },
+  "normalization": {
+    "encoding": "UTF-8 without BOM",
+    "document": "One compact JSON object with keys artifact_id, columns, rows; columns contains column IDs and rows contains arrays in manifest column order.",
+    "object_keys": "JSON object keys sorted by Unicode code point; no insignificant whitespace; separators are ',' and ':'.",
+    "array_order": "Arrays and rows retain manifest/generator order; no sorting unless a formula explicitly requires it.",
+    "numbers": "IEEE 754 binary64 results are formatted as base-10 fixed-point with exactly 9 digits after the decimal point, round-to-nearest ties-to-even; no exponent notation.",
+    "integers": "JSON integers use base-10 without leading zeroes and are not converted to floating point.",
+    "negative_zero": "IEEE -0.0 and any nonzero value rounding to zero at 9 decimals serialize as 0.000000000.",
+    "nonfinite": "NaN, +Infinity, and -Infinity are rejected before serialization; null is the only missing/warm-up representation.",
+    "nulls": "Missing values serialize as JSON null, never NaN, an empty string, or a sentinel number.",
+    "booleans": "JSON true and false only.",
+    "strings": "JSON string escaping per RFC 8259; non-ASCII characters are emitted directly as UTF-8; no locale conversion or Unicode normalization.",
+    "dates": "ISO 8601 YYYY-MM-DD strings. Business calendars skip Saturday/Sunday and make no holiday claim.",
+    "datetimes": "ISO 8601 UTC strings YYYY-MM-DDTHH:MM:SSZ; synthetic intraday sessions are 09:30 through 16:00 exclusive, 390 one-minute bars, weekdays only.",
+    "line_endings": "No carriage returns; exactly one LF (0x0A) follows the closing JSON brace; no other trailing bytes."
+  },
+  "numeric_oracle": {
+    "calculation": "Compute with IEEE 754 binary64 (and explicit binary32 only for Browser 2 trend) without intermediate 9-decimal rounding. Normalize only for content serialization.",
+    "absolute_tolerance": 1e-09,
+    "relative_tolerance": 1e-09,
+    "display_formatting": "Display precision, currency symbols, grouping, and locale are separate. Formula tests may use these tolerances; content hashes require exact normalized bytes."
+  },
+  "formulas": {
+    "structure": "Three companies each have Sector, Executive, two Securities, two Indicators and one Event. Relations retain construction order plus one company-0/company-1 CORRELATED_WITH link. IDs kg-00..kg-23 and kg-edge-00..kg-edge-21 are stable, not display indices.",
+    "visibility": "Only root Company nodes initially visible=true; every nonroot starts collapsed/hidden until ancestors expand. Expanding a company reveals its direct Sector, Executive, Securities and Event; expanding a Security reveals its Indicator. Collapse hides descendants without deleting entities or relations.",
+    "positions": "depth=0 root, depth=1 when parent is root, else depth=2; angle=2.399*source_index+.2*u; radius=.25+.3*depth; x=radius*cos(angle), y=radius*sin(angle). Drag overrides presentation position only."
+  },
+  "variants": [
+    {
+      "id": "24x22",
+      "selection": "default",
+      "dimensions": {
+        "entities": 24,
+        "relations": 22,
+        "initial_visible": 3
+      },
+      "artifacts": [
+        {
+          "id": "knowledge.entities.24",
+          "description": "Typed entities, parent hierarchy, initial visibility and fixed positions.",
+          "row_count": 24,
+          "columns": [
+            {
+              "id": "entity_id",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "label",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "type",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "parent_id",
+              "type": "string",
+              "nullable": true
+            },
+            {
+              "id": "initial_visible",
+              "type": "boolean",
+              "nullable": false
+            },
+            {
+              "id": "x",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "y",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "kg-00",
+                "Acme Corp",
+                "Company",
+                null,
+                true,
+                0.247248812,
+                0.036986823
+              ]
+            },
+            {
+              "selector": "row[23]",
+              "row": [
+                "kg-23",
+                "Earnings Q3",
+                "Event",
+                "kg-16",
+                false,
+                0.152336867,
+                -0.528482241
+              ]
+            }
+          ],
+          "sha256": "78a74b8c6d448a80ad73f7bb3013fe75cae143c4294bd3f4619d3ba4ff5b245f"
+        },
+        {
+          "id": "knowledge.relations.22",
+          "description": "Stable typed relation list and expansion input.",
+          "row_count": 22,
+          "columns": [
+            {
+              "id": "relation_id",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "source_entity_id",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "target_entity_id",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "type",
+              "type": "string",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "kg-edge-00",
+                "kg-00",
+                "kg-01",
+                "BELONGS_TO"
+              ]
+            },
+            {
+              "selector": "row[21]",
+              "row": [
+                "kg-edge-21",
+                "kg-00",
+                "kg-08",
+                "CORRELATED_WITH"
+              ]
+            }
+          ],
+          "sha256": "810ef7a8adde970d57a7fb4dbf31bdd3c554485c87c127ecb69ce13dd8f9fd6a"
+        }
+      ]
+    }
+  ],
+  "extensions": [],
+  "separation_notes": [],
+  "references": []
+}

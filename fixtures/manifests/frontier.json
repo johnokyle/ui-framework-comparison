@@ -1,0 +1,307 @@
+{
+  "schema_version": "1.0.0",
+  "id": "frontier",
+  "revision": 1,
+  "title": "Sampled efficient-frontier rendering fixture",
+  "classification": "rendering",
+  "generator": {
+    "name": "common-fixture-generator",
+    "revision": 1
+  },
+  "entity_identity": {
+    "rule": "The first column is the stable entity/record ID unless entity_identity states otherwise.",
+    "ordering": "Source ordinal order is canonical; display sorting, clustering, filtering, and LOD never change source identity."
+  },
+  "rng": {
+    "algorithm": "SplitMix64",
+    "state": "Unsigned 64-bit state initialized to seed modulo 2^64. next_u64 first adds 0x9E3779B97F4A7C15 modulo 2^64.",
+    "output": "z=state; z=(z xor (z>>30))*0xBF58476D1CE4E5B9 mod 2^64; z=(z xor (z>>27))*0x94D049BB133111EB mod 2^64; return z xor (z>>31).",
+    "uniform": "(next_u64() >> 11) * 2^-53, producing IEEE binary64 in [0,1).",
+    "below": "below(n)=next_u64() modulo n for integer n>=1; no rejection sampling.",
+    "normal": "u1=max(uniform(),1e-12); u2=uniform(); return sqrt(-2*ln(u1))*cos(2*pi*u2). Consume exactly two outputs, discard the sine component, and do not cache normals.",
+    "seed": "20260825",
+    "draw_order": [
+      "Generate 12 expected-return uniforms then 12 volatility uniforms. For each of 2500 portfolios generate 12 uniforms and transform to exponential weights before normalization. No draws for envelope or special portfolios."
+    ]
+  },
+  "normalization": {
+    "encoding": "UTF-8 without BOM",
+    "document": "One compact JSON object with keys artifact_id, columns, rows; columns contains column IDs and rows contains arrays in manifest column order.",
+    "object_keys": "JSON object keys sorted by Unicode code point; no insignificant whitespace; separators are ',' and ':'.",
+    "array_order": "Arrays and rows retain manifest/generator order; no sorting unless a formula explicitly requires it.",
+    "numbers": "IEEE 754 binary64 results are formatted as base-10 fixed-point with exactly 9 digits after the decimal point, round-to-nearest ties-to-even; no exponent notation.",
+    "integers": "JSON integers use base-10 without leading zeroes and are not converted to floating point.",
+    "negative_zero": "IEEE -0.0 and any nonzero value rounding to zero at 9 decimals serialize as 0.000000000.",
+    "nonfinite": "NaN, +Infinity, and -Infinity are rejected before serialization; null is the only missing/warm-up representation.",
+    "nulls": "Missing values serialize as JSON null, never NaN, an empty string, or a sentinel number.",
+    "booleans": "JSON true and false only.",
+    "strings": "JSON string escaping per RFC 8259; non-ASCII characters are emitted directly as UTF-8; no locale conversion or Unicode normalization.",
+    "dates": "ISO 8601 YYYY-MM-DD strings. Business calendars skip Saturday/Sunday and make no holiday claim.",
+    "datetimes": "ISO 8601 UTC strings YYYY-MM-DDTHH:MM:SSZ; synthetic intraday sessions are 09:30 through 16:00 exclusive, 390 one-minute bars, weekdays only.",
+    "line_endings": "No carriage returns; exactly one LF (0x0A) follows the closing JSON brace; no other trailing bytes."
+  },
+  "numeric_oracle": {
+    "calculation": "Compute with IEEE 754 binary64 (and explicit binary32 only for Browser 2 trend) without intermediate 9-decimal rounding. Normalize only for content serialization.",
+    "absolute_tolerance": 1e-09,
+    "relative_tolerance": 1e-09,
+    "display_formatting": "Display precision, currency symbols, grouping, and locale are separate. Formula tests may use these tolerances; content hashes require exact normalized bytes."
+  },
+  "formulas": {
+    "assets": "mu[i]=.03+.012*i+.01*u; vol[i]=.09+.013*i+.02*u for i=0..11.",
+    "portfolios": "w[i]=-ln(max(1e-9,u)); sum=sum(w); expected=sum(w*mu)/sum; risk=sqrt(sum(w^2*vol^2))/sum. Weights are retained unnormalized in the artifact; normalized weight is w/sum. This is a diagonal-volatility rendering model, not a covariance QP.",
+    "envelope": "vlo/vhi are cloud min/max risk. Forty half-open bins [vlo+(vhi-vlo)*b/40,vlo+(vhi-vlo)*(b+1)/40). Select maximum expected return; ties retain earliest source portfolio. Empty bins have null portfolio/risk/return. The maximum-risk cloud point is intentionally eligible only through special portfolios, matching half-open bin semantics.",
+    "special": "minimum-variance and maximum-Sharpe ties retain earliest source index. Sharpe=(return-.02)/risk. Current is fixed risk=.14, return=.065 and is not claimed feasible.",
+    "separation": "Sampled envelope and special cloud points are rendering-only. Exact long-only QP, larger clouds, and numerical frontier benchmarks require a separate numerical fixture/revision."
+  },
+  "variants": [
+    {
+      "id": "12x2500x40",
+      "selection": "default",
+      "dimensions": {
+        "assets": 12,
+        "portfolios": 2500,
+        "bins": 40,
+        "risk_free_rate": 0.02
+      },
+      "artifacts": [
+        {
+          "id": "frontier.assets.12",
+          "description": "Twelve synthetic asset parameters.",
+          "row_count": 12,
+          "columns": [
+            {
+              "id": "asset_id",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "expected_return",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "volatility",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "A00",
+                0.036109866,
+                0.101148297
+              ]
+            },
+            {
+              "selector": "row[11]",
+              "row": [
+                "A11",
+                0.162465806,
+                0.236335628
+              ]
+            }
+          ],
+          "sha256": "539e3268140b1763b3e7a9d58c934299e12fc750a91c83943d483bb941212258"
+        },
+        {
+          "id": "frontier.portfolios.2500",
+          "description": "Random long-only portfolio cloud with twelve weights per row.",
+          "row_count": 2500,
+          "columns": [
+            {
+              "id": "portfolio_id",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "risk",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "expected_return",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "unnormalized_weights",
+              "type": "number[]",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "portfolio-0000",
+                0.055940161,
+                0.093338341,
+                [
+                  0.2857295,
+                  0.993872798,
+                  2.023671242,
+                  1.295350253,
+                  1.940686067,
+                  0.574341117,
+                  0.004279258,
+                  0.635819024,
+                  0.996434323,
+                  1.564479209,
+                  0.390145736,
+                  0.20167893
+                ]
+              ]
+            },
+            {
+              "selector": "row[2499]",
+              "row": [
+                "portfolio-2499",
+                0.068875965,
+                0.102039357,
+                [
+                  1.27113278,
+                  0.616937859,
+                  0.707998904,
+                  0.230187111,
+                  0.615893349,
+                  0.344631498,
+                  0.444484347,
+                  0.162829256,
+                  0.349382759,
+                  0.082289471,
+                  1.525383883,
+                  1.282012241
+                ]
+              ]
+            }
+          ],
+          "sha256": "0456484a71a560c2b7168d0bbecbf4327f3e846ef3b8ead85a5580f72b92955c"
+        },
+        {
+          "id": "frontier.envelope.40",
+          "description": "All forty sampled-envelope bins including null empty bins.",
+          "row_count": 40,
+          "columns": [
+            {
+              "id": "bin",
+              "type": "integer",
+              "nullable": false
+            },
+            {
+              "id": "risk_low",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "risk_high",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "portfolio_id",
+              "type": "string",
+              "nullable": true
+            },
+            {
+              "id": "risk",
+              "type": "number",
+              "nullable": true
+            },
+            {
+              "id": "expected_return",
+              "type": "number",
+              "nullable": true
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                0,
+                0.045869181,
+                0.048136887,
+                "portfolio-0488",
+                0.048125819,
+                0.08547122
+              ]
+            },
+            {
+              "selector": "row[39]",
+              "row": [
+                39,
+                0.134309709,
+                0.136577415,
+                null,
+                null,
+                null
+              ]
+            }
+          ],
+          "sha256": "c3dbd750ecb20f13fd05ee3f668a36b71baaa85418b8ad565eb2ffb949a4b23e"
+        },
+        {
+          "id": "frontier.special.3",
+          "description": "Minimum variance, maximum Sharpe and fixed current portfolio.",
+          "row_count": 3,
+          "columns": [
+            {
+              "id": "kind",
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "id": "portfolio_id",
+              "type": "string",
+              "nullable": true
+            },
+            {
+              "id": "risk",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "expected_return",
+              "type": "number",
+              "nullable": false
+            },
+            {
+              "id": "sharpe",
+              "type": "number",
+              "nullable": false
+            }
+          ],
+          "golden_samples": [
+            {
+              "selector": "row[0]",
+              "row": [
+                "minimum-variance",
+                "portfolio-1788",
+                0.045869181,
+                0.080518638,
+                1.319374718
+              ]
+            },
+            {
+              "selector": "row[2]",
+              "row": [
+                "current",
+                null,
+                0.14,
+                0.065,
+                0.321428571
+              ]
+            }
+          ],
+          "sha256": "8ccd1323d686a3211dbeea368b9568dc92ee341dc76005e8f848b0b368615244"
+        }
+      ]
+    }
+  ],
+  "extensions": [],
+  "separation_notes": [
+    "Do not replace this fixture with an exact frontier in rendering parity scenarios; exact numerical demonstrations remain separate."
+  ],
+  "references": []
+}
