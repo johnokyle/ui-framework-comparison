@@ -12,15 +12,13 @@ The project compares functional coverage, native versus application-owned capabi
 
 ## Current status
 
-This repository is an **initial local scaffold**. The source audit and historical metrics are recorded, but no controlled three-framework benchmark has been run.
+This repository now contains versioned specifications, canonical fixture manifests, schemas, validation tooling, and a common stable-ID runtime smoke harness. The three implementation repositories have clean Git baselines and are linked above; they are currently private and are not attached as submodules.
 
-The implementation repositories are not attached as submodules yet:
+Normalized headless/model fixture evidence covers all 73 parent artifacts across Slint, QML, and Bevy + egui. A development runtime smoke run also passed semantic navigation, unknown-ID non-mutation, and clean-shutdown checks in all three Release applications. These checks do not establish equivalent rendering, OS-level interaction, accessibility, or performance.
 
-- QML has no Git baseline in the audited location.
-- The complete audited Bevy + egui implementation is not contained in its current HEAD.
-- Licenses have not been selected for the implementations or this parent repository.
+No controlled three-framework benchmark has been run. Licenses have not been selected for the implementations or this parent repository.
 
-See [Publication blockers and limitations](docs/limitations.md) before publishing or attaching implementations.
+See [Publication blockers and limitations](docs/limitations.md) for the evidence boundaries and remaining verification work.
 
 ## Start here
 
@@ -74,13 +72,11 @@ Validation checks JSON syntax, scenario and result documents against their schem
 
 ## Next milestones
 
-1. Select licenses and complete publication reviews.
-2. Establish clean, complete implementation Git baselines.
-3. Implement the bounded [Bevy + egui parity plan](docs/bevy-parity-implementation-plan.md).
-4. Attach the three implementations as pinned submodules.
-5. Replace draft scenarios with verified fixtures and executable smoke tests.
-6. Collect a controlled baseline on documented hardware.
-7. Publish the first versioned comparison report.
+1. Select licenses and complete the remaining publication reviews.
+2. Attach the three implementations as pinned submodules at recorded revisions.
+3. Collect OS-level interaction, screenshot, theme/DPI, and accessibility evidence still required by the scenarios.
+4. Activate the applicable performance scenarios and collect controlled baselines with raw samples on documented hardware.
+5. Publish the first versioned controlled comparison report.
 
 ## License
 
