@@ -20,6 +20,29 @@ No controlled three-framework benchmark has been run. Licenses have not been sel
 
 See [Publication blockers and limitations](docs/limitations.md) for the evidence boundaries and remaining verification work.
 
+## Comparison summary
+
+**Preliminary comparisons are complete; controlled empirical comparisons are forthcoming.**
+
+### Completed
+
+- Source-level and architectural comparisons, with capability classification.
+- Normalized headless/model checks covering all 73 canonical fixture artifacts across the three implementations.
+- A development runtime smoke test verifying semantic navigation, retained selections, unknown-ID handling, and clean shutdown in all three applications.
+- Historical measurements and implementation observations recorded with their limitations.
+
+### Forthcoming
+
+- Controlled three-framework performance benchmarks with raw samples and distributions.
+- Defensible performance rankings.
+- Equivalent screenshot and rendering-quality comparisons.
+- OS-level pointer/keyboard and touch interaction testing.
+- Accessibility, theme, DPI, and responsive-layout verification.
+- Runtime acceptance of the controlled performance scenarios.
+- The first versioned controlled comparison report.
+
+The current evidence supports source-level, functional, fixture/model, and limited semantic-runtime comparisons. It does not yet support a controlled conclusion that one framework is faster, smoother, or generally better.
+
 ## Start here
 
 - [Initial findings and implementation plan](docs/reports/2026-11-20-initial-findings.md)
