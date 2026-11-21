@@ -6,9 +6,9 @@ This register records limitations from the initial static audit, subsequent Bevy
 
 - As of 2026-11-21, the [parent comparison repository](https://github.com/johnokyle/ui-framework-comparison) is public. The audited Slint, QML, and Bevy + egui source trees have clean committed baselines synchronized to private GitHub remotes.
 - The parent repository attaches all three implementations as pinned submodules:
-  - `implementations/slint` uses [Slint](https://github.com/johnokyle/slint-ui-test) at `10da5581ec16992beb6adf71cd7abf09e9c20362`.
-  - `implementations/qml` uses [QML](https://github.com/johnokyle/qml-ui-test) at `df83bdf6704f0c33b43eda56bae9ba9db28c8cc5`.
-  - `implementations/bevy-egui` uses [Bevy + egui](https://github.com/johnokyle/bevy-egui-test) at `adf0d678609d99f6fd836fc1cfce520f8aba0344`.
+  - `implementations/slint` uses [Slint](https://github.com/johnokyle/slint-ui-test) at `d1fc847ac5956d501a8204b6cfc4206c0bd6464e`.
+  - `implementations/qml` uses [QML](https://github.com/johnokyle/qml-ui-test) at `df0dd1baeaa263dea5523d6d7172ea47060b065c`.
+  - `implementations/bevy-egui` uses [Bevy + egui](https://github.com/johnokyle/bevy-egui-test) at `8eaf9ba44569c3f3c78a550516c4a1b841c63cf6`.
 - Each implementation remote retains the annotated `comparison-baseline-2026-11-21` tag at its original licensed baseline. The current pins above include the subsequent README, third-party-notice, and publication-cleanup revisions; parent gitlinks remain authoritative even if implementation branches advance. Because the implementation repositories are private, public parent clones cannot initialize the submodules without the corresponding GitHub access.
 
 ## Licensing
@@ -23,8 +23,8 @@ This register records limitations from the initial static audit, subsequent Bevy
 - Populated local credential files remain ignored and were not found in tracked history. Their values were not displayed or validated. Repository-local ignore rules now cover local environment variants and agent/editor settings, including QML's previously global-only `.claude/settings.local.json` rule.
 - Current documentation replaces machine-specific checkout paths with variables, the QML metrics script no longer defaults to a user-specific Qt prefix, and irrelevant tracked Bevy clangd settings were removed. Existing commits and baseline tags still contain their original content; no history or tag rewrite was performed. No secret-driven history rewrite is presently indicated.
 - Optional provider scripts are documented as development-agent helpers unrelated to application workloads. Bevy's project-relative agent configuration is retained and documented; its 204 newline-only Rust placeholder modules remain intentional-inclusion review items rather than confirmed generated artifacts.
-- Source notices now identify the modified Feather and Lucide icons in Slint and the source-versus-binary obligations for all implementations. Fifteen unmatched Slint SVGs still lack documented authorship, which must not be inferred from the comparison.
-- Slint binary distribution requires an explicit Slint licensing-route and attribution decision. Bevy binaries require the embedded default-font notices, and QML binaries require an exact shipped-Qt-module inventory and licensing/source-compliance review. Target-specific Rust dependency notice bundles have not been generated.
+- Source notices identify the modified Feather and Lucide icons in Slint and the source-versus-binary obligations for all implementations. The maintainer confirmed on 2026-11-21 that Claude Code created the other 15 Slint SVGs for the project; no third-party derivation was reported.
+- Slint binary distribution requires an explicit Slint licensing-route and attribution decision. Bevy binaries require the embedded default-font notices, and QML binaries require an exact shipped-Qt-module inventory and licensing/source-compliance review. Linux x86-64 development inventories now record 484 Slint and 449 Bevy Cargo target-resolution packages plus the audited QML Qt linkage/SBOM inputs. These are not complete release notice bundles: 42 Slint and 25 Bevy packages lack package-root license/notice files in the local package copies, and actual shipped artifacts still require verification.
 - No controlled three-framework benchmark or equivalent screenshot set exists.
 
 ## Slint

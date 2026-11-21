@@ -16,7 +16,7 @@ This repository now contains versioned specifications, canonical fixture manifes
 
 Normalized headless/model fixture evidence covers all 73 parent artifacts across Slint, QML, and Bevy + egui. A development runtime smoke run also passed semantic navigation, unknown-ID non-mutation, and clean-shutdown checks in all three Release applications. These checks do not establish equivalent rendering, OS-level interaction, accessibility, or performance.
 
-No controlled three-framework benchmark has been run. License texts, a third-party source inventory, and a reachable-history review have been added. Remaining publication work includes confirming undocumented Slint icon authorship and preparing target-specific binary-release notices.
+No controlled three-framework benchmark has been run. License texts, third-party source inventories, target-specific development inventories, and a reachable-history review have been added. Slint icon provenance has been recorded, including maintainer confirmation of the project-generated assets. Complete binary-release notice bundles and licensing-route decisions remain release prerequisites.
 
 See [Publication blockers and limitations](docs/limitations.md) for the evidence boundaries and remaining verification work.
 
@@ -96,7 +96,7 @@ Validation checks JSON syntax, scenario and result documents against their schem
 
 ## Next milestones
 
-1. Confirm undocumented Slint asset provenance and prepare release-specific notice bundles before distributing binaries.
+1. Prepare and verify target-specific binary-release notice bundles before distributing binaries.
 2. Collect OS-level interaction, screenshot, theme/DPI, and accessibility evidence still required by the scenarios.
 3. Activate the applicable performance scenarios and collect controlled baselines with raw samples on documented hardware.
 4. Publish the first versioned controlled comparison report.

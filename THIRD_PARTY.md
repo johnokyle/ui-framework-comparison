@@ -22,6 +22,23 @@ Each independently licensed implementation records its own dependencies, reposit
 
 These links require access to the private implementation repositories. Parent gitlinks identify the authoritative reviewed implementation revisions, including these notice revisions.
 
+### Target-specific development inventories
+
+- [Slint Cargo target-resolution inventory](https://github.com/johnokyle/slint-ui-test/blob/master/THIRD_PARTY_TARGET.md): 484 non-workspace Linux x86-64 packages, including 42 without package-root license/notice files in the local package copies.
+- [QML Qt development inventory](https://github.com/johnokyle/qml-ui-test/blob/master/THIRD_PARTY_TARGET.md): audited Qt 6.11.1 Release linkage and available SPDX/CycloneDX SBOM inputs.
+- [Bevy + egui Cargo target-resolution inventory](https://github.com/johnokyle/bevy-egui-test/blob/master/THIRD_PARTY_TARGET.md): 449 non-workspace Linux x86-64 packages, including 25 without package-root license/notice files in the local package copies.
+
+Regenerate either Rust inventory from the parent repository with the corresponding implementation root:
+
+```bash
+python3 tools/cargo_license_inventory.py \
+  --manifest-path "$IMPLEMENTATION_ROOT/Cargo.toml" \
+  --target x86_64-unknown-linux-gnu \
+  --output "$IMPLEMENTATION_ROOT/THIRD_PARTY_TARGET.md"
+```
+
+The generator uses locked Cargo metadata filtered to the target and records the current source revision. These development inventories are not linked-binary proofs or complete legal notice bundles. Actual release features, linked and runtime-loaded components, shipped artifacts, and applicable license texts must still be verified; every missing-file entry requires upstream resolution before distribution.
+
 ## Source and binary scope
 
 Manifest and lockfile references normally do not require vendoring every dependency license into a source-only repository. Repository-carried third-party assets require their notices with the source. Dependencies, fonts, and other content embedded into an executable also require a target- and feature-specific notice review for each release archive.
