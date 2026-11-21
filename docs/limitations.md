@@ -2,13 +2,19 @@
 
 This register records limitations from the initial static audit, subsequent Bevy BP-01–BP-09 implementation checks, and Slint/QML canonical fixture normalization. Evidence limits are stated explicitly; implementation and headless tests do not imply cross-framework runtime acceptance.
 
+## Repository and submodule state
+
+- As of 2026-11-21, the [parent comparison repository](https://github.com/johnokyle/ui-framework-comparison) is public. The audited Slint, QML, and Bevy + egui source trees have clean committed baselines synchronized to private GitHub remotes.
+- Parent commit `7eb4697` attaches all three implementations as pinned submodules:
+  - `implementations/slint` uses [Slint](https://github.com/johnokyle/slint-ui-test) at `c7d5f6c725569369f2ccf08efcf269b28d39105d`.
+  - `implementations/qml` uses [QML](https://github.com/johnokyle/qml-ui-test) at `45f35f524f3fbbcd1e55fe5de6d26acc3259af6c`.
+  - `implementations/bevy-egui` uses [Bevy + egui](https://github.com/johnokyle/bevy-egui-test) at `5f2697153a93132585e28fcd3e205c527d081cce`.
+- The parent gitlinks identify exact revisions even if implementation branches advance. Because the implementation repositories are private, public parent clones cannot initialize the submodules without the corresponding GitHub access.
+
 ## Cross-project publication blockers
 
 - No implementation license was found. No parent license has been selected yet.
-- QML has no Git metadata in the audited location, so no immutable source revision exists.
-- Most of the audited Bevy + egui implementation is uncommitted or untracked; its HEAD is not a complete baseline.
-- Slint has a Git repository but no observed remote.
-- Credentials, local settings, unrelated scripts, generated build content, and historical Git content require review before publication.
+- Credentials, local settings, unrelated scripts, generated build content, and historical Git content require review before making the implementation repositories public or publishing additional history.
 - No controlled three-framework benchmark or equivalent screenshot set exists.
 
 ## Slint
