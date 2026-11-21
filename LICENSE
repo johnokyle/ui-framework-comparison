@@ -1,0 +1,19 @@
+UI Framework Comparison licensing
+Copyright (c) 2026 UI Framework Comparison contributors
+
+Except where otherwise noted, original content in this repository is licensed
+as follows:
+
+1. Original source code, JSON schemas, scenarios, and fixture manifests are
+   licensed under the Apache License, Version 2.0. See LICENSE-APACHE.
+
+2. Original documentation, reports, and other Markdown prose are licensed
+   under the Creative Commons Attribution 4.0 International License. See
+   LICENSE-CC-BY-4.0.
+
+These choices apply separately by content type; they are not a requirement to
+accept both licenses for the same file.
+
+Implementation submodules are covered by their own repository licenses.
+Third-party dependencies, frameworks, fonts, icons, and other assets retain
+their respective licenses and notice requirements.

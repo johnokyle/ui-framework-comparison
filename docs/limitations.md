@@ -5,15 +5,20 @@ This register records limitations from the initial static audit, subsequent Bevy
 ## Repository and submodule state
 
 - As of 2026-11-21, the [parent comparison repository](https://github.com/johnokyle/ui-framework-comparison) is public. The audited Slint, QML, and Bevy + egui source trees have clean committed baselines synchronized to private GitHub remotes.
-- Parent commit `7eb4697` attaches all three implementations as pinned submodules:
-  - `implementations/slint` uses [Slint](https://github.com/johnokyle/slint-ui-test) at `c7d5f6c725569369f2ccf08efcf269b28d39105d`.
-  - `implementations/qml` uses [QML](https://github.com/johnokyle/qml-ui-test) at `45f35f524f3fbbcd1e55fe5de6d26acc3259af6c`.
-  - `implementations/bevy-egui` uses [Bevy + egui](https://github.com/johnokyle/bevy-egui-test) at `5f2697153a93132585e28fcd3e205c527d081cce`.
+- The parent repository attaches all three implementations as pinned submodules:
+  - `implementations/slint` uses [Slint](https://github.com/johnokyle/slint-ui-test) at `7c1b4151b9b4d7e716683a8681a548d3220318a2`.
+  - `implementations/qml` uses [QML](https://github.com/johnokyle/qml-ui-test) at `3561683acde306bdb65233c337d2bec3eba455c5`.
+  - `implementations/bevy-egui` uses [Bevy + egui](https://github.com/johnokyle/bevy-egui-test) at `4f1c89556206c8f1efd61d420062eb4039c454b6`.
 - The parent gitlinks identify exact revisions even if implementation branches advance. Because the implementation repositories are private, public parent clones cannot initialize the submodules without the corresponding GitHub access.
+
+## Licensing
+
+- Original parent source code, JSON schemas, scenarios, and fixture manifests use Apache-2.0; original parent documentation, reports, and other Markdown prose use CC BY 4.0.
+- Original Slint and Bevy + egui implementation code uses MIT OR Apache-2.0. Original QML implementation code uses GPL-3.0-or-later.
+- These licenses cover only original repository content. Third-party dependencies, frameworks, fonts, icons, and other assets retain their respective licenses and notice requirements.
 
 ## Cross-project publication blockers
 
-- No implementation license was found. No parent license has been selected yet.
 - Credentials, local settings, unrelated scripts, generated build content, and historical Git content require review before making the implementation repositories public or publishing additional history.
 - No controlled three-framework benchmark or equivalent screenshot set exists.
 
