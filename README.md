@@ -12,7 +12,7 @@ The project compares functional coverage, native versus application-owned capabi
 
 ## Current status
 
-This repository now contains versioned specifications, canonical fixture manifests, schemas, validation tooling, and a common stable-ID runtime smoke harness. The three implementation repositories have clean Git baselines and are linked above; they are currently private and are not attached as submodules.
+This repository now contains versioned specifications, canonical fixture manifests, schemas, validation tooling, and a common stable-ID runtime smoke harness. The three implementation repositories have clean Git baselines and are linked above; they are currently private and are attached as pinned submodules under `implementations/`.
 
 Normalized headless/model fixture evidence covers all 73 parent artifacts across Slint, QML, and Bevy + egui. A development runtime smoke run also passed semantic navigation, unknown-ID non-mutation, and clean-shutdown checks in all three Release applications. These checks do not establish equivalent rendering, OS-level interaction, accessibility, or performance.
 
@@ -58,7 +58,7 @@ The current evidence supports source-level, functional, fixture/model, and limit
 ## Repository layout
 
 ```text
-implementations/       Pinned implementation submodules, once baselines are ready
+implementations/       Pinned implementation submodules
 docs/                  Methodology, matrices, limitations, and versioned reports
 specifications/        Common comparison rules and workload contracts
 scenarios/             Machine-readable core, Slint/QML, and specific scenarios
@@ -96,10 +96,9 @@ Validation checks JSON syntax, scenario and result documents against their schem
 ## Next milestones
 
 1. Select licenses and complete the remaining publication reviews.
-2. Attach the three implementations as pinned submodules at recorded revisions.
-3. Collect OS-level interaction, screenshot, theme/DPI, and accessibility evidence still required by the scenarios.
-4. Activate the applicable performance scenarios and collect controlled baselines with raw samples on documented hardware.
-5. Publish the first versioned controlled comparison report.
+2. Collect OS-level interaction, screenshot, theme/DPI, and accessibility evidence still required by the scenarios.
+3. Activate the applicable performance scenarios and collect controlled baselines with raw samples on documented hardware.
+4. Publish the first versioned controlled comparison report.
 
 ## License
 

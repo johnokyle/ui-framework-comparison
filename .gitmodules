@@ -1,0 +1,9 @@
+[submodule "implementations/slint"]
+	path = implementations/slint
+	url = https://github.com/johnokyle/slint-ui-test.git
+[submodule "implementations/qml"]
+	path = implementations/qml
+	url = https://github.com/johnokyle/qml-ui-test.git
+[submodule "implementations/bevy-egui"]
+	path = implementations/bevy-egui
+	url = https://github.com/johnokyle/bevy-egui-test.git
