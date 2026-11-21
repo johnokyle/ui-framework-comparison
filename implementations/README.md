@@ -4,11 +4,11 @@ This directory contains three Git submodules pinned by the parent repository's g
 
 | Path | Repository | Pinned commit |
 |---|---|---|
-| `implementations/slint` | [Slint](https://github.com/johnokyle/slint-ui-test) | `7c1b4151b9b4d7e716683a8681a548d3220318a2` |
-| `implementations/qml` | [QML](https://github.com/johnokyle/qml-ui-test) | `3561683acde306bdb65233c337d2bec3eba455c5` |
-| `implementations/bevy-egui` | [Bevy + egui](https://github.com/johnokyle/bevy-egui-test) | `4f1c89556206c8f1efd61d420062eb4039c454b6` |
+| `implementations/slint` | [Slint](https://github.com/johnokyle/slint-ui-test) | `10da5581ec16992beb6adf71cd7abf09e9c20362` |
+| `implementations/qml` | [QML](https://github.com/johnokyle/qml-ui-test) | `df83bdf6704f0c33b43eda56bae9ba9db28c8cc5` |
+| `implementations/bevy-egui` | [Bevy + egui](https://github.com/johnokyle/bevy-egui-test) | `adf0d678609d99f6fd836fc1cfce520f8aba0344` |
 
-The implementation repositories are currently private. Each remote publishes the annotated `comparison-baseline-2026-11-21` tag at the pinned commit listed above. Parent gitlinks, rather than branch or tag names, remain authoritative for exact source revisions.
+The implementation repositories are currently private. Each remote retains the annotated `comparison-baseline-2026-11-21` tag at its original licensed baseline. The current pins above include the subsequent README, third-party-notice, and publication-cleanup revisions. Parent gitlinks, rather than branch or tag names, remain authoritative for exact source revisions.
 
 Initialize or update the working copies with:
 

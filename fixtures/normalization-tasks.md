@@ -180,16 +180,16 @@ No OS-level input or accessibility automation tool was available. This probe the
 
 ### Common stable-ID development smoke (2026-11-21)
 
-The standard-library parent runner and opt-in application adapters were exercised sequentially on the audited GNOME Wayland session, without metrics or offscreen/renderer overrides:
+The standard-library parent runner and opt-in application adapters were exercised sequentially on the audited GNOME Wayland session, without metrics or offscreen/renderer overrides. This checkout-independent rendering replaces the original machine-specific paths with root variables:
 
 ```bash
-python3 /run/media/john/data/Experimental/UITests/ui-framework-comparison/tools/runtime_smoke.py \
-  --slint /run/media/john/data/Experimental/UITests/SlintUiTest/slintuitest/target/release/slintuitest \
-  --qml /run/media/john/data/Experimental/UITests/QmlUiTest/QmlUITest/build-fixture-tests/appQmlUITest \
-  --bevy-egui /run/media/john/data/Experimental/UITests/Bevy+egui/bevy_egui_test/target/release/bevy_egui_test \
-  --bevy-asset-root /run/media/john/data/Experimental/UITests/Bevy+egui/bevy_egui_test \
+python3 "$COMPARISON_ROOT/tools/runtime_smoke.py" \
+  --slint "$SLINT_ROOT/target/release/slintuitest" \
+  --qml "$QML_ROOT/build-fixture-tests/appQmlUITest" \
+  --bevy-egui "$BEVY_ROOT/target/release/bevy_egui_test" \
+  --bevy-asset-root "$BEVY_ROOT" \
   --timeout 30 \
-  --jsonl /tmp/ui-framework-runtime-smoke.jsonl
+  --jsonl "$TMPDIR/ui-framework-runtime-smoke.jsonl"
 ```
 
 The result was `PASS slint: passed`, `PASS qml: passed`, and `PASS bevy-egui: passed`. Each implementation reported initial `primary.browser/browser.browser1`; successful canonical selection of Browser 2, Stock, and Monte Carlo; retained Browser 2/Stock/Monte Carlo selections after primary-only selection; and a successful idempotent Monte Carlo reselection. `not.a-route` returned `unknown-id` with `primary.quantviz/quant.monte-carlo` unchanged in both the selection reply and a follow-up `state` reply. Each run then restored `browser.browser1`, acknowledged `quit`, and exited with status 0. QML responses were canonicalized by the parent from its local IDs. The flushed JSONL log is development smoke evidence, not a controlled result.

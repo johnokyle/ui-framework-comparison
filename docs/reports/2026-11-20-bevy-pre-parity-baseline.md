@@ -6,7 +6,7 @@ This records the BP-00 verification of the current local Bevy + egui worktree be
 
 ## Source identity
 
-- Repository: `/run/media/john/data/Experimental/UITests/Bevy+egui/bevy_egui_test`
+- Repository: local Bevy + egui checkout (path omitted from the published report)
 - Branch: `master`
 - HEAD: `354f7ea`
 - Declared stack: Bevy 0.19.0 (0.19.1 resolved), bevy_egui 0.42.0, egui_plot 0.37, egui_extras 0.36.2
@@ -15,12 +15,12 @@ HEAD alone does **not** identify the verified application. The worktree contains
 
 ## Verification results
 
-Commands were run with an explicit Bevy manifest path and the locked dependency graph:
+Commands were run with an explicit Bevy manifest path and the locked dependency graph. The following checkout-independent rendering uses `BEVY_ROOT` for the local repository path used in the original run:
 
 ```bash
-cargo fmt --all --manifest-path "/run/media/john/data/Experimental/UITests/Bevy+egui/bevy_egui_test/Cargo.toml" -- --check
-cargo test --manifest-path "/run/media/john/data/Experimental/UITests/Bevy+egui/bevy_egui_test/Cargo.toml" --locked
-cargo build --release --manifest-path "/run/media/john/data/Experimental/UITests/Bevy+egui/bevy_egui_test/Cargo.toml" --locked
+cargo fmt --all --manifest-path "$BEVY_ROOT/Cargo.toml" -- --check
+cargo test --manifest-path "$BEVY_ROOT/Cargo.toml" --locked
+cargo build --release --manifest-path "$BEVY_ROOT/Cargo.toml" --locked
 ```
 
 | Check | Result |

@@ -16,7 +16,7 @@ This repository now contains versioned specifications, canonical fixture manifes
 
 Normalized headless/model fixture evidence covers all 73 parent artifacts across Slint, QML, and Bevy + egui. A development runtime smoke run also passed semantic navigation, unknown-ID non-mutation, and clean-shutdown checks in all three Release applications. These checks do not establish equivalent rendering, OS-level interaction, accessibility, or performance.
 
-No controlled three-framework benchmark has been run. License texts have been added; remaining publication work concerns third-party notices and historical-content review.
+No controlled three-framework benchmark has been run. License texts, a third-party source inventory, and a reachable-history review have been added. Remaining publication work includes confirming undocumented Slint icon authorship and preparing target-specific binary-release notices.
 
 See [Publication blockers and limitations](docs/limitations.md) for the evidence boundaries and remaining verification work.
 
@@ -54,6 +54,7 @@ The current evidence supports source-level, functional, fixture/model, and limit
 - [Bevy + egui parity specification](specifications/bevy-parity.md)
 - [Bevy + egui parity implementation plan](docs/bevy-parity-implementation-plan.md)
 - [Known limitations and publication blockers](docs/limitations.md)
+- [Third-party notices](THIRD_PARTY.md)
 
 ## Repository layout
 
@@ -95,7 +96,7 @@ Validation checks JSON syntax, scenario and result documents against their schem
 
 ## Next milestones
 
-1. Complete the remaining third-party notice and historical-content publication reviews.
+1. Confirm undocumented Slint asset provenance and prepare release-specific notice bundles before distributing binaries.
 2. Collect OS-level interaction, screenshot, theme/DPI, and accessibility evidence still required by the scenarios.
 3. Activate the applicable performance scenarios and collect controlled baselines with raw samples on documented hardware.
 4. Publish the first versioned controlled comparison report.
@@ -104,4 +105,4 @@ Validation checks JSON syntax, scenario and result documents against their schem
 
 Original source code, JSON schemas, scenarios, and fixture manifests are licensed under the [Apache License 2.0](LICENSE-APACHE). Original documentation, reports, and other Markdown prose are licensed under the [Creative Commons Attribution 4.0 International License](LICENSE-CC-BY-4.0). See [LICENSE](LICENSE) for the content-type mapping.
 
-Implementation submodules are covered by their own repository licenses. Third-party dependencies, frameworks, fonts, icons, and other assets retain their respective licenses and notice requirements.
+Implementation submodules are covered by their own repository licenses. Third-party dependencies, frameworks, fonts, icons, and other assets retain their respective licenses and notice requirements. See [Third-party notices](THIRD_PARTY.md) for the source and binary-release inventory.

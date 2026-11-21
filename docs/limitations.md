@@ -6,20 +6,25 @@ This register records limitations from the initial static audit, subsequent Bevy
 
 - As of 2026-11-21, the [parent comparison repository](https://github.com/johnokyle/ui-framework-comparison) is public. The audited Slint, QML, and Bevy + egui source trees have clean committed baselines synchronized to private GitHub remotes.
 - The parent repository attaches all three implementations as pinned submodules:
-  - `implementations/slint` uses [Slint](https://github.com/johnokyle/slint-ui-test) at `7c1b4151b9b4d7e716683a8681a548d3220318a2`.
-  - `implementations/qml` uses [QML](https://github.com/johnokyle/qml-ui-test) at `3561683acde306bdb65233c337d2bec3eba455c5`.
-  - `implementations/bevy-egui` uses [Bevy + egui](https://github.com/johnokyle/bevy-egui-test) at `4f1c89556206c8f1efd61d420062eb4039c454b6`.
-- Each implementation remote publishes the annotated `comparison-baseline-2026-11-21` tag at its corresponding pinned commit. The tags name the licensed baselines; parent gitlinks remain authoritative even if implementation branches advance. Because the implementation repositories are private, public parent clones cannot initialize the submodules without the corresponding GitHub access.
+  - `implementations/slint` uses [Slint](https://github.com/johnokyle/slint-ui-test) at `10da5581ec16992beb6adf71cd7abf09e9c20362`.
+  - `implementations/qml` uses [QML](https://github.com/johnokyle/qml-ui-test) at `df83bdf6704f0c33b43eda56bae9ba9db28c8cc5`.
+  - `implementations/bevy-egui` uses [Bevy + egui](https://github.com/johnokyle/bevy-egui-test) at `adf0d678609d99f6fd836fc1cfce520f8aba0344`.
+- Each implementation remote retains the annotated `comparison-baseline-2026-11-21` tag at its original licensed baseline. The current pins above include the subsequent README, third-party-notice, and publication-cleanup revisions; parent gitlinks remain authoritative even if implementation branches advance. Because the implementation repositories are private, public parent clones cannot initialize the submodules without the corresponding GitHub access.
 
 ## Licensing
 
 - Original parent source code, JSON schemas, scenarios, and fixture manifests use Apache-2.0; original parent documentation, reports, and other Markdown prose use CC BY 4.0.
 - Original Slint and Bevy + egui implementation code uses MIT OR Apache-2.0. Original QML implementation code uses GPL-3.0-or-later.
-- These licenses cover only original repository content. Third-party dependencies, frameworks, fonts, icons, and other assets retain their respective licenses and notice requirements.
+- These licenses cover only original repository content. Third-party dependencies, frameworks, fonts, icons, and other assets retain their respective licenses and notice requirements. The parent and each implementation now provide a `THIRD_PARTY.md` inventory; the parent inventory links to the implementation records.
 
 ## Cross-project publication blockers
 
-- Credentials, local settings, unrelated scripts, generated build content, and historical Git content require review before making the implementation repositories public or publishing additional history.
+- The 2026-11-21 reachable-history review examined 35 commits and 547 unique historical blobs across all local heads, remote-tracking refs, and tags. It found no confirmed committed credentials, private keys, tokens, credential-bearing URLs, compiled build output, caches, or large binaries. Pattern-based scanning cannot prove the absence of every secret; unreachable objects and non-Git GitHub content were not reviewed.
+- Populated local credential files remain ignored and were not found in tracked history. Their values were not displayed or validated. Repository-local ignore rules now cover local environment variants and agent/editor settings, including QML's previously global-only `.claude/settings.local.json` rule.
+- Current documentation replaces machine-specific checkout paths with variables, the QML metrics script no longer defaults to a user-specific Qt prefix, and irrelevant tracked Bevy clangd settings were removed. Existing commits and baseline tags still contain their original content; no history or tag rewrite was performed. No secret-driven history rewrite is presently indicated.
+- Optional provider scripts are documented as development-agent helpers unrelated to application workloads. Bevy's project-relative agent configuration is retained and documented; its 204 newline-only Rust placeholder modules remain intentional-inclusion review items rather than confirmed generated artifacts.
+- Source notices now identify the modified Feather and Lucide icons in Slint and the source-versus-binary obligations for all implementations. Fifteen unmatched Slint SVGs still lack documented authorship, which must not be inferred from the comparison.
+- Slint binary distribution requires an explicit Slint licensing-route and attribution decision. Bevy binaries require the embedded default-font notices, and QML binaries require an exact shipped-Qt-module inventory and licensing/source-compliance review. Target-specific Rust dependency notice bundles have not been generated.
 - No controlled three-framework benchmark or equivalent screenshot set exists.
 
 ## Slint
@@ -75,7 +80,7 @@ Primary records: QML `CMakeLists.txt`, `fixtures/`, `tests/`, `Main.qml`, `Brows
 
 ## Stable-ID development runtime evidence
 
-- On 2026-11-21, `tools/runtime_smoke.py` drove the Slint, QML, and Bevy + egui Release executables sequentially in the audited GNOME Wayland session using their explicit automation opt-ins and `BEVY_ASSET_ROOT` for Bevy. Metrics and offscreen/renderer overrides were absent. The exact invocation and route replies are recorded in NT-12; the development JSONL log is `/tmp/ui-framework-runtime-smoke.jsonl`.
+- On 2026-11-21, `tools/runtime_smoke.py` drove the Slint, QML, and Bevy + egui Release executables sequentially in the audited GNOME Wayland session using their explicit automation opt-ins and `BEVY_ASSET_ROOT` for Bevy. Metrics and offscreen/renderer overrides were absent. NT-12 records a checkout-independent rendering of the invocation and the route replies; the development JSONL log was kept outside the repositories.
 - All three passed initial-state, canonical cross-primary selection, retained-secondary, idempotent-reselection, and unknown-ID non-mutation assertions, including a follow-up `state` check. Each restored Browser 1, acknowledged `quit`, and exited with status 0. QML local IDs were translated and canonicalized by the parent runner.
 - These are semantic application-state checks after adapter-specific GUI-thread or post-draw acknowledgement. They are not OS-level pointer/keyboard tests and do not establish rendered content, presented frames, screenshots, accessibility, theme/DPI behavior, cadence, performance, disabled-route behavior, or controlled scenario acceptance. No capability status or inactive performance scenario was changed by this smoke run.
 
