@@ -4,9 +4,9 @@ A versioned comparison of three data-intensive desktop UI implementations:
 
 | Implementation | Language and UI stack | Audited framework versions |
 |---|---|---|
-| Slint | Rust, Slint | Slint 1.17.1; Rust edition 2024 |
-| QML | C++, Qt Quick/QML | Qt 6.10+ declared; Qt 6.11.1 in the audited build cache |
-| Bevy + egui | Rust, Bevy ECS, egui | Bevy 0.19.1; bevy_egui 0.42.0; egui_plot 0.37.0 |
+| [Slint](https://github.com/johnokyle/slint-ui-test) (private) | Rust, Slint | Slint 1.17.1; Rust edition 2024 |
+| [QML](https://github.com/johnokyle/qml-ui-test) (private) | C++, Qt Quick/QML | Qt 6.10+ declared; Qt 6.11.1 in the audited build cache |
+| [Bevy + egui](https://github.com/johnokyle/bevy-egui-test) (private) | Rust, Bevy ECS, egui | Bevy 0.19.1; bevy_egui 0.42.0; egui_plot 0.37.0 |
 
 The project compares functional coverage, native versus application-owned capabilities, implementation effort, rendering quality, maintainability, and runtime behavior. It does not reduce the comparison to a single framework ranking.
 
