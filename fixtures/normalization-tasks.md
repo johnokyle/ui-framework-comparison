@@ -961,6 +961,34 @@ Independent validation checked every JSONL executable hash, route sequence, clic
 
 This establishes one real page-content Price-sort interaction for Slint and QML only. Bevy + egui page-content sorting remains unverified after two preserved unsuccessful attempts. These single positive runs do not establish repeated-run reliability, other headers or descending sort, row/cell editing, scrolling, drag, touch, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, or scenario acceptance. All 82 parent discovery tests, repository validation, and `git diff --check` passed after the documentation update. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
 
+### Browser 1 first-row page-content pointer captures (2026-11-22)
+
+A separate `/tmp/run_browser1_row_pointer.py` driver reused the same focus, neutral-pointer parking, external-capture, route-readback, and clean-quit contract for one fresh-state click on source row `IM` in the Company column. This limited oracle is common only from the empty default with exactly one unmodified click: Slint inserts the row (`src/browser1.rs:146-160`, `ui/grid.slint:213-219,734-741`), QML toggles its stable row ID on (`Browser1Page.qml:21-38,176-219`), and Bevy + egui replaces the empty selection with that row (`src/ui/state/browser_1_state.rs:235-303`, `src/ui/tabs/browser/browser_1.rs:252-340`). A second click would toggle Slint/QML off but retain/replace Bevy's single-row selection, so no click was repeated. Exact highlight colors, checkmarks, borders, and status wording were not treated as common pixel expectations.
+
+The accepted invocation for each implementation was:
+
+```bash
+python3 /tmp/run_browser1_row_pointer.py \
+  --implementation "$IMPLEMENTATION" \
+  --work-root "/tmp/ui-framework-browser1-row-pointer-2026-11-22-01/$IMPLEMENTATION" \
+  --jsonl "/tmp/ui-framework-browser1-row-pointer-2026-11-22-01/$IMPLEMENTATION.jsonl" \
+  --settle 2
+```
+
+| Implementation | First-row Company review-crop point | First-row Company logical point |
+|---|---:|---:|
+| Slint | `(200,273)` | `(1209,511.2)` |
+| QML | `(200,302)` | `(1209,528.6)` |
+| Bevy + egui | `(200,294)` | `(1209,523.8)` |
+
+The Browser-primary focus points, raw/review crop conversion, and five-state-readback sequence were unchanged from the Price-header runs. Every process attempted two clicks, produced distinct decodable before/after capture pairs, preserved Browser 1, acknowledged `quit`, and exited with status 0 without programmatic selection or keyboard input. Procedural `status=passed` again does not assert page-content success; every JSONL retains `row_selection_visually_verified=false` and `capture_pixel_content_reviewed=false` for subsequent assistant review.
+
+Assistant inspection found Slint's full `IM` row highlighted with `Rows: IM`, and QML's `IM` row highlighted with its selected-row status identifying `IM`; both before-captures had no selected row. Bevy + egui instead retained `Selected: 0`, no `IM` checkmark or selected-row highlight, and a disabled Clear Selection control after the click. Its before/after toolbar and row-detail crops confirm that the expected selection did not occur. This second unsuccessful Bevy page-content target broadens the runtime gap beyond the Price header but still does not prove universal input failure or distinguish input delivery from application behavior.
+
+Independent validation checked all three JSONL records' exact flags, two-click/five-route sequences, executable hashes, clean exits, capture modes/dimensions/byte counts, and SHA-256 values. After-review SHA-256 values were Slint `f862793c756e564a836668e08ca2b8a98fb915d6b6c6b566de4f6de3f78f29c5`, QML `5cbb31bb5f241ac6b802d92d03b32e8efd51dd6082a579b5d9714504abac2c93`, and Bevy + egui `78c742e57739c436b7fcd0036a1f6744d822f7410cf0679bf88dbb969aa7d64d`. JSONL SHA-256 values were Slint `f8b9d3c68ccba73dfce1c527892d071ca97d533258e315362981779099b84f9c`, QML `6b87dba29549fc69fd21e0fa1873f20e26bee1dc76043628c6832fcee2ea0d25`, and Bevy + egui `bbd1e0adf44e4a500f7af37a35070ea95f20230d381a08d2fc9a4ea383883c7a`. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation.
+
+This establishes one fresh-state row-selection interaction for Slint and QML, not repeated clicks, multi-selection, modifiers, editing, or equivalent selection semantics. Bevy + egui page-content row selection remains unverified alongside Price sorting. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed; rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, and scenario acceptance remain unestablished.
+
 ### Bevy + egui Export View pointer and application capture (2026-11-22)
 
 A development-only `/tmp/run_bevy_export_view_pointer.py` driver launched the unchanged Bevy + egui Release executable at native light/100% with a fresh `/tmp` working directory. It used the existing stable-ID adapter only for initial/final route readback and acknowledged quit, never route selection. Two same-route Browser-primary clicks established focus, followed by one real Export View toolbar click. The accepted invocation was:
