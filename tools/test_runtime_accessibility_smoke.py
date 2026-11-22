@@ -144,6 +144,16 @@ def browser_tree():
 
 
 class RuntimeAccessibilitySmokeTests(unittest.TestCase):
+    def test_browser3_is_the_last_canonical_browser_route(self):
+        self.assertEqual(
+            accessibility.BROWSER3_ROUTE,
+            core.Route("primary.browser", "browser.browser3"),
+        )
+        self.assertEqual(
+            core.SECONDARY_BY_PRIMARY["primary.browser"][-1],
+            accessibility.BROWSER3_ROUTE.secondary,
+        )
+
     def test_walk_tree_is_ordered_and_bounded(self):
         root, _, _ = browser_tree()
         nodes = list(accessibility.walk_tree(root))
@@ -160,7 +170,7 @@ class RuntimeAccessibilitySmokeTests(unittest.TestCase):
         with self.assertRaises(core.SmokeFailure):
             accessibility.visible_tab(bridge, bridge.nodes, "Browser #1")
 
-    def test_qml_focus_arrows_return_and_clean_restoration(self):
+    def test_qml_focus_arrows_browser3_home_return_and_clean_restoration(self):
         root, first, second = browser_tree()
         bridge = FakeBridge(root)
         keyboard = FakeKeyboard(first, second)
@@ -171,16 +181,32 @@ class RuntimeAccessibilitySmokeTests(unittest.TestCase):
                 accessibility.BROWSER2_ROUTE,
                 accessibility.BROWSER2_ROUTE,
                 accessibility.INITIAL_ROUTE,
+                accessibility.INITIAL_ROUTE,
+                accessibility.INITIAL_ROUTE,
+                accessibility.BROWSER3_ROUTE,
+                accessibility.BROWSER3_ROUTE,
+                accessibility.INITIAL_ROUTE,
             ]
         )
         with mock.patch.object(accessibility.time, "sleep"):
             record = accessibility.run_qml_sequence(session, bridge, keyboard, settle=0)
         self.assertEqual(
             keyboard.keys,
-            [accessibility.RIGHT, accessibility.RETURN, accessibility.LEFT, accessibility.RETURN],
+            [
+                accessibility.RIGHT,
+                accessibility.RETURN,
+                accessibility.LEFT,
+                accessibility.RETURN,
+                accessibility.RIGHT,
+                accessibility.RIGHT,
+                accessibility.RETURN,
+                accessibility.HOME,
+                accessibility.RETURN,
+            ],
         )
-        self.assertEqual(session.state_count, 5)
+        self.assertEqual(session.state_count, 10)
         self.assertTrue(record["focus_without_selection_verified"])
+        self.assertTrue(record["home_and_browser3_navigation_verified"])
         self.assertFalse(record["pointer_input"])
         self.assertTrue(record["clean_exit"])
         self.assertTrue(session.finished)
@@ -220,7 +246,7 @@ class RuntimeAccessibilitySmokeTests(unittest.TestCase):
                 )
         self.assertFalse(session.quit_acknowledged)
 
-    def test_slint_startup_focus_arrows_return_and_clean_restoration(self):
+    def test_slint_startup_focus_arrows_browser3_home_and_clean_restoration(self):
         root, _, _ = browser_tree()
         bridge = FakeBridge(root)
         bridge.root = None
@@ -232,6 +258,11 @@ class RuntimeAccessibilitySmokeTests(unittest.TestCase):
                 accessibility.BROWSER2_ROUTE,
                 accessibility.BROWSER2_ROUTE,
                 accessibility.INITIAL_ROUTE,
+                accessibility.INITIAL_ROUTE,
+                accessibility.INITIAL_ROUTE,
+                accessibility.BROWSER3_ROUTE,
+                accessibility.BROWSER3_ROUTE,
+                accessibility.INITIAL_ROUTE,
             ],
             implementation="slint",
         )
@@ -241,11 +272,22 @@ class RuntimeAccessibilitySmokeTests(unittest.TestCase):
             )
         self.assertEqual(
             keyboard.keys,
-            [accessibility.RIGHT, accessibility.RETURN, accessibility.LEFT, accessibility.RETURN],
+            [
+                accessibility.RIGHT,
+                accessibility.RETURN,
+                accessibility.LEFT,
+                accessibility.RETURN,
+                accessibility.RIGHT,
+                accessibility.RIGHT,
+                accessibility.RETURN,
+                accessibility.HOME,
+                accessibility.RETURN,
+            ],
         )
         self.assertEqual(record["status"], "passed")
         self.assertEqual(record["accessibility"]["status"], "gap")
         self.assertTrue(record["focus_without_selection_verified"])
+        self.assertTrue(record["home_and_browser3_navigation_verified"])
         self.assertTrue(session.finished)
 
     def test_slint_rejects_selection_change_from_focus_only_arrow(self):
@@ -263,7 +305,7 @@ class RuntimeAccessibilitySmokeTests(unittest.TestCase):
                 )
         self.assertFalse(session.quit_acknowledged)
 
-    def test_bevy_tab_traversal_arrows_return_and_clean_restoration(self):
+    def test_bevy_tab_traversal_arrows_browser3_home_and_clean_restoration(self):
         root, _, _ = browser_tree()
         bridge = FakeBridge(root)
         bridge.root = None
@@ -275,6 +317,11 @@ class RuntimeAccessibilitySmokeTests(unittest.TestCase):
                 accessibility.INITIAL_ROUTE,
                 accessibility.BROWSER2_ROUTE,
                 accessibility.BROWSER2_ROUTE,
+                accessibility.INITIAL_ROUTE,
+                accessibility.INITIAL_ROUTE,
+                accessibility.INITIAL_ROUTE,
+                accessibility.BROWSER3_ROUTE,
+                accessibility.BROWSER3_ROUTE,
                 accessibility.INITIAL_ROUTE,
             ],
             implementation="bevy-egui",
@@ -291,11 +338,17 @@ class RuntimeAccessibilitySmokeTests(unittest.TestCase):
                 accessibility.RETURN,
                 accessibility.LEFT,
                 accessibility.RETURN,
+                accessibility.RIGHT,
+                accessibility.RIGHT,
+                accessibility.RETURN,
+                accessibility.HOME,
+                accessibility.RETURN,
             ],
         )
         self.assertEqual(record["status"], "passed")
         self.assertEqual(record["accessibility"]["status"], "gap")
         self.assertEqual(record["os_key_sequence"][0], "Tab x11")
+        self.assertTrue(record["home_and_browser3_navigation_verified"])
         self.assertTrue(session.finished)
 
     def test_bevy_rejects_selection_change_from_left(self):

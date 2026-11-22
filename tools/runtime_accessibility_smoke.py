@@ -17,9 +17,11 @@ import runtime_smoke as core
 
 RIGHT = 0xFF53
 LEFT = 0xFF51
+HOME = 0xFF50
 RETURN = 0xFF0D
 INITIAL_ROUTE = core.Route("primary.browser", "browser.browser1")
 BROWSER2_ROUTE = core.Route("primary.browser", "browser.browser2")
+BROWSER3_ROUTE = core.Route("primary.browser", "browser.browser3")
 MAX_NODES = 4000
 
 
@@ -105,6 +107,25 @@ def tap(keyboard, keysym: int) -> None:
     time.sleep(0.05)
 
 
+def run_browser3_and_home_sequence(
+    session: core.ProcessSession,
+    keyboard,
+    settle: float,
+) -> None:
+    """Traverse to the last canonical Browser tab and prove Home by activation."""
+    steps = [
+        (RIGHT, INITIAL_ROUTE, "Right must focus Browser 2 without selection"),
+        (RIGHT, INITIAL_ROUTE, "Right must focus Browser 3 without selection"),
+        (RETURN, BROWSER3_ROUTE, "Return selects focused Browser 3"),
+        (HOME, BROWSER3_ROUTE, "Home must focus Browser 1 without selection"),
+        (RETURN, INITIAL_ROUTE, "Return restores Browser 1 from Browser 3"),
+    ]
+    for key, expected, description in steps:
+        tap(keyboard, key)
+        time.sleep(settle)
+        core.require_route(session.request("state"), expected, description)
+
+
 def set_focus(bridge, node) -> None:
     actions = [node.get_action_name(index) for index in range(node.get_n_actions())]
     if "SetFocus" not in actions:
@@ -177,6 +198,7 @@ def run_qml_sequence(
     core.require_route(session.request("state"), INITIAL_ROUTE, "Return restores Browser 1")
     if not bridge.has_state(first, "CHECKED") or bridge.has_state(second, "CHECKED"):
         raise core.SmokeFailure("AT-SPI checked states did not follow Browser 1 restoration")
+    run_browser3_and_home_sequence(session, keyboard, settle)
     final_summary, _ = tree_summary(bridge, root)
     finish_cleanly(session)
     return {
@@ -187,15 +209,31 @@ def run_qml_sequence(
         "initial_tree": initial_summary,
         "final_tree": final_summary,
         "focus_action": "AT-SPI SetFocus",
-        "os_key_sequence": ["Right", "Return", "Left", "Return"],
+        "os_key_sequence": [
+            "Right",
+            "Return",
+            "Left",
+            "Return",
+            "Right",
+            "Right",
+            "Return",
+            "Home",
+            "Return",
+        ],
         "route_sequence": [
             "browser.browser1",
             "browser.browser1",
             "browser.browser2",
             "browser.browser2",
             "browser.browser1",
+            "browser.browser1",
+            "browser.browser1",
+            "browser.browser3",
+            "browser.browser3",
+            "browser.browser1",
         ],
         "focus_without_selection_verified": True,
+        "home_and_browser3_navigation_verified": True,
         "pointer_input": False,
         "clean_exit": True,
     }
@@ -247,6 +285,7 @@ def run_slint_sequence(
     tap(keyboard, RETURN)
     time.sleep(settle)
     core.require_route(session.request("state"), INITIAL_ROUTE, "Return restores Browser 1")
+    run_browser3_and_home_sequence(session, keyboard, settle)
     finish_cleanly(session)
     return {
         "evidence": "development-os-keyboard",
@@ -254,15 +293,31 @@ def run_slint_sequence(
         "status": "passed",
         "outcome": "focused-tab-keyboard-selection",
         "focus_action": "ordinary startup focus on Browser secondary tab bar",
-        "os_key_sequence": ["Right", "Return", "Left", "Return"],
+        "os_key_sequence": [
+            "Right",
+            "Return",
+            "Left",
+            "Return",
+            "Right",
+            "Right",
+            "Return",
+            "Home",
+            "Return",
+        ],
         "route_sequence": [
             "browser.browser1",
             "browser.browser1",
             "browser.browser2",
             "browser.browser2",
             "browser.browser1",
+            "browser.browser1",
+            "browser.browser1",
+            "browser.browser3",
+            "browser.browser3",
+            "browser.browser1",
         ],
         "focus_without_selection_verified": True,
+        "home_and_browser3_navigation_verified": True,
         "accessibility": accessibility,
         "pointer_input": False,
         "clean_exit": True,
@@ -303,6 +358,7 @@ def run_bevy_sequence(
     tap(keyboard, RETURN)
     time.sleep(settle)
     core.require_route(session.request("state"), INITIAL_ROUTE, "Return restores Browser 1")
+    run_browser3_and_home_sequence(session, keyboard, settle)
     finish_cleanly(session)
     return {
         "evidence": "development-os-keyboard",
@@ -310,7 +366,18 @@ def run_bevy_sequence(
         "status": "passed",
         "outcome": "focused-tab-keyboard-selection",
         "focus_action": "ordinary egui Tab traversal to Browser 1",
-        "os_key_sequence": ["Tab x11", "Right", "Return", "Left", "Return"],
+        "os_key_sequence": [
+            "Tab x11",
+            "Right",
+            "Return",
+            "Left",
+            "Return",
+            "Right",
+            "Right",
+            "Return",
+            "Home",
+            "Return",
+        ],
         "route_sequence": [
             "browser.browser1",
             "browser.browser1",
@@ -318,8 +385,14 @@ def run_bevy_sequence(
             "browser.browser2",
             "browser.browser2",
             "browser.browser1",
+            "browser.browser1",
+            "browser.browser1",
+            "browser.browser3",
+            "browser.browser3",
+            "browser.browser1",
         ],
         "focus_without_selection_verified": True,
+        "home_and_browser3_navigation_verified": True,
         "accessibility": accessibility,
         "pointer_input": False,
         "clean_exit": True,
