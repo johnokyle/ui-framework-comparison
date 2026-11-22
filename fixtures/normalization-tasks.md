@@ -922,6 +922,18 @@ Every focus/export state check retained `browser.browser1`; no programmatic rout
 
 Subsequent assistant inspection of that exact PNG found the Bevy shell, toolbar, Browser tabs, and populated Browser 1 table rather than a blank image or stale route; the application-owned capture excludes native window decorations. The JSONL retains `capture_pixel_content_reviewed=false` because that review occurred after the driver completed. The accepted development record is `/tmp/ui-framework-bevy-export-view-2026-11-22-01.jsonl`.
 
-This closes the earlier Bevy Export View toolbar-click/output gap for one native Browser 1 run. It does not establish repeated-run reliability, Export View on other routes or native-scene content, page-content interaction, human-reviewed visual equivalence, durable artifact attachment, presented-frame timing, controlled results, or scenario acceptance. No application source, parent test code, fixture, scenario, or large/on-demand variant changed or was constructed.
+The same temporary driver then gained an optional `--route quant.vol-surface` while preserving the Browser 1 default. A second fresh native light/100% process used two real same-route Browser-primary focus clicks, one real Quantitative-primary click at `(1428,396.6)` that selected retained Volatility Surface, and one real Export View click at `(1242,418.8)`. Semantic readback produced `browser.browser1 → quant.vol-surface`; Export View preserved that route. No programmatic route selection or keyboard input occurred. The accepted native-scene invocation was:
+
+```bash
+python3 /tmp/run_bevy_export_view_pointer.py \
+  --route quant.vol-surface \
+  --work-root /tmp/ui-framework-bevy-export-view-native-scene-2026-11-22-01 \
+  --jsonl /tmp/ui-framework-bevy-export-view-native-scene-2026-11-22-01.jsonl \
+  --settle 2
+```
+
+That run produced `/tmp/ui-framework-bevy-export-view-native-scene-2026-11-22-01/captures/quant-vol-surface-1795383095238-1.png`, a 269,635-byte 1600×1000 RGB PNG with SHA-256 `9e5785f7b97c6724a34467189aec681fe92105887ed610a438d4a25109b50453`. Bevy acknowledged `quit` and exited with status 0; its executable hash was unchanged. Subsequent assistant inspection found the Quantitative shell and controls together with the populated composited 3D volatility surface, without native window decorations. The accepted development record is `/tmp/ui-framework-bevy-export-view-native-scene-2026-11-22-01.jsonl`; its `capture_pixel_content_reviewed=false` again predates the external assistant review.
+
+These runs close the earlier Bevy Export View toolbar-click/output gap for one native Browser 1 run and one native Volatility Surface run, including one demonstrated native-scene composition. They do not establish repeated-run reliability, Export View on other routes, page-content interaction, human-reviewed visual equivalence, durable artifact attachment, presented-frame timing, controlled results, or scenario acceptance. No application source, parent test code, fixture, scenario, or large/on-demand variant changed or was constructed.
 
 No scenario activation or implementation hash attestation is part of this parent-only BP-01 fixture deliverable.
