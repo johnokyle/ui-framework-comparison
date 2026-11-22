@@ -18,11 +18,47 @@ import runtime_smoke as core
 RIGHT = 0xFF53
 LEFT = 0xFF51
 HOME = 0xFF50
+END = 0xFF57
 RETURN = 0xFF0D
 INITIAL_ROUTE = core.Route("primary.browser", "browser.browser1")
 BROWSER2_ROUTE = core.Route("primary.browser", "browser.browser2")
 BROWSER3_ROUTE = core.Route("primary.browser", "browser.browser3")
+CHARTING_ROUTE = core.Route("primary.charting", "chart.analytical")
+CHARTING_STOCK_ROUTE = core.Route("primary.charting", "chart.stock")
+CHARTING_PIVOT_ROUTE = core.Route("primary.charting", "chart.pivot")
+CHARTING_KEY_SEQUENCE = [
+    "Ctrl+Tab",
+    "End",
+    "Right",
+    "Right",
+    "Return",
+    "Home",
+    "Return",
+    "Left",
+    "Left",
+    "Return",
+    "Home",
+    "Return",
+]
 MAX_NODES = 4000
+
+
+def charting_route_sequence(second_route: core.Route) -> list[str]:
+    """Return canonical secondary readbacks for the Ctrl+Tab and Charting steps."""
+    return [
+        CHARTING_ROUTE.secondary,
+        CHARTING_ROUTE.secondary,
+        CHARTING_ROUTE.secondary,
+        CHARTING_ROUTE.secondary,
+        second_route.secondary,
+        second_route.secondary,
+        CHARTING_ROUTE.secondary,
+        CHARTING_ROUTE.secondary,
+        CHARTING_ROUTE.secondary,
+        CHARTING_STOCK_ROUTE.secondary,
+        CHARTING_STOCK_ROUTE.secondary,
+        CHARTING_ROUTE.secondary,
+    ]
 
 
 def walk_tree(root, *, max_nodes: int = MAX_NODES):
@@ -126,6 +162,48 @@ def run_browser3_and_home_sequence(
         core.require_route(session.request("state"), expected, description)
 
 
+def select_charting_from_keyboard(
+    session: core.ProcessSession,
+    keyboard,
+    settle: float,
+) -> None:
+    """Move from the focused Browser bar to Charting through the global shortcut."""
+    keyboard.ctrl_tab()
+    time.sleep(settle)
+    core.require_route(
+        session.request("state"),
+        CHARTING_ROUTE,
+        "Ctrl+Tab selects Charting and retains Analytical",
+    )
+
+
+def run_charting_end_and_wrap_sequence(
+    session: core.ProcessSession,
+    keyboard,
+    settle: float,
+    *,
+    second_route: core.Route,
+) -> None:
+    """Prove Charting End and both arrow wraps by focus retention and activation."""
+    steps = [
+        (END, CHARTING_ROUTE, "End must focus the last Charting tab without selection"),
+        (RIGHT, CHARTING_ROUTE, "Right must wrap from the last Charting tab to Analytical"),
+        (RIGHT, CHARTING_ROUTE, "Right must focus the second canonical Charting route"),
+        (RETURN, second_route, "Return selects the focused second canonical Charting route"),
+        (HOME, second_route, "Home must focus Analytical without changing Charting selection"),
+        (RETURN, CHARTING_ROUTE, "Return restores Analytical after right wraparound"),
+        (LEFT, CHARTING_ROUTE, "Left must wrap from Analytical to the last Charting tab"),
+        (LEFT, CHARTING_ROUTE, "Left must focus Stock without selection"),
+        (RETURN, CHARTING_STOCK_ROUTE, "Return selects Stock after left wraparound"),
+        (HOME, CHARTING_STOCK_ROUTE, "Home must focus Analytical without changing Stock"),
+        (RETURN, CHARTING_ROUTE, "Return restores Analytical after left wraparound"),
+    ]
+    for key, expected, description in steps:
+        tap(keyboard, key)
+        time.sleep(settle)
+        core.require_route(session.request("state"), expected, description)
+
+
 def set_focus(bridge, node) -> None:
     actions = [node.get_action_name(index) for index in range(node.get_n_actions())]
     if "SetFocus" not in actions:
@@ -200,6 +278,22 @@ def run_qml_sequence(
         raise core.SmokeFailure("AT-SPI checked states did not follow Browser 1 restoration")
     run_browser3_and_home_sequence(session, keyboard, settle)
     final_summary, _ = tree_summary(bridge, root)
+
+    select_charting_from_keyboard(session, keyboard, settle)
+    root = bridge.application_for_pid(session.process.pid)
+    if root is None:
+        raise core.SmokeFailure("QML lost its process-scoped AT-SPI application on Charting")
+    nodes = list(walk_tree(root))
+    analytical = visible_tab(bridge, nodes, "Basic Charts")
+    set_focus(bridge, analytical)
+    time.sleep(0.2)
+    require_focus(bridge, analytical)
+    run_charting_end_and_wrap_sequence(
+        session,
+        keyboard,
+        settle,
+        second_route=CHARTING_PIVOT_ROUTE,
+    )
     finish_cleanly(session)
     return {
         "evidence": "development-atspi-os-keyboard",
@@ -208,7 +302,7 @@ def run_qml_sequence(
         "outcome": "focused-tab-keyboard-selection",
         "initial_tree": initial_summary,
         "final_tree": final_summary,
-        "focus_action": "AT-SPI SetFocus",
+        "focus_action": "AT-SPI SetFocus for Browser #1 and Basic Charts",
         "os_key_sequence": [
             "Right",
             "Return",
@@ -219,7 +313,7 @@ def run_qml_sequence(
             "Return",
             "Home",
             "Return",
-        ],
+        ] + CHARTING_KEY_SEQUENCE,
         "route_sequence": [
             "browser.browser1",
             "browser.browser1",
@@ -231,9 +325,10 @@ def run_qml_sequence(
             "browser.browser3",
             "browser.browser3",
             "browser.browser1",
-        ],
+        ] + charting_route_sequence(CHARTING_PIVOT_ROUTE),
         "focus_without_selection_verified": True,
         "home_and_browser3_navigation_verified": True,
+        "charting_end_and_wrap_verified": True,
         "pointer_input": False,
         "clean_exit": True,
     }
@@ -286,13 +381,20 @@ def run_slint_sequence(
     time.sleep(settle)
     core.require_route(session.request("state"), INITIAL_ROUTE, "Return restores Browser 1")
     run_browser3_and_home_sequence(session, keyboard, settle)
+    select_charting_from_keyboard(session, keyboard, settle)
+    run_charting_end_and_wrap_sequence(
+        session,
+        keyboard,
+        settle,
+        second_route=CHARTING_STOCK_ROUTE,
+    )
     finish_cleanly(session)
     return {
         "evidence": "development-os-keyboard",
         "implementation": "slint",
         "status": "passed",
         "outcome": "focused-tab-keyboard-selection",
-        "focus_action": "ordinary startup focus on Browser secondary tab bar",
+        "focus_action": "ordinary startup and primary-switch secondary-bar focus",
         "os_key_sequence": [
             "Right",
             "Return",
@@ -303,7 +405,7 @@ def run_slint_sequence(
             "Return",
             "Home",
             "Return",
-        ],
+        ] + CHARTING_KEY_SEQUENCE,
         "route_sequence": [
             "browser.browser1",
             "browser.browser1",
@@ -315,9 +417,10 @@ def run_slint_sequence(
             "browser.browser3",
             "browser.browser3",
             "browser.browser1",
-        ],
+        ] + charting_route_sequence(CHARTING_STOCK_ROUTE),
         "focus_without_selection_verified": True,
         "home_and_browser3_navigation_verified": True,
+        "charting_end_and_wrap_verified": True,
         "accessibility": accessibility,
         "pointer_input": False,
         "clean_exit": True,
@@ -359,13 +462,20 @@ def run_bevy_sequence(
     time.sleep(settle)
     core.require_route(session.request("state"), INITIAL_ROUTE, "Return restores Browser 1")
     run_browser3_and_home_sequence(session, keyboard, settle)
+    select_charting_from_keyboard(session, keyboard, settle)
+    run_charting_end_and_wrap_sequence(
+        session,
+        keyboard,
+        settle,
+        second_route=CHARTING_STOCK_ROUTE,
+    )
     finish_cleanly(session)
     return {
         "evidence": "development-os-keyboard",
         "implementation": "bevy-egui",
         "status": "passed",
         "outcome": "focused-tab-keyboard-selection",
-        "focus_action": "ordinary egui Tab traversal to Browser 1",
+        "focus_action": "ordinary egui Tab traversal to Browser 1 and primary-switch focus on Charting",
         "os_key_sequence": [
             "Tab x11",
             "Right",
@@ -377,7 +487,7 @@ def run_bevy_sequence(
             "Return",
             "Home",
             "Return",
-        ],
+        ] + CHARTING_KEY_SEQUENCE,
         "route_sequence": [
             "browser.browser1",
             "browser.browser1",
@@ -390,9 +500,10 @@ def run_bevy_sequence(
             "browser.browser3",
             "browser.browser3",
             "browser.browser1",
-        ],
+        ] + charting_route_sequence(CHARTING_STOCK_ROUTE),
         "focus_without_selection_verified": True,
         "home_and_browser3_navigation_verified": True,
+        "charting_end_and_wrap_verified": True,
         "accessibility": accessibility,
         "pointer_input": False,
         "clean_exit": True,

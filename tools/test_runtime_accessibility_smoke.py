@@ -69,6 +69,9 @@ class FakeKeyboard:
         self.second = second
         self.keys = []
 
+    def ctrl_tab(self):
+        self.keys.extend([os_smoke.CONTROL_L, os_smoke.TAB])
+
     def keysym(self, keysym, state):
         if state:
             self.keys.append(keysym)
@@ -92,6 +95,9 @@ class FakeKeyboard:
 class RecordingKeyboard:
     def __init__(self):
         self.keys = []
+
+    def ctrl_tab(self):
+        self.keys.extend([os_smoke.CONTROL_L, os_smoke.TAB])
 
     def keysym(self, keysym, state):
         if state:
@@ -130,6 +136,7 @@ def browser_tree():
         FakeNode("Browser", "page tab", checked=True),
         FakeNode("Charting", "page tab"),
         FakeNode("Quantitative Visualization", "page tab"),
+        FakeNode("Basic Charts", "page tab"),
         first,
         second,
         FakeNode("Browser #3", "page tab"),
@@ -143,6 +150,41 @@ def browser_tree():
     return FakeNode("appQmlUITest", "application", children=[frame]), first, second
 
 
+def charting_key_presses():
+    return [
+        os_smoke.CONTROL_L,
+        os_smoke.TAB,
+        accessibility.END,
+        accessibility.RIGHT,
+        accessibility.RIGHT,
+        accessibility.RETURN,
+        accessibility.HOME,
+        accessibility.RETURN,
+        accessibility.LEFT,
+        accessibility.LEFT,
+        accessibility.RETURN,
+        accessibility.HOME,
+        accessibility.RETURN,
+    ]
+
+
+def charting_states(second_route):
+    return [
+        accessibility.CHARTING_ROUTE,
+        accessibility.CHARTING_ROUTE,
+        accessibility.CHARTING_ROUTE,
+        accessibility.CHARTING_ROUTE,
+        second_route,
+        second_route,
+        accessibility.CHARTING_ROUTE,
+        accessibility.CHARTING_ROUTE,
+        accessibility.CHARTING_ROUTE,
+        accessibility.CHARTING_STOCK_ROUTE,
+        accessibility.CHARTING_STOCK_ROUTE,
+        accessibility.CHARTING_ROUTE,
+    ]
+
+
 class RuntimeAccessibilitySmokeTests(unittest.TestCase):
     def test_browser3_is_the_last_canonical_browser_route(self):
         self.assertEqual(
@@ -152,6 +194,24 @@ class RuntimeAccessibilitySmokeTests(unittest.TestCase):
         self.assertEqual(
             core.SECONDARY_BY_PRIMARY["primary.browser"][-1],
             accessibility.BROWSER3_ROUTE.secondary,
+        )
+
+    def test_charting_constants_match_the_canonical_registry(self):
+        self.assertEqual(
+            core.SECONDARY_BY_PRIMARY["primary.charting"],
+            ("chart.analytical", "chart.stock", "chart.pivot"),
+        )
+        self.assertEqual(
+            accessibility.CHARTING_ROUTE,
+            core.Route("primary.charting", "chart.analytical"),
+        )
+        self.assertEqual(
+            accessibility.CHARTING_STOCK_ROUTE,
+            core.Route("primary.charting", "chart.stock"),
+        )
+        self.assertEqual(
+            accessibility.CHARTING_PIVOT_ROUTE,
+            core.Route("primary.charting", "chart.pivot"),
         )
 
     def test_walk_tree_is_ordered_and_bounded(self):
@@ -187,6 +247,7 @@ class RuntimeAccessibilitySmokeTests(unittest.TestCase):
                 accessibility.BROWSER3_ROUTE,
                 accessibility.INITIAL_ROUTE,
             ]
+            + charting_states(accessibility.CHARTING_PIVOT_ROUTE)
         )
         with mock.patch.object(accessibility.time, "sleep"):
             record = accessibility.run_qml_sequence(session, bridge, keyboard, settle=0)
@@ -202,11 +263,13 @@ class RuntimeAccessibilitySmokeTests(unittest.TestCase):
                 accessibility.RETURN,
                 accessibility.HOME,
                 accessibility.RETURN,
-            ],
+            ]
+            + charting_key_presses(),
         )
-        self.assertEqual(session.state_count, 10)
+        self.assertEqual(session.state_count, 22)
         self.assertTrue(record["focus_without_selection_verified"])
         self.assertTrue(record["home_and_browser3_navigation_verified"])
+        self.assertTrue(record["charting_end_and_wrap_verified"])
         self.assertFalse(record["pointer_input"])
         self.assertTrue(record["clean_exit"])
         self.assertTrue(session.finished)
@@ -263,7 +326,8 @@ class RuntimeAccessibilitySmokeTests(unittest.TestCase):
                 accessibility.BROWSER3_ROUTE,
                 accessibility.BROWSER3_ROUTE,
                 accessibility.INITIAL_ROUTE,
-            ],
+            ]
+            + charting_states(accessibility.CHARTING_STOCK_ROUTE),
             implementation="slint",
         )
         with mock.patch.object(accessibility.time, "sleep"):
@@ -282,12 +346,14 @@ class RuntimeAccessibilitySmokeTests(unittest.TestCase):
                 accessibility.RETURN,
                 accessibility.HOME,
                 accessibility.RETURN,
-            ],
+            ]
+            + charting_key_presses(),
         )
         self.assertEqual(record["status"], "passed")
         self.assertEqual(record["accessibility"]["status"], "gap")
         self.assertTrue(record["focus_without_selection_verified"])
         self.assertTrue(record["home_and_browser3_navigation_verified"])
+        self.assertTrue(record["charting_end_and_wrap_verified"])
         self.assertTrue(session.finished)
 
     def test_slint_rejects_selection_change_from_focus_only_arrow(self):
@@ -323,7 +389,8 @@ class RuntimeAccessibilitySmokeTests(unittest.TestCase):
                 accessibility.BROWSER3_ROUTE,
                 accessibility.BROWSER3_ROUTE,
                 accessibility.INITIAL_ROUTE,
-            ],
+            ]
+            + charting_states(accessibility.CHARTING_STOCK_ROUTE),
             implementation="bevy-egui",
         )
         with mock.patch.object(accessibility.time, "sleep"):
@@ -343,12 +410,14 @@ class RuntimeAccessibilitySmokeTests(unittest.TestCase):
                 accessibility.RETURN,
                 accessibility.HOME,
                 accessibility.RETURN,
-            ],
+            ]
+            + charting_key_presses(),
         )
         self.assertEqual(record["status"], "passed")
         self.assertEqual(record["accessibility"]["status"], "gap")
         self.assertEqual(record["os_key_sequence"][0], "Tab x11")
         self.assertTrue(record["home_and_browser3_navigation_verified"])
+        self.assertTrue(record["charting_end_and_wrap_verified"])
         self.assertTrue(session.finished)
 
     def test_bevy_rejects_selection_change_from_left(self):
