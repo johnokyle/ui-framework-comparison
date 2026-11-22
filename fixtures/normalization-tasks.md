@@ -270,4 +270,33 @@ Exact executable and raw/review PNG SHA-256 identities, requested variants, QML 
 
 Verification comprised 23 stable-ID runner tests, five OS-smoke tests, nine screenshot-runner tests, repository validation, 91 Slint ordinary tests plus Release build, all 12 QML ordinary CTest entries, and 569 Bevy + egui ordinary tests plus Release build. Raw desktop images contain unrelated content and are not publication artifacts. All matrix artifacts remain only under `/tmp`; no durable CI/release attachment, controlled result, scenario activation, capability-status change, or human equivalence claim was created.
 
+### Constrained Browser 1 development screenshots (2026-11-21)
+
+The opt-in adapters now accept startup-only `SLINTUITEST_CAPTURE_SIZE`, `QMLUITEST_CAPTURE_SIZE`, and `BEVY_EGUI_CAPTURE_SIZE` values of exactly `1200x750` or `660x750`; invalid values fail startup. QML applies its size before root creation, Bevy + egui combines size with its optional scale override, and Slint applies a one-shot post-configure physical-pixel request derived from its effective scale. The last detail is necessary on the measured host: an earlier logical-size probe followed Wayland's native 5/3 scale rather than the requested absolute 100%. The parent runner exposes these values through `--sizes`, uses a fresh process for every combination, and gives size-qualified captures distinct names and manifest metadata. Ordinary non-automation startup remains unchanged.
+
+The passing sequential six-capture invocation was:
+
+```bash
+python3 "$COMPARISON_ROOT/tools/runtime_screenshot.py" \
+  --slint "$SLINT_ROOT/target/release/slintuitest" \
+  --qml "$QML_ROOT/build-fixture-tests/appQmlUITest" \
+  --bevy-egui "$BEVY_ROOT/target/release/bevy_egui_test" \
+  --bevy-asset-root "$BEVY_ROOT" \
+  --output-dir /tmp/ui-framework-screenshots-2026-11-21-06 \
+  --timeout 30 \
+  --settle 2 \
+  --themes light \
+  --scales 100 \
+  --sizes 1200x750 660x750 \
+  --qml-host-scale 1.6666666269302368
+```
+
+Every case reported `primary.browser/browser.browser1` before and after capture, acknowledged `quit`, and exited with status 0. QML's relative scale factor was `0.6000000143051151`. All raw desktop PNGs measured 5120×2160. Host Pillow 12.1.1 produced decorated review copies using half-open crop `(2015, 704, 3215, 1514)` at 1200×750, yielding 1200×810, and `(2285, 704, 2945, 1514)` at 660×750, yielding 660×810. The 60-pixel decoration allowance and isolated window content are consistent with the requested logical client sizes at absolute 100%; raw desktop dimensions alone were not used as geometry evidence.
+
+Assistant inspection of all six isolated copies found Browser 1 controls and tables present at both sizes. At 660×750, Slint retained its primary and secondary tabs but clipped right-side toolbar/reset controls and table columns; QML truncated its title and right-side toolbar and clipped table columns; Bevy + egui retained all three primary and secondary tabs but clipped right-side shell controls and table columns, with a horizontal table scrollbar visible. These observations establish captured constrained-layout behavior, not working scroll interaction, responsive-layout acceptance, or human-reviewed equivalence.
+
+Executable SHA-256 hashes are Slint `7254d2dc8f349a08c4523f3ef7066f4bfbd74efd3b2c57eada43033106dc2a91`, QML `4b1bf027fb5587b580b227a64f15f60ae0f72b81c6d8cb121971131523fe759e`, and Bevy + egui `7e2f2c281bfbd3b3cc9b975b98bee489bee3986002e45efa684105cd1cc81931`. The capture-time dirty trees were subsequently committed unchanged as Slint `875e30c3776ff201f75033d25472306cdcdaf50e`, QML `00abd57eeb0f601011a79216d36223d0fb288673`, and Bevy + egui `77f200b8a9a1a67756d7fec5316c38e229320a3d`; these immutable revisions exactly identify the tested source and are the new parent pins. Exact raw/review capture hashes, requested variants, QML normalization, crop boxes, route preservation, clean exits, and assistant observations are recorded in `manifest.jsonl`, `review-captures.jsonl`, and `assistant-review.jsonl` under `/tmp/ui-framework-screenshots-2026-11-21-06`. Earlier `-03`, `-04`, and `-05-slint` directories are diagnostic probes, not accepted constrained-geometry evidence.
+
+Verification comprised 23 stable-ID runner tests, five OS-smoke tests, ten screenshot-runner tests, repository validation, 92 Slint ordinary tests plus Release build and format check, all 12 QML ordinary CTest entries, and 569 Bevy + egui ordinary tests plus Release build. Raw desktop images contain unrelated content and are not publication artifacts. All matrix artifacts remain only under `/tmp`; no durable CI/release attachment, controlled result, scenario activation, capability-status change, or human equivalence claim was created.
+
 No scenario activation or implementation hash attestation is part of this parent-only BP-01 fixture deliverable.
