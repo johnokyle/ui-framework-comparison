@@ -314,6 +314,30 @@ Executable SHA-256 hashes are Slint `7254d2dc8f349a08c4523f3ef7066f4bfbd74efd3b2
 
 Verification comprised 23 stable-ID runner tests, five OS-smoke tests, ten screenshot-runner tests, repository validation, 92 Slint ordinary tests plus Release build and format check, all 12 QML ordinary CTest entries, and 569 Bevy + egui ordinary tests plus Release build. Raw desktop images contain unrelated content and are not publication artifacts. All matrix artifacts remain only under `/tmp`; no durable CI/release attachment, controlled result, scenario activation, capability-status change, or human equivalence claim was created.
 
+### Analytical-chart development screenshots (2026-11-22)
+
+The parent screenshot runner now accepts `--route` from the canonical secondary-ID registry. It still requires the initial Browser 1 route, selects a noninitial route through the existing stable-ID automation adapter, requires an exact successful selection reply, and checks the same actual route again after external capture. QML alias translation and response canonicalization remain parent-owned. Route-qualified filenames and manifest fields distinguish these programmatic selections from initial-default captures; the default Browser 1 behavior and filenames are unchanged.
+
+The passing sequential invocation was:
+
+```bash
+python3 "$COMPARISON_ROOT/tools/runtime_screenshot.py" \
+  --slint "$SLINT_ROOT/target/release/slintuitest" \
+  --qml "$QML_ROOT/build-fixture-tests/appQmlUITest" \
+  --bevy-egui "$BEVY_ROOT/target/release/bevy_egui_test" \
+  --bevy-asset-root "$BEVY_ROOT" \
+  --output-dir /tmp/ui-framework-screenshots-2026-11-22-chart-analytical-01 \
+  --route chart.analytical \
+  --themes light \
+  --scales 100 \
+  --qml-host-scale 1.6666666269302368 \
+  --timeout 30
+```
+
+Slint, QML, and Bevy + egui each selected and retained `primary.charting/chart.analytical`, acknowledged `quit`, and exited with status 0. All raw desktop PNGs measured 5120×2160. Host Pillow produced 1600×1060 decorated review copies using half-open crop `(1815, 579, 3415, 1639)`. Assistant inspection found a populated multi-series analytical chart and light shell in each isolated copy. Slint and QML devote most of the window to the plot; Bevy + egui's extensive diagnostics and controls leave a shorter plot. This is a captured-layout observation, not human-reviewed equivalence or presented-frame timing evidence.
+
+Executable SHA-256 hashes were Slint `49022ade231309e7f34e794832de390b4a2582cc4fbf9cb5d29fe9e946737557`, QML `4b1bf027fb5587b580b227a64f15f60ae0f72b81c6d8cb121971131523fe759e`, and Bevy + egui `7e2f2c281bfbd3b3cc9b975b98bee489bee3986002e45efa684105cd1cc81931`. Exact capture/review hashes, crop boxes, route metadata, clean exits, and assistant observations are in `manifest.jsonl` and `assistant-review.jsonl` under `/tmp/ui-framework-screenshots-2026-11-22-chart-analytical-01`. All 61 parent Python tests passed, including twelve screenshot-runner tests, and repository validation passed. No implementation source changed. Raw desktop images contain unrelated content and are not publication artifacts; durable attachment, OS-input behavior, active accessibility, human equivalence acceptance, controlled results, and scenario activation remain unestablished.
+
 ### Browser 1 AT-SPI and focused-keyboard development evidence (2026-11-21)
 
 A parent-only `tools/runtime_accessibility_smoke.py` runner reads the host AT-SPI `IsEnabled` status without changing it, launches fresh light/100% 1200×750 processes, and restricts desktop traversal to each child's PID. QML alone receives `QT_LINUX_ACCESSIBILITY_ALWAYS_ON=1`, in addition to its existing capture overrides. The runner uses QML's AT-SPI `SetFocus` action only to establish initial tab focus; subsequent Right, Return, and Left input is delivered through the existing authorized RemoteDesktop keyboard session. Stable-ID route readback remains the application-state oracle. No absolute coordinates, pointer events, direct selection calls, screenshots, or host settings changes are used.

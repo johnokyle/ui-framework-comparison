@@ -33,9 +33,16 @@ class FakePortal:
 
 
 class FakeSession:
-    def __init__(self, executable="unused", initial=core.Route("primary.browser", "browser.browser1")):
+    def __init__(
+        self,
+        executable="unused",
+        initial=core.Route("primary.browser", "browser.browser1"),
+        selection_route=None,
+    ):
         self.adapter = core.Adapter("slint", executable)
-        self.initial = initial
+        self.route = initial
+        self.selection_route = selection_route
+        self.selections = []
         self.state_count = 0
         self.quit_acknowledged = False
         self.finished = False
@@ -46,8 +53,21 @@ class FakeSession:
             return core.Reply(
                 "state",
                 "ok",
-                primary=self.initial.primary,
-                secondary=self.initial.secondary,
+                primary=self.route.primary,
+                secondary=self.route.secondary,
+            )
+        if command.startswith("select-route "):
+            stable_id = command.removeprefix("select-route ")
+            self.selections.append(stable_id)
+            self.route = self.selection_route or core.Route(
+                core.SECONDARY_OWNER[stable_id], stable_id
+            )
+            return core.Reply(
+                "select",
+                "ok",
+                requested=stable_id,
+                primary=self.route.primary,
+                secondary=self.route.secondary,
             )
         if command == "quit":
             self.quit_acknowledged = True
@@ -124,7 +144,45 @@ class RuntimeScreenshotTests(unittest.TestCase):
             self.assertEqual(saved.parent, output)
             self.assertEqual(saved.name, "slint-browser1-desktop.png")
             self.assertEqual(saved.read_bytes(), source.read_bytes())
+            self.assertEqual(session.selections, [])
+            self.assertEqual(record["route_selection"], "initial-default")
             json.dumps(record)
+
+    def test_noninitial_route_is_selected_and_preserved_through_capture(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "portal.png"
+            source.write_bytes(png_header())
+            session = FakeSession()
+            route = core.Route("primary.charting", "chart.analytical")
+            with mock.patch.object(capture, "executable_sha256", return_value="hash"):
+                record = capture.run_capture(
+                    session, FakePortal(source), root, settle=0, route=route
+                )
+            self.assertEqual(session.selections, ["chart.analytical"])
+            self.assertEqual(session.state_count, 2)
+            self.assertTrue(session.finished)
+            self.assertEqual(record["primary"], "primary.charting")
+            self.assertEqual(record["secondary"], "chart.analytical")
+            self.assertEqual(record["route_selection"], "programmatic-stable-id")
+            self.assertEqual(
+                Path(record["capture"]["path"]).name,
+                "slint-chart-analytical-desktop.png",
+            )
+
+    def test_wrong_selected_route_is_rejected_without_capture(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "portal.png"
+            source.write_bytes(png_header())
+            portal = FakePortal(source)
+            session = FakeSession(selection_route=capture.INITIAL_ROUTE)
+            route = core.Route("primary.charting", "chart.analytical")
+            with self.assertRaises(core.SmokeFailure):
+                capture.run_capture(session, portal, root, settle=0, route=route)
+            self.assertEqual(session.selections, ["chart.analytical"])
+            self.assertEqual(portal.capture_count, 0)
+            self.assertFalse(session.quit_acknowledged)
 
     def test_variant_environment_and_qml_host_normalization(self):
         self.assertEqual(
@@ -218,6 +276,7 @@ class RuntimeScreenshotTests(unittest.TestCase):
                 "--bevy-egui", "bevy",
                 "--bevy-asset-root", "assets",
                 "--output-dir", str(output),
+                "--route", "chart.analytical",
                 "--settle", "0",
                 "--themes", "light", "dark",
                 "--scales", "100", "200",
@@ -232,6 +291,9 @@ class RuntimeScreenshotTests(unittest.TestCase):
             self.assertEqual(len(sessions), 12)
             self.assertEqual(portal.capture_count, 12)
             self.assertTrue(all(session.finished for session in sessions))
+            self.assertTrue(
+                all(session.selections == ["chart.analytical"] for session in sessions)
+            )
             self.assertEqual(
                 [(session.adapter.implementation, session.adapter.environment) for session in sessions[:2]],
                 [
@@ -244,6 +306,13 @@ class RuntimeScreenshotTests(unittest.TestCase):
             self.assertEqual(len({record["capture"]["path"] for record in records}), 12)
             self.assertTrue(all(record["clean_exit"] for record in records))
             self.assertTrue(all(not record["equivalence_established"] for record in records))
+            self.assertTrue(
+                all(
+                    (record["primary"], record["secondary"])
+                    == ("primary.charting", "chart.analytical")
+                    for record in records
+                )
+            )
 
     def test_main_runs_six_fresh_constrained_size_sessions(self):
         with tempfile.TemporaryDirectory() as directory:

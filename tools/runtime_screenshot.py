@@ -131,8 +131,15 @@ def variant_adapter(
     )
 
 
-def capture_name(implementation: str, theme: str, scale: str, size: str) -> str:
-    stem = f"{implementation}-browser1"
+def capture_name(
+    implementation: str,
+    theme: str,
+    scale: str,
+    size: str,
+    route: core.Route = INITIAL_ROUTE,
+) -> str:
+    route_part = "browser1" if route == INITIAL_ROUTE else route.secondary.replace(".", "-")
+    stem = f"{implementation}-{route_part}"
     if theme != "default" or scale != "native":
         stem += f"-{theme}-{scale}pct"
     if size != "native":
@@ -150,16 +157,21 @@ def run_capture(
     scale: str = "native",
     size: str = "native",
     qml_host_scale: float | None = None,
+    route: core.Route = INITIAL_ROUTE,
 ) -> dict[str, object]:
-    """Capture Browser 1 externally; the stable-ID adapter only observes and quits."""
+    """Select and capture a canonical route without OS-input or presented-frame claims."""
     implementation = session.adapter.implementation
     core.require_route(session.request("state"), INITIAL_ROUTE, "screenshot initial state")
+    if route != INITIAL_ROUTE:
+        core.require_selection(
+            session.request(f"select-route {route.secondary}"), route.secondary, route
+        )
     time.sleep(settle)
     uri = portal.capture()
-    capture = copy_capture(uri, output_dir / capture_name(implementation, theme, scale, size))
-    core.require_route(
-        session.request("state"), INITIAL_ROUTE, "state after external screenshot"
+    capture = copy_capture(
+        uri, output_dir / capture_name(implementation, theme, scale, size, route)
     )
+    core.require_route(session.request("state"), route, "state after external screenshot")
     reply = session.request("quit")
     if reply.status != "ok":
         raise core.SmokeFailure("screenshot smoke quit was not acknowledged")
@@ -171,8 +183,9 @@ def run_capture(
         "requested_theme": theme,
         "requested_scale_percent": scale,
         "requested_size": size,
-        "primary": INITIAL_ROUTE.primary,
-        "secondary": INITIAL_ROUTE.secondary,
+        "primary": route.primary,
+        "secondary": route.secondary,
+        "route_selection": "initial-default" if route == INITIAL_ROUTE else "programmatic-stable-id",
         "scope": "full-desktop",
         "interactive": False,
         "capture": capture,
@@ -282,6 +295,12 @@ def parser() -> argparse.ArgumentParser:
     result.add_argument("--bevy-egui")
     result.add_argument("--bevy-asset-root")
     result.add_argument("--output-dir", required=True)
+    result.add_argument(
+        "--route",
+        choices=core.SECONDARY_IDS,
+        default=INITIAL_ROUTE.secondary,
+        help="canonical secondary stable ID selected through the automation adapter",
+    )
     result.add_argument("--timeout", type=float, default=30.0)
     result.add_argument("--settle", type=float, default=2.0)
     result.add_argument(
@@ -337,6 +356,7 @@ def main(argv: list[str] | None = None) -> int:
     ):
         parser().error("explicit QML scales require a finite positive --qml-host-scale")
 
+    route = core.Route(core.SECONDARY_OWNER[args.route], args.route)
     output_dir = Path(args.output_dir)
     try:
         output_dir.mkdir(parents=True, exist_ok=False)
@@ -349,7 +369,9 @@ def main(argv: list[str] | None = None) -> int:
                             adapter = variant_adapter(
                                 base_adapter, theme, scale, size, args.qml_host_scale
                             )
-                            label = f"{adapter.implementation} {theme} {scale} {size}"
+                            label = (
+                                f"{adapter.implementation} {args.route} {theme} {scale} {size}"
+                            )
                             session = core.ProcessSession(adapter, args.timeout)
                             try:
                                 record = run_capture(
@@ -361,6 +383,7 @@ def main(argv: list[str] | None = None) -> int:
                                     scale=scale,
                                     size=size,
                                     qml_host_scale=args.qml_host_scale,
+                                    route=route,
                                 )
                             except Exception as error:
                                 failure = {
@@ -370,6 +393,8 @@ def main(argv: list[str] | None = None) -> int:
                                     "requested_theme": theme,
                                     "requested_scale_percent": scale,
                                     "requested_size": size,
+                                    "primary": route.primary,
+                                    "secondary": route.secondary,
                                     "error": str(error),
                                 }
                                 manifest.write(json.dumps(failure, sort_keys=True) + "\n")
