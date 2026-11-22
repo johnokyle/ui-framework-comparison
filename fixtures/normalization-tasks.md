@@ -1060,6 +1060,44 @@ Independent validation checked all three records' exact two-click/five-route seq
 
 This establishes one real ascending Company-sort interaction for Slint only. QML and Bevy + egui Company sorting remain unverified after one preserved unsuccessful attempt each. Other columns and directions, repeated-run reliability, editing, scrolling, drag, touch, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, and scenario acceptance remain unestablished. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
 
+### Browser 1 Price then Reset View pointer captures (2026-11-22)
+
+Source inspection rejected two initially considered reset oracles before any application launched. Slint's Reset Order restores visual column order (`src/browser1.rs:249-253`), not sorted rows, and QML exposes Reset Widths & Order rather than a common Reset All. The shared control is Reset View, but its exact sort behavior is not assumed to be identical: Slint's global callback invokes Browser 1 `reset_all`, clearing sort and restoring source rows (`src/main.rs:126-137`, `src/browser1.rs:255-266`); QML dispatches to Browser 1 `resetView`, which resets only column widths/order (`Main.qml:199-206`, `Browser1Page.qml:54-58`); Bevy + egui's shell invokes `Browser1State::reset_view`, which clears sort and restores source rows (`src/ui/tabs/browser/mod.rs:49-53`, `src/ui/state/browser_1_state.rs:571-581`). The parent contract defines Reset View as active-view transient presentation reset, while PAR-B1-012 explicitly requires column order/width restoration (`specifications/bevy-parity.md:103,224`); this evidence therefore records actual behavior without declaring QML's retained sort a defect by assumption.
+
+A development-only `/tmp/run_browser1_reset_view_pointer.py` driver captured the fresh source state, requested one ascending Price sort, captured again, attempted the shared Reset View control, and captured a third time. The accepted invocation for each implementation used the driver's 60-second default timeout:
+
+```bash
+python3 /tmp/run_browser1_reset_view_pointer.py \
+  --implementation "$IMPLEMENTATION" \
+  --work-root "/tmp/ui-framework-browser1-reset-view-pointer-2026-11-22-01/$IMPLEMENTATION" \
+  --jsonl "/tmp/ui-framework-browser1-reset-view-pointer-2026-11-22-01/$IMPLEMENTATION.jsonl" \
+  --settle 2
+```
+
+Browser-primary focus and Price targets were unchanged from the two-click Price runs, including Bevy + egui's centered `(1413,505.2)` Price target. Reset View targets were:
+
+| Implementation | Reset View review-crop point | Reset View logical point |
+|---|---:|---:|
+| Slint | `(50,80)` | `(1119,395.4)` |
+| QML | `(50,80)` | `(1119,395.4)` |
+| Bevy + egui | `(50,118)` | `(1119,418.2)` |
+
+Every fresh native light/100% process attempted focus, Price, and Reset View clicks, parked at logical `(100,100)` before each capture, and passed seven Browser 1 readbacks. Every process acknowledged `quit` and exited with status 0 without programmatic route selection or keyboard input. Each external desktop PNG is 5120×2160; each review PNG is 1600×1060 from `(1815,579,3415,1639)`.
+
+Procedural `status=passed` requires attempted clicks, unchanged route, decodable captures, distinct before/after-sort review images, and clean exit. It deliberately does **not** require Reset View to change pixels, because a no-visible-change result is evidence to review rather than a harness malfunction. All three records passed and retain `price_sort_visually_verified=false`, `reset_view_behavior_visually_verified=false`, and `capture_pixel_content_reviewed=false` for subsequent assistant inspection.
+
+| Implementation | Before | After Price click | After Reset View attempt | Clean exit |
+|---|---|---|---|---|
+| Slint | Canonical source order | Expected ascending Price marker and rows | Initial source-order review PNG restored exactly | Acknowledged quit, status 0 |
+| QML | Canonical source order | Expected ascending Price marker and rows | After-sort ascending review PNG retained exactly | Acknowledged quit, status 0 |
+| Bevy + egui | Canonical source order | Original rows; no ascending sort observed | Original rows; only toolbar-region differences | Acknowledged quit, status 0 |
+
+Slint's exact initial/post-reset pixel match verifies one complete ascending-Price/Reset View cycle. QML's exact post-sort/post-reset match is consistent with its layout-only handler, but the external captures do not independently prove Reset View activated or distinguish activation from a missed/no-visible-change click. Bevy + egui's before/after-reset differences were confined to `(8,64,233,127)` and after-sort/after-reset differences to `(8,109,582,276)`, both above data rows; because its Price sort did not occur, reset-after-actual-sort behavior remains unverified.
+
+Independent validation checked all three records' exact three-click/seven-route sequences, executable hashes, visual-review flags, clean exits, capture modes/dimensions/byte counts, pairwise-distinctness fields, and SHA-256 values: 9 clicks, 21 Browser 1 readbacks, and 18 recorded PNGs. Before/after-sort/after-reset review SHA-256 values were Slint `3071a93e38a8687b6b184082c9c56b70c6178fefbdd32b2b9ca4b69e33279b94`, `4da17a0285f5181cd84f79063ff238366eb41726e6291f2d3beae3926ba01cf7`, `3071a93e38a8687b6b184082c9c56b70c6178fefbdd32b2b9ca4b69e33279b94`; QML `da29565fea0b20b8fcc6869b3715c6d84088251a1dbde26f04df24f647d9bfc0`, `347b259b2df6b839bc34e591db21dd86d97e9f0536ce7bf179462c3d948bc46d`, `347b259b2df6b839bc34e591db21dd86d97e9f0536ce7bf179462c3d948bc46d`; and Bevy + egui `1f2a2f338bd5f3e3d314026fe5f2082f2c8707f6e1b508170b0b3f2876bbbf70`, `83088e5d315f2b8c9ab9190e992d4a016e44ab3e878cf9dbb0787749b3ca7748`, `ab052ca6b7618836c57f00ef60c73cd35f6eaf7b01baab952378b85bda586fef`. JSONL SHA-256 values were Slint `aa0f116ba1a73e2146dd5f96f90f3b78bcad82986b27b481a9f679946e5a4914`, QML `fbf48e26c6dc91967560c02a7cb2aea81c0150a1af456a69de6330f621757ee1`, and Bevy + egui `493a7266744c1484fa8603abf884ebc1fe84aabf68bbcfe5450bb7b4150e86ff`.
+
+This establishes one Slint sort/reset cycle and records the actual QML/Bevy + egui post-reset pixels without imposing a common sort-clearing oracle. Repeated-run reliability, QML reset activation, Bevy + egui reset after actual sorting, other controls, editing, scrolling, drag, touch, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, and scenario acceptance remain unestablished. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
+
 ### Bevy + egui Export View pointer and application capture (2026-11-22)
 
 A development-only `/tmp/run_bevy_export_view_pointer.py` driver launched the unchanged Bevy + egui Release executable at native light/100% with a fresh `/tmp` working directory. It used the existing stable-ID adapter only for initial/final route readback and acknowledged quit, never route selection. Two same-route Browser-primary clicks established focus, followed by one real Export View toolbar click. The accepted invocation was:
