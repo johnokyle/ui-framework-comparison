@@ -6,9 +6,9 @@ This register records limitations from the initial static audit, subsequent Bevy
 
 - As of 2026-11-21, the [parent comparison repository](https://github.com/johnokyle/ui-framework-comparison) is public. The audited Slint, QML, and Bevy + egui source trees have clean committed baselines synchronized to private GitHub remotes.
 - The parent repository attaches all three implementations as pinned submodules:
-  - `implementations/slint` uses [Slint](https://github.com/johnokyle/slint-ui-test) at `d1fc847ac5956d501a8204b6cfc4206c0bd6464e`.
+  - `implementations/slint` uses [Slint](https://github.com/johnokyle/slint-ui-test) at `db68c1a3ac73504bb5f116083d6570dd4e08f8b8`.
   - `implementations/qml` uses [QML](https://github.com/johnokyle/qml-ui-test) at `df0dd1baeaa263dea5523d6d7172ea47060b065c`.
-  - `implementations/bevy-egui` uses [Bevy + egui](https://github.com/johnokyle/bevy-egui-test) at `8eaf9ba44569c3f3c78a550516c4a1b841c63cf6`.
+  - `implementations/bevy-egui` uses [Bevy + egui](https://github.com/johnokyle/bevy-egui-test) at `2b845c883017772797da0bd23d2033ffd4dcd98b`.
 - Each implementation remote retains the annotated `comparison-baseline-2026-11-21` tag at its original licensed baseline. The current pins above include the subsequent README, third-party-notice, and publication-cleanup revisions; parent gitlinks remain authoritative even if implementation branches advance. Because the implementation repositories are private, public parent clones cannot initialize the submodules without the corresponding GitHub access.
 
 ## Licensing
@@ -25,6 +25,7 @@ This register records limitations from the initial static audit, subsequent Bevy
 - Optional provider scripts are documented as development-agent helpers unrelated to application workloads. Bevy's project-relative agent configuration is retained and documented; its 204 newline-only Rust placeholder modules remain intentional-inclusion review items rather than confirmed generated artifacts.
 - Source notices identify the modified Feather and Lucide icons in Slint and the source-versus-binary obligations for all implementations. The maintainer confirmed on 2026-11-21 that Claude Code created the other 15 Slint SVGs for the project; no third-party derivation was reported.
 - Slint binary distribution requires an explicit Slint licensing-route and attribution decision. Bevy binaries require the embedded default-font notices, and QML binaries require an exact shipped-Qt-module inventory and licensing/source-compliance review. Linux x86-64 development inventories now record 484 Slint and 449 Bevy Cargo target-resolution packages plus the audited QML Qt linkage/SBOM inputs. These are not complete release notice bundles: 42 Slint and 25 Bevy packages lack package-root license/notice files in the local package copies, and actual shipped artifacts still require verification.
+- Exact-revision upstream review now covers all 67 Cargo package-root gaps. Slint's `drm-fourcc` and `simd_helpers` and Bevy's `constgebra` and `hexf-parse` remain manifest-only upstream and require clarification. Other recorded limits include incomplete alternative-route texts, AccessKit Chromium and concrete source-file notices, Slint REUSE asset metadata, a dirty `skia-bindings` packaged-VCS record, and unverified native Skia payloads. Bevy's four embedded font files were matched byte-for-byte to the pinned egui revision and their exact notice paths recorded. These findings do not establish actual shipped-artifact coverage.
 - No controlled three-framework benchmark or equivalent screenshot set exists.
 
 ## Slint

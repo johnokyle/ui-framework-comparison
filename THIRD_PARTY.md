@@ -37,7 +37,9 @@ python3 tools/cargo_license_inventory.py \
   --output "$IMPLEMENTATION_ROOT/THIRD_PARTY_TARGET.md"
 ```
 
-The generator uses locked Cargo metadata filtered to the target and records the current source revision. These development inventories are not linked-binary proofs or complete legal notice bundles. Actual release features, linked and runtime-loaded components, shipped artifacts, and applicable license texts must still be verified; every missing-file entry requires upstream resolution before distribution.
+The generator uses locked Cargo metadata filtered to the target and records the current source revision. The implementation notices now record an exact-revision upstream review of all 67 package-root gaps. Four entries remain manifest-only upstream: Slint's `drm-fourcc` and `simd_helpers`, and Bevy's `constgebra` and `hexf-parse`. The records also identify incomplete alternative-route texts, additional copyright/asset notices, and Slint's dirty `skia-bindings` VCS record and unverified native Skia payloads.
+
+These development inventories and upstream references are not linked-binary proofs or complete legal notice bundles. Actual release features, linked and runtime-loaded components, shipped artifacts, and applicable license texts must still be verified. The four manifest-only entries require upstream clarification, and all applicable notices must be included in the release archive.
 
 ## Source and binary scope
 
