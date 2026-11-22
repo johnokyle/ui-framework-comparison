@@ -905,4 +905,23 @@ Executable hashes remained Slint `34fc038090dc7f14d5a08d9e529d347f18de20bb747c19
 
 This closes the previous direct Network Graph and Order Book shell-tab pointer gap only at the audited native geometry. It is one passing complete run per implementation, not repeated-run reliability. It does not establish page-content or other-control interaction, touch, scrolling, drag, behavior at other geometries or scales, rendered-frame correctness, presented-frame timing, active-screen-reader behavior, human-reviewed equivalence, durable artifact attachment, controlled results, or scenario acceptance.
 
+### Bevy + egui Export View pointer and application capture (2026-11-22)
+
+A development-only `/tmp/run_bevy_export_view_pointer.py` driver launched the unchanged Bevy + egui Release executable at native light/100% with a fresh `/tmp` working directory. It used the existing stable-ID adapter only for initial/final route readback and acknowledged quit, never route selection. Two same-route Browser-primary clicks established focus, followed by one real Export View toolbar click. The accepted invocation was:
+
+```bash
+python3 /tmp/run_bevy_export_view_pointer.py \
+  --work-root /tmp/ui-framework-bevy-export-view-2026-11-22-01 \
+  --jsonl /tmp/ui-framework-bevy-export-view-2026-11-22-01.jsonl \
+  --settle 2
+```
+
+The compositor-logical Browser-primary focus target was `(1161,396.6)` and the Export View target was `(1242,418.8)`. The latter is the native review-crop toolbar center `(255,119)`, converted with the same `(1815,579)` raw crop origin and `1.6666666269302368` host scale as the preceding native tab run. These coordinates remain specific to the audited desktop and window placement.
+
+Every focus/export state check retained `browser.browser1`; no programmatic route selection or keyboard input occurred. Export View produced `/tmp/ui-framework-bevy-export-view-2026-11-22-01/captures/browser-browser1-1795382821961-1.png`. The file decoded as a 1600×1000 RGB PNG, was 430,837 bytes, and had SHA-256 `3dd62de6324b9a9d5bddde054325d41107662875cea7e9e441f76705e0a3c21e`. Bevy then acknowledged `quit` and exited with status 0. The executable SHA-256 remained `f60ebe4eb6f90e56529838ac7a1b5a104b06d7019a6e98743bf569ed3e345fa1`.
+
+Subsequent assistant inspection of that exact PNG found the Bevy shell, toolbar, Browser tabs, and populated Browser 1 table rather than a blank image or stale route; the application-owned capture excludes native window decorations. The JSONL retains `capture_pixel_content_reviewed=false` because that review occurred after the driver completed. The accepted development record is `/tmp/ui-framework-bevy-export-view-2026-11-22-01.jsonl`.
+
+This closes the earlier Bevy Export View toolbar-click/output gap for one native Browser 1 run. It does not establish repeated-run reliability, Export View on other routes or native-scene content, page-content interaction, human-reviewed visual equivalence, durable artifact attachment, presented-frame timing, controlled results, or scenario acceptance. No application source, parent test code, fixture, scenario, or large/on-demand variant changed or was constructed.
+
 No scenario activation or implementation hash attestation is part of this parent-only BP-01 fixture deliverable.
