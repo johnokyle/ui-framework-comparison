@@ -242,4 +242,32 @@ Host Pillow 12.1.1 produced the three 2667×1756 window review copies with the h
 
 The raw desktop captures include unrelated desktop content and are not publication artifacts. `manifest.jsonl`, `review-captures.jsonl`, `assistant-review.jsonl`, and the PNGs remain only under `/tmp/ui-framework-screenshots-2026-11-21-01`; no durable CI/release attachment or controlled result document was created. Six new dependency-free runner tests passed. No capability status, scenario activation, or implementation hash attestation changed.
 
+### Explicit Browser 1 theme/scale development screenshots (2026-11-21)
+
+Narrow startup-only capture overrides were added to the existing opt-in adapters: `SLINTUITEST_CAPTURE_THEME`, `QMLUITEST_CAPTURE_THEME`, and `BEVY_EGUI_CAPTURE_THEME` accept `light`, `dark`, or `system`; Slint scale uses its existing `SLINT_SCALE_FACTOR`, QML scale uses `QT_SCALE_FACTOR` normalized against the measured host scale, and `BEVY_EGUI_CAPTURE_SCALE_PERCENT` accepts exactly `100` or `200`. The parent runner applies these only to child environments, while continuing to force automation on and scrub metrics. Invalid new theme values and invalid Bevy scale values fail startup rather than silently selecting another variant. Ordinary non-automation startup is unchanged.
+
+The passing sequential twelve-capture invocation was:
+
+```bash
+python3 "$COMPARISON_ROOT/tools/runtime_screenshot.py" \
+  --slint "$SLINT_ROOT/target/release/slintuitest" \
+  --qml "$QML_ROOT/build-fixture-tests/appQmlUITest" \
+  --bevy-egui "$BEVY_ROOT/target/release/bevy_egui_test" \
+  --bevy-asset-root "$BEVY_ROOT" \
+  --output-dir /tmp/ui-framework-screenshots-2026-11-21-02 \
+  --timeout 30 \
+  --settle 2 \
+  --themes light dark \
+  --scales 100 200 \
+  --qml-host-scale 1.6666666269302368
+```
+
+Slint, QML, and Bevy + egui each passed light/dark × 100%/200% captures in fresh processes. Every case reported `primary.browser/browser.browser1` before and after capture, acknowledged `quit`, and exited with status 0. The measured Mutter host scale was `1.6666666269302368`; QML's requested relative factors were `0.6000000143051151` and `1.2000000286102301`. All raw desktop PNGs measured 5120×2160, which is desktop geometry rather than proof of application scale.
+
+Host Pillow 12.1.1 produced isolated review copies using half-open crop `(1815, 579, 3415, 1639)` at 100%, yielding 1600×1060 including decorations, and `(1015, 53, 4215, 2140)` at 200%, yielding 3200×2087 including decorations. Assistant inspection of all twelve isolated copies and three labeled contact sheets found the selected light/dark rendering and doubled 200% window geometry, with Browser 1 controls/table present and no unrelated desktop content in the review copies. This verifies the collected variants at a development visual-inspection level; it is not human-reviewed cross-framework equivalence acceptance.
+
+Exact executable and raw/review PNG SHA-256 identities, requested variants, QML normalization values, route preservation, clean exits, crop rectangles, and review dimensions are recorded in `manifest.jsonl`, `review-captures.jsonl`, and `assistant-review.jsonl` under `/tmp/ui-framework-screenshots-2026-11-21-02`. Executable hashes are Slint `9e5b6529b611eacab56f850a1c9f55f3d9949ab25d33fb54574c41d3dda477ba`, QML `a29bac748c67fca0bf9693e66f2aeb0698edc241fddd51721f7ed71f641c40be`, and Bevy + egui `cd5615eec171df01ee6445a220cc32e9cf2b6161784040d6d02ac39f21f48370`. Their capture-time dirty working trees were subsequently committed unchanged as Slint `a8cfd98fc49c424195ee827545afaf3c08158dd6`, QML `2f5b3ab3880802db62a62bace4518a61356c33b1`, and Bevy + egui `af5a301e067507da6ad4e24a19436c17e31cf026`; these immutable revisions exactly identify the tested source.
+
+Verification comprised 23 stable-ID runner tests, five OS-smoke tests, nine screenshot-runner tests, repository validation, 91 Slint ordinary tests plus Release build, all 12 QML ordinary CTest entries, and 569 Bevy + egui ordinary tests plus Release build. Raw desktop images contain unrelated content and are not publication artifacts. All matrix artifacts remain only under `/tmp`; no durable CI/release attachment, controlled result, scenario activation, capability-status change, or human equivalence claim was created.
+
 No scenario activation or implementation hash attestation is part of this parent-only BP-01 fixture deliverable.

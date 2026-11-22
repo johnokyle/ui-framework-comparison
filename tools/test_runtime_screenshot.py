@@ -57,6 +57,12 @@ class FakeSession:
     def finish_quit(self):
         self.finished = self.quit_acknowledged
 
+    def close(self):
+        pass
+
+    def diagnostic_tail(self):
+        return ""
+
 
 class RuntimeScreenshotTests(unittest.TestCase):
     def test_request_path_uses_portal_sender_rules(self):
@@ -111,10 +117,121 @@ class RuntimeScreenshotTests(unittest.TestCase):
             self.assertFalse(record["equivalence_established"])
             self.assertTrue(record["clean_exit"])
             self.assertEqual(record["executable_sha256"], "executable-hash")
+            self.assertEqual(record["requested_theme"], "default")
+            self.assertEqual(record["requested_scale_percent"], "native")
             saved = Path(record["capture"]["path"])
             self.assertEqual(saved.parent, output)
+            self.assertEqual(saved.name, "slint-browser1-desktop.png")
             self.assertEqual(saved.read_bytes(), source.read_bytes())
             json.dumps(record)
+
+    def test_variant_environment_and_qml_host_normalization(self):
+        self.assertEqual(
+            capture.variant_environment("slint", "dark", "200", None),
+            (
+                ("SLINTUITEST_CAPTURE_THEME", "dark"),
+                ("SLINT_SCALE_FACTOR", "2"),
+            ),
+        )
+        self.assertEqual(
+            capture.variant_environment("qml", "light", "100", 5 / 3),
+            (
+                ("QMLUITEST_CAPTURE_THEME", "light"),
+                ("QT_SCALE_FACTOR", "0.6"),
+            ),
+        )
+        self.assertEqual(
+            capture.variant_environment("qml", "dark", "200", 5 / 3),
+            (
+                ("QMLUITEST_CAPTURE_THEME", "dark"),
+                ("QT_SCALE_FACTOR", "1.2"),
+            ),
+        )
+        self.assertEqual(
+            capture.variant_environment("bevy-egui", "system", "200", None),
+            (
+                ("BEVY_EGUI_CAPTURE_THEME", "system"),
+                ("BEVY_EGUI_CAPTURE_SCALE_PERCENT", "200"),
+            ),
+        )
+        self.assertEqual(capture.variant_environment("slint", "default", "native", None), ())
+        for invalid in (None, 0, -1, float("nan"), float("inf")):
+            with self.subTest(invalid=invalid), self.assertRaises(core.SmokeFailure):
+                capture.variant_environment("qml", "default", "100", invalid)
+
+    def test_variant_capture_metadata_and_filename(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "portal.png"
+            source.write_bytes(png_header())
+            session = FakeSession()
+            session.adapter = core.Adapter("qml", "unused")
+            with mock.patch.object(capture, "executable_sha256", return_value="hash"):
+                record = capture.run_capture(
+                    session,
+                    FakePortal(source),
+                    root,
+                    settle=0,
+                    theme="dark",
+                    scale="200",
+                    qml_host_scale=5 / 3,
+                )
+            self.assertEqual(record["requested_theme"], "dark")
+            self.assertEqual(record["requested_scale_percent"], "200")
+            self.assertAlmostEqual(record["qml_host_scale"], 5 / 3)
+            self.assertAlmostEqual(record["qml_scale_factor"], 1.2)
+            self.assertEqual(
+                Path(record["capture"]["path"]).name,
+                "qml-browser1-dark-200pct-desktop.png",
+            )
+
+    def test_main_runs_twelve_fresh_variant_sessions(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "portal.png"
+            source.write_bytes(png_header())
+            output = root / "output"
+            portal = FakePortal(source)
+            sessions = []
+
+            def factory(adapter, timeout):
+                session = FakeSession(adapter.executable)
+                session.adapter = adapter
+                sessions.append(session)
+                return session
+
+            arguments = [
+                "--slint", "slint",
+                "--qml", "qml",
+                "--bevy-egui", "bevy",
+                "--bevy-asset-root", "assets",
+                "--output-dir", str(output),
+                "--settle", "0",
+                "--themes", "light", "dark",
+                "--scales", "100", "200",
+                "--qml-host-scale", str(5 / 3),
+            ]
+            with (
+                mock.patch.object(capture, "ScreenshotPortal", return_value=portal),
+                mock.patch.object(capture.core, "ProcessSession", side_effect=factory),
+                mock.patch.object(capture, "executable_sha256", return_value="hash"),
+            ):
+                self.assertEqual(capture.main(arguments), 0)
+            self.assertEqual(len(sessions), 12)
+            self.assertEqual(portal.capture_count, 12)
+            self.assertTrue(all(session.finished for session in sessions))
+            self.assertEqual(
+                [(session.adapter.implementation, session.adapter.environment) for session in sessions[:2]],
+                [
+                    ("slint", (("SLINTUITEST_CAPTURE_THEME", "light"), ("SLINT_SCALE_FACTOR", "1"))),
+                    ("slint", (("SLINTUITEST_CAPTURE_THEME", "light"), ("SLINT_SCALE_FACTOR", "2"))),
+                ],
+            )
+            records = [json.loads(line) for line in (output / "manifest.jsonl").read_text().splitlines()]
+            self.assertEqual(len(records), 12)
+            self.assertEqual(len({record["capture"]["path"] for record in records}), 12)
+            self.assertTrue(all(record["clean_exit"] for record in records))
+            self.assertTrue(all(not record["equivalence_established"] for record in records))
 
     def test_wrong_initial_route_is_rejected_without_capture(self):
         with tempfile.TemporaryDirectory() as directory:

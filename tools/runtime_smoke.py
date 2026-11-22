@@ -97,6 +97,7 @@ class Adapter:
     implementation: str
     executable: str
     asset_root: str | None = None
+    environment: tuple[tuple[str, str], ...] = ()
 
     @property
     def automation_variable(self) -> str:
@@ -176,6 +177,7 @@ def parse_reply(line: str, implementation: str) -> Reply:
 
 def child_environment(adapter: Adapter) -> dict[str, str]:
     environment = os.environ.copy()
+    environment.update(adapter.environment)
     automation_variable, metrics_variables = ADAPTER_ENV[adapter.implementation]
     for variable in metrics_variables:
         environment.pop(variable, None)

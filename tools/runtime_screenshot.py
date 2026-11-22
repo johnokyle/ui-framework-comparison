@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import struct
@@ -77,21 +78,72 @@ def executable_sha256(path: str) -> str:
     return digest.hexdigest()
 
 
+def variant_environment(
+    implementation: str,
+    theme: str,
+    scale: str,
+    qml_host_scale: float | None,
+) -> tuple[tuple[str, str], ...]:
+    """Translate requested capture variants into narrow, child-only overrides."""
+    variables: list[tuple[str, str]] = []
+    if theme != "default":
+        variable = {
+            "slint": "SLINTUITEST_CAPTURE_THEME",
+            "qml": "QMLUITEST_CAPTURE_THEME",
+            "bevy-egui": "BEVY_EGUI_CAPTURE_THEME",
+        }[implementation]
+        variables.append((variable, theme))
+    if scale != "native":
+        if implementation == "slint":
+            variables.append(("SLINT_SCALE_FACTOR", str(int(scale) // 100)))
+        elif implementation == "bevy-egui":
+            variables.append(("BEVY_EGUI_CAPTURE_SCALE_PERCENT", scale))
+        else:
+            if qml_host_scale is None or not math.isfinite(qml_host_scale) or qml_host_scale <= 0:
+                raise core.SmokeFailure(
+                    "explicit QML scales require a finite positive --qml-host-scale"
+                )
+            factor = int(scale) / 100 / qml_host_scale
+            variables.append(("QT_SCALE_FACTOR", format(factor, ".12g")))
+    return tuple(variables)
+
+
+def variant_adapter(
+    adapter: core.Adapter,
+    theme: str,
+    scale: str,
+    qml_host_scale: float | None,
+) -> core.Adapter:
+    return core.Adapter(
+        adapter.implementation,
+        adapter.executable,
+        adapter.asset_root,
+        variant_environment(adapter.implementation, theme, scale, qml_host_scale),
+    )
+
+
+def capture_name(implementation: str, theme: str, scale: str) -> str:
+    if theme == "default" and scale == "native":
+        return f"{implementation}-browser1-desktop.png"
+    return f"{implementation}-browser1-{theme}-{scale}pct-desktop.png"
+
+
 def run_capture(
     session: core.ProcessSession,
     portal,
     output_dir: Path,
     *,
     settle: float = 2.0,
+    theme: str = "default",
+    scale: str = "native",
+    qml_host_scale: float | None = None,
 ) -> dict[str, object]:
     """Capture Browser 1 externally; the stable-ID adapter only observes and quits."""
     implementation = session.adapter.implementation
     core.require_route(session.request("state"), INITIAL_ROUTE, "screenshot initial state")
     time.sleep(settle)
     uri = portal.capture()
-    capture = copy_capture(
-        uri, output_dir / f"{implementation}-browser1-desktop.png"
-    )
+    capture = copy_capture(uri, output_dir / capture_name(implementation, theme, scale))
     core.require_route(
         session.request("state"), INITIAL_ROUTE, "state after external screenshot"
     )
@@ -99,10 +151,12 @@ def run_capture(
     if reply.status != "ok":
         raise core.SmokeFailure("screenshot smoke quit was not acknowledged")
     session.finish_quit()
-    return {
+    record = {
         "evidence": "development-external-screenshot",
         "status": "passed",
         "implementation": implementation,
+        "requested_theme": theme,
+        "requested_scale_percent": scale,
         "primary": INITIAL_ROUTE.primary,
         "secondary": INITIAL_ROUTE.secondary,
         "scope": "full-desktop",
@@ -112,6 +166,10 @@ def run_capture(
         "clean_exit": True,
         "equivalence_established": False,
     }
+    if implementation == "qml" and scale != "native":
+        record["qml_host_scale"] = qml_host_scale
+        record["qml_scale_factor"] = int(scale) / 100 / qml_host_scale
+    return record
 
 
 class ScreenshotPortal:
@@ -212,6 +270,23 @@ def parser() -> argparse.ArgumentParser:
     result.add_argument("--output-dir", required=True)
     result.add_argument("--timeout", type=float, default=30.0)
     result.add_argument("--settle", type=float, default=2.0)
+    result.add_argument(
+        "--themes",
+        nargs="+",
+        choices=("default", "light", "dark", "system"),
+        default=["default"],
+    )
+    result.add_argument(
+        "--scales",
+        nargs="+",
+        choices=("native", "100", "200"),
+        default=["native"],
+    )
+    result.add_argument(
+        "--qml-host-scale",
+        type=float,
+        help="absolute host scale used to normalize explicit QML scale requests",
+    )
     return result
 
 
@@ -230,35 +305,61 @@ def main(argv: list[str] | None = None) -> int:
         )
     if not adapters:
         parser().error("at least one implementation executable is required")
+    if (
+        args.qml
+        and any(scale != "native" for scale in args.scales)
+        and (
+            args.qml_host_scale is None
+            or not math.isfinite(args.qml_host_scale)
+            or args.qml_host_scale <= 0
+        )
+    ):
+        parser().error("explicit QML scales require a finite positive --qml-host-scale")
 
     output_dir = Path(args.output_dir)
     try:
         output_dir.mkdir(parents=True, exist_ok=False)
         portal = ScreenshotPortal(args.timeout)
         with (output_dir / "manifest.jsonl").open("x", encoding="utf-8") as manifest:
-            for adapter in adapters:
-                session = core.ProcessSession(adapter, args.timeout)
-                try:
-                    record = run_capture(session, portal, output_dir, settle=args.settle)
-                except Exception as error:
-                    failure = {
-                        "evidence": "development-external-screenshot",
-                        "status": "failed",
-                        "implementation": adapter.implementation,
-                        "error": str(error),
-                    }
-                    manifest.write(json.dumps(failure, sort_keys=True) + "\n")
-                    manifest.flush()
-                    print(f"FAIL {adapter.implementation}: {error}", file=sys.stderr)
-                    tail = session.diagnostic_tail()
-                    if tail:
-                        print(tail, file=sys.stderr)
-                    return 1
-                finally:
-                    session.close()
-                manifest.write(json.dumps(record, sort_keys=True) + "\n")
-                manifest.flush()
-                print(f"PASS {adapter.implementation}: {record['capture']['path']}")
+            for base_adapter in adapters:
+                for theme in args.themes:
+                    for scale in args.scales:
+                        adapter = variant_adapter(
+                            base_adapter, theme, scale, args.qml_host_scale
+                        )
+                        label = f"{adapter.implementation} {theme} {scale}"
+                        session = core.ProcessSession(adapter, args.timeout)
+                        try:
+                            record = run_capture(
+                                session,
+                                portal,
+                                output_dir,
+                                settle=args.settle,
+                                theme=theme,
+                                scale=scale,
+                                qml_host_scale=args.qml_host_scale,
+                            )
+                        except Exception as error:
+                            failure = {
+                                "evidence": "development-external-screenshot",
+                                "status": "failed",
+                                "implementation": adapter.implementation,
+                                "requested_theme": theme,
+                                "requested_scale_percent": scale,
+                                "error": str(error),
+                            }
+                            manifest.write(json.dumps(failure, sort_keys=True) + "\n")
+                            manifest.flush()
+                            print(f"FAIL {label}: {error}", file=sys.stderr)
+                            tail = session.diagnostic_tail()
+                            if tail:
+                                print(tail, file=sys.stderr)
+                            return 1
+                        finally:
+                            session.close()
+                        manifest.write(json.dumps(record, sort_keys=True) + "\n")
+                        manifest.flush()
+                        print(f"PASS {label}: {record['capture']['path']}")
     except Exception as error:
         print(f"FAIL external screenshot smoke: {error}", file=sys.stderr)
         return 1

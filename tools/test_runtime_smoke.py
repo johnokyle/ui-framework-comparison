@@ -610,6 +610,23 @@ class EnvironmentAndCliTests(unittest.TestCase):
         with self.assertRaises(SmokeFailure):
             child_environment(Adapter("bevy-egui", "/fake/bevy"))
 
+    def test_environment_applies_capture_overrides_without_weakening_safety(self) -> None:
+        adapter = Adapter(
+            "slint",
+            "/fake/slint",
+            environment=(
+                ("SLINTUITEST_CAPTURE_THEME", "dark"),
+                ("SLINT_SCALE_FACTOR", "2"),
+                ("SLINTUITEST_METRICS", "1"),
+                ("SLINTUITEST_AUTOMATION", "0"),
+            ),
+        )
+        environment = child_environment(adapter)
+        self.assertEqual(environment["SLINTUITEST_CAPTURE_THEME"], "dark")
+        self.assertEqual(environment["SLINT_SCALE_FACTOR"], "2")
+        self.assertNotIn("SLINTUITEST_METRICS", environment)
+        self.assertEqual(environment["SLINTUITEST_AUTOMATION"], "1")
+
     def test_popen_is_direct_merges_stderr_and_applies_environment(self) -> None:
         process = FakeProcess(
             line("state", "ok", "primary.browser", "browser.browser1"),
