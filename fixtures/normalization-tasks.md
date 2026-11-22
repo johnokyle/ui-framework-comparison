@@ -1022,6 +1022,44 @@ Independent validation checked all three records' exact three-click/seven-route 
 
 This establishes one real two-click ascending/descending Price interaction for Slint and QML. Bevy + egui Price sorting remains unverified after three preserved unsuccessful processes. Other headers, repeated-run reliability, editing, scrolling, drag, touch, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, and scenario acceptance remain unestablished. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
 
+### Browser 1 Company-header page-content pointer captures (2026-11-22)
+
+A development-only `/tmp/run_browser1_company_pointer.py` driver reused the single-click Price structure for a case-sensitive string column. First activation requests ascending sort in all three implementations; Company uses string comparison in Slint (`src/data.rs:238-256` and `src/browser1.rs:175-188`), QML (`Browser1Page.qml:40-52` and `browser1sortproxymodel.cpp:11-56`), and Bevy + egui (`src/ui/tabs/browser/browser_1_model.rs:6-24`, `src/ui/tabs/browser/browser_1.rs:505-591`, and `src/ui/state/browser_1_state.rs:157-166`). The limited common oracle is one fresh-state Company-header click producing ascending alphabetical Company order and its ascending marker.
+
+The accepted invocation for each implementation used the driver's 60-second default timeout:
+
+```bash
+python3 /tmp/run_browser1_company_pointer.py \
+  --implementation "$IMPLEMENTATION" \
+  --work-root "/tmp/ui-framework-browser1-company-pointer-2026-11-22-01/$IMPLEMENTATION" \
+  --jsonl "/tmp/ui-framework-browser1-company-pointer-2026-11-22-01/$IMPLEMENTATION.jsonl" \
+  --settle 2
+```
+
+The Browser-primary focus points and raw/review crop conversion were unchanged from the Price runs. Company targets were:
+
+| Implementation | Company review-crop point | Company logical point |
+|---|---:|---:|
+| Slint | `(200,243)` | `(1209,493.2)` |
+| QML | `(200,271)` | `(1209,510)` |
+| Bevy + egui | `(200,263)` | `(1209,505.2)` |
+
+Every fresh native light/100% process attempted one focus click and one Company-header click, parked at logical `(100,100)` before each capture, and passed five Browser 1 readbacks. Every process acknowledged `quit` and exited with status 0 without programmatic route selection or keyboard input. External desktop PNGs are 5120×2160 and review PNGs are 1600×1060 from the same `(1815,579,3415,1639)` half-open crop.
+
+Procedural `status=passed` for Slint and Bevy + egui means only that both clicks were attempted, the route was preserved, distinct decodable capture pairs were produced, and clean exit completed. QML's before/after review PNGs were identical, so its record has `status=failed` and `captures_distinct=false` after recording clean exit. Every record deliberately retains `company_sort_visually_verified=false` and `capture_pixel_content_reviewed=false`; subsequent assistant inspection is the sorting oracle.
+
+| Implementation | Subsequent visual review | Clean exit |
+|---|---|---|
+| Slint | Ascending Company marker and repeated `Apex Brands` leaders, replacing canonical source order | Acknowledged quit, status 0 |
+| QML | Byte-identical before/after review PNGs; original order retained and no Company sort observed | Acknowledged quit, status 0 |
+| Bevy + egui | Original row order retained; no ascending Company marker or sorted rows observed | Acknowledged quit, status 0 |
+
+Independent RGB comparison found no QML review-pixel difference. Bevy + egui's difference was confined to review rectangle `(106,109,708,276)`, above the data rows, despite its procedural distinct-capture pass. Neither unsuccessful Company interaction establishes input-delivery failure or an application defect. QML's earlier Price/row successes are not treated as proof of Company behavior, and Slint's success is not generalized to other columns or runs. No failed Company attempt was retried.
+
+Independent validation checked all three records' exact two-click/five-route sequences, executable hashes, visual-review flags, clean exits, capture modes/dimensions/byte counts, and SHA-256 values: 6 clicks, 15 Browser 1 readbacks, and 12 recorded PNGs. Before/after review SHA-256 values were Slint `fe7a201fe76f6bcd016162ea40b0ade65f72eaefea1dab041c8c48431a410b1e` and `772a70f95da06fb8352af28d0897f8a7a55c881ac48d0c7dcb0e01a3c4497f76`; QML `3e8456b43aa6f2350c3c75e066c25ecf9bc16bb9ca831a1c02341c7a79f9c4cb` twice; and Bevy + egui `88466a61526d0f3f21c31de86a0f8599786e57457a67edf8533d6bcf64cf6b18` and `da73a3667b3f5ec2695b3b2804cb8c6fd58898cdb0308deab33b4683adb4b1c2`. JSONL SHA-256 values were Slint `2bb16679909b112c9c06a237a8410a562bafc8c88c75f833acccfdffa8ec7`, QML `b3ca1fe61140adc911284c3737d94ad664467d16f12058654a463de9477e47f7`, and Bevy + egui `c78304053cd094de26cbf20a69725039723020bdad7444d45536c9ed28ca92a0`. An initial validator incorrectly reused Bevy's earlier Price-difference rectangle; the measured Company rectangle above replaced that assumption, and the corrected independent checks passed.
+
+This establishes one real ascending Company-sort interaction for Slint only. QML and Bevy + egui Company sorting remain unverified after one preserved unsuccessful attempt each. Other columns and directions, repeated-run reliability, editing, scrolling, drag, touch, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, and scenario acceptance remain unestablished. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
+
 ### Bevy + egui Export View pointer and application capture (2026-11-22)
 
 A development-only `/tmp/run_bevy_export_view_pointer.py` driver launched the unchanged Bevy + egui Release executable at native light/100% with a fresh `/tmp` working directory. It used the existing stable-ID adapter only for initial/final route readback and acknowledged quit, never route selection. Two same-route Browser-primary clicks established focus, followed by one real Export View toolbar click. The accepted invocation was:
