@@ -201,15 +201,8 @@ def run_qml_sequence(
     }
 
 
-def run_observation(
-    session: core.ProcessSession,
-    bridge,
-    *,
-    settle: float = 1.0,
-) -> dict[str, object]:
-    """Record whether a non-QML process has an AT-SPI tree; absence is an explicit gap."""
-    core.require_route(session.request("state"), INITIAL_ROUTE, "AT-SPI initial state")
-    time.sleep(settle)
+def observe_application(session: core.ProcessSession, bridge) -> dict[str, object]:
+    """Record process-scoped AT-SPI presence independently of keyboard evidence."""
     root = bridge.application_for_pid(session.process.pid)
     if root is None:
         outcome = "no-process-accessible"
@@ -217,16 +210,135 @@ def run_observation(
     else:
         outcome = "tree-observed-no-input-assertion"
         summary = tree_summary(bridge, root)[0]
-    finish_cleanly(session)
     return {
         "evidence": "development-atspi-observation",
         "implementation": session.adapter.implementation,
         "status": "gap" if root is None else "observed",
         "outcome": outcome,
         "tree": summary,
+    }
+
+
+def run_slint_sequence(
+    session: core.ProcessSession,
+    bridge,
+    keyboard,
+    *,
+    settle: float = 1.0,
+) -> dict[str, object]:
+    """Use the Browser secondary bar's ordinary startup focus and real OS keys."""
+    core.require_route(session.request("state"), INITIAL_ROUTE, "OS keyboard initial state")
+    time.sleep(settle)
+    accessibility = observe_application(session, bridge)
+
+    tap(keyboard, RIGHT)
+    time.sleep(settle)
+    core.require_route(
+        session.request("state"), INITIAL_ROUTE, "Right must move focus without selection"
+    )
+    tap(keyboard, RETURN)
+    time.sleep(settle)
+    core.require_route(session.request("state"), BROWSER2_ROUTE, "Return selects focused Browser 2")
+    tap(keyboard, LEFT)
+    time.sleep(settle)
+    core.require_route(
+        session.request("state"), BROWSER2_ROUTE, "Left must move focus without selection"
+    )
+    tap(keyboard, RETURN)
+    time.sleep(settle)
+    core.require_route(session.request("state"), INITIAL_ROUTE, "Return restores Browser 1")
+    finish_cleanly(session)
+    return {
+        "evidence": "development-os-keyboard",
+        "implementation": "slint",
+        "status": "passed",
+        "outcome": "focused-tab-keyboard-selection",
+        "focus_action": "ordinary startup focus on Browser secondary tab bar",
+        "os_key_sequence": ["Right", "Return", "Left", "Return"],
+        "route_sequence": [
+            "browser.browser1",
+            "browser.browser1",
+            "browser.browser2",
+            "browser.browser2",
+            "browser.browser1",
+        ],
+        "focus_without_selection_verified": True,
+        "accessibility": accessibility,
         "pointer_input": False,
         "clean_exit": True,
     }
+
+
+def shift_tab(keyboard) -> None:
+    keyboard.keysym(os_smoke.SHIFT_L, 1)
+    tap(keyboard, os_smoke.TAB)
+    keyboard.keysym(os_smoke.SHIFT_L, 0)
+
+
+def run_bevy_sequence(
+    session: core.ProcessSession,
+    bridge,
+    keyboard,
+    *,
+    settle: float = 1.0,
+) -> dict[str, object]:
+    """Use egui's ordinary widget traversal, not application-owned selection shortcuts."""
+    core.require_route(session.request("state"), INITIAL_ROUTE, "OS keyboard initial state")
+    time.sleep(settle)
+    accessibility = observe_application(session, bridge)
+
+    for _ in range(12):
+        tap(keyboard, os_smoke.TAB)
+    time.sleep(settle)
+    core.require_route(
+        session.request("state"), INITIAL_ROUTE, "Tab traversal must focus Browser 2 without selection"
+    )
+    tap(keyboard, RETURN)
+    time.sleep(settle)
+    core.require_route(session.request("state"), BROWSER2_ROUTE, "Return selects focused Browser 2")
+    shift_tab(keyboard)
+    time.sleep(settle)
+    core.require_route(
+        session.request("state"), BROWSER2_ROUTE, "Shift+Tab must focus Browser 1 without selection"
+    )
+    tap(keyboard, RETURN)
+    time.sleep(settle)
+    core.require_route(session.request("state"), INITIAL_ROUTE, "Return restores Browser 1")
+    finish_cleanly(session)
+    return {
+        "evidence": "development-os-keyboard",
+        "implementation": "bevy-egui",
+        "status": "passed",
+        "outcome": "focused-tab-keyboard-selection",
+        "focus_action": "ordinary egui Tab traversal",
+        "os_key_sequence": ["Tab x12", "Return", "Shift+Tab", "Return"],
+        "route_sequence": [
+            "browser.browser1",
+            "browser.browser1",
+            "browser.browser2",
+            "browser.browser2",
+            "browser.browser1",
+        ],
+        "focus_without_selection_verified": True,
+        "accessibility": accessibility,
+        "pointer_input": False,
+        "clean_exit": True,
+    }
+
+
+def run_observation(
+    session: core.ProcessSession,
+    bridge,
+    *,
+    settle: float = 1.0,
+) -> dict[str, object]:
+    """Record only whether a non-QML process has an AT-SPI tree, then exit."""
+    core.require_route(session.request("state"), INITIAL_ROUTE, "AT-SPI initial state")
+    time.sleep(settle)
+    record = observe_application(session, bridge)
+    finish_cleanly(session)
+    record.update({"pointer_input": False, "clean_exit": True})
+    return record
 
 
 class AtspiBridge:
@@ -328,11 +440,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         with (
             Path(args.jsonl).open("x", encoding="utf-8") if args.jsonl else nullcontext()
-        ) as manifest, (
-            os_smoke.RemoteDesktopKeyboard(args.timeout)
-            if args.qml
-            else nullcontext()
-        ) as keyboard:
+        ) as manifest, os_smoke.RemoteDesktopKeyboard(args.timeout) as keyboard:
             bridge = AtspiBridge(args.timeout)
             host_enabled = bridge.host_enabled()
             for base in adapters:
@@ -343,8 +451,14 @@ def main(argv: list[str] | None = None) -> int:
                         record = run_qml_sequence(
                             session, bridge, keyboard, settle=args.settle
                         )
+                    elif adapter.implementation == "slint":
+                        record = run_slint_sequence(
+                            session, bridge, keyboard, settle=args.settle
+                        )
                     else:
-                        record = run_observation(session, bridge, settle=args.settle)
+                        record = run_bevy_sequence(
+                            session, bridge, keyboard, settle=args.settle
+                        )
                 except Exception as error:
                     record = {
                         "evidence": "development-atspi-smoke",
@@ -377,6 +491,10 @@ def main(argv: list[str] | None = None) -> int:
                     manifest.flush()
                 label = "PASS" if record["status"] == "passed" else "GAP"
                 print(f"{label} {adapter.implementation}: {record['outcome']} and clean exit")
+                accessibility = record.get("accessibility")
+                if accessibility is not None:
+                    label = "GAP" if accessibility["status"] == "gap" else "OBSERVED"
+                    print(f"{label} {adapter.implementation}: {accessibility['outcome']}")
     except Exception as error:
         print(f"FAIL AT-SPI runtime smoke: {error}", file=sys.stderr)
         return 1

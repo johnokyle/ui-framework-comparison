@@ -463,4 +463,26 @@ Verification comprised all 58 parent runtime-harness tests, including nine focus
 
 This is focused semantic/accessibility evidence, not an actual screen-reader session, standards-compliance assessment, pointer/touch result, or human-reviewed visual equivalence claim. Other routes and controls remain unverified. No capability cell, controlled result, or inactive performance scenario changed.
 
+### Common focused-secondary-tab OS keyboard evidence (2026-11-22)
+
+The extended `tools/runtime_accessibility_smoke.py` completed one common semantic Browser sequence in all three implementations: focus Browser 2 without selecting it, activate Browser 2, focus Browser 1 without changing the Browser 2 selection, activate Browser 1, and exit cleanly. RemoteDesktop was started before any application launch. Every application ran as a fresh light/100% 1200×750 process, and the stable-ID adapter supplied state readback and clean quit only.
+
+```bash
+python3 "$COMPARISON_ROOT/tools/runtime_accessibility_smoke.py" \
+  --slint "$SLINT_ROOT/target/release/slintuitest" \
+  --qml "$QML_ROOT/build-fixture-tests/appQmlUITest" \
+  --bevy-egui "$BEVY_ROOT/target/release/bevy_egui_test" \
+  --bevy-asset-root "$BEVY_ROOT" \
+  --qml-host-scale 1.6666666269302368 \
+  --timeout 30 \
+  --settle 2 \
+  --jsonl /tmp/ui-framework-accessibility-2026-11-22-02.jsonl
+```
+
+Slint now gives each displayed secondary tab bar ordinary keyboard focus when its primary page is initialized, and `TabBar` forwards that focus to its existing `FocusScope`. This replaces blind native Tab-count attempts and preserves forward/reverse primary cycling when the previously focused page is destroyed. Real `Right, Return, Left, Return` input produced the route sequence `browser.browser1 → browser.browser1 → browser.browser2 → browser.browser2 → browser.browser1`. The separate native primary runner also passed three Ctrl+Tab and three Ctrl+Shift+Tab transitions. Slint's locked suite passed 94 tests with four explicit large cases ignored, formatting passed, and the locked Release executable was rebuilt without the temporary navigation diagnostics.
+
+QML retained its verified AT-SPI `SetFocus` plus real `Right, Return, Left, Return` sequence and checked-state assertions. Bevy + egui used ordinary egui widget traversal: twelve Tab presses focused Browser 2 without selection, Return selected it, Shift+Tab focused Browser 1 while retaining Browser 2, and Return restored Browser 1. A separate exploratory Slint-style Right/Return probe did not select Bevy Browser 2; no Bevy arrow-key pass or source change is claimed. All three implementations restored `primary.browser/browser.browser1`, acknowledged `quit`, and exited with status 0.
+
+Host `org.a11y.Status IsEnabled` remained `false`. Slint and Bevy + egui still exposed no populated process-scoped AT-SPI application, recorded as nested gaps separate from their passing keyboard results. QML's child-only accessibility behavior was unchanged. Executable hashes were Slint `80cf5569e15dea92652440b018b9f28a5ecd083359c9134329c25b670beba58b`, QML `4b1bf027fb5587b580b227a64f15f60ae0f72b81c6d8cb121971131523fe759e`, and Bevy + egui `7e2f2c281bfbd3b3cc9b975b98bee489bee3986002e45efa684105cd1cc81931`. All 65 parent Python tests and repository validation passed. The JSONL remains development evidence under `/tmp`; it establishes no pointer/touch input, Bevy arrow navigation, active-screen-reader behavior, rendered-frame correctness, human equivalence, durable attachment, controlled result, or scenario acceptance.
+
 No scenario activation or implementation hash attestation is part of this parent-only BP-01 fixture deliverable.

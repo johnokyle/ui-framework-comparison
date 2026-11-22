@@ -5,6 +5,7 @@ import unittest
 from unittest import mock
 
 import runtime_accessibility_smoke as accessibility
+import runtime_os_smoke as os_smoke
 import runtime_smoke as core
 
 
@@ -86,6 +87,15 @@ class FakeKeyboard:
             other = self.first if selected is self.second else self.second
             selected.states.add("CHECKED")
             other.states.discard("CHECKED")
+
+
+class RecordingKeyboard:
+    def __init__(self):
+        self.keys = []
+
+    def keysym(self, keysym, state):
+        if state:
+            self.keys.append(keysym)
 
 
 class FakeSession:
@@ -207,6 +217,103 @@ class RuntimeAccessibilitySmokeTests(unittest.TestCase):
             with self.assertRaises(core.SmokeFailure):
                 accessibility.run_qml_sequence(
                     session, FakeBridge(root), FakeKeyboard(first, second), settle=0
+                )
+        self.assertFalse(session.quit_acknowledged)
+
+    def test_slint_startup_focus_arrows_return_and_clean_restoration(self):
+        root, _, _ = browser_tree()
+        bridge = FakeBridge(root)
+        bridge.root = None
+        keyboard = RecordingKeyboard()
+        session = FakeSession(
+            [
+                accessibility.INITIAL_ROUTE,
+                accessibility.INITIAL_ROUTE,
+                accessibility.BROWSER2_ROUTE,
+                accessibility.BROWSER2_ROUTE,
+                accessibility.INITIAL_ROUTE,
+            ],
+            implementation="slint",
+        )
+        with mock.patch.object(accessibility.time, "sleep"):
+            record = accessibility.run_slint_sequence(
+                session, bridge, keyboard, settle=0
+            )
+        self.assertEqual(
+            keyboard.keys,
+            [accessibility.RIGHT, accessibility.RETURN, accessibility.LEFT, accessibility.RETURN],
+        )
+        self.assertEqual(record["status"], "passed")
+        self.assertEqual(record["accessibility"]["status"], "gap")
+        self.assertTrue(record["focus_without_selection_verified"])
+        self.assertTrue(session.finished)
+
+    def test_slint_rejects_selection_change_from_focus_only_arrow(self):
+        root, _, _ = browser_tree()
+        bridge = FakeBridge(root)
+        bridge.root = None
+        session = FakeSession(
+            [accessibility.INITIAL_ROUTE, accessibility.BROWSER2_ROUTE],
+            implementation="slint",
+        )
+        with mock.patch.object(accessibility.time, "sleep"):
+            with self.assertRaises(core.SmokeFailure):
+                accessibility.run_slint_sequence(
+                    session, bridge, RecordingKeyboard(), settle=0
+                )
+        self.assertFalse(session.quit_acknowledged)
+
+    def test_bevy_tab_traversal_return_and_clean_restoration(self):
+        root, _, _ = browser_tree()
+        bridge = FakeBridge(root)
+        bridge.root = None
+        keyboard = RecordingKeyboard()
+        session = FakeSession(
+            [
+                accessibility.INITIAL_ROUTE,
+                accessibility.INITIAL_ROUTE,
+                accessibility.BROWSER2_ROUTE,
+                accessibility.BROWSER2_ROUTE,
+                accessibility.INITIAL_ROUTE,
+            ],
+            implementation="bevy-egui",
+        )
+        with mock.patch.object(accessibility.time, "sleep"):
+            record = accessibility.run_bevy_sequence(
+                session, bridge, keyboard, settle=0
+            )
+        self.assertEqual(
+            keyboard.keys,
+            [os_smoke.TAB] * 12
+            + [
+                accessibility.RETURN,
+                os_smoke.SHIFT_L,
+                os_smoke.TAB,
+                accessibility.RETURN,
+            ],
+        )
+        self.assertEqual(record["status"], "passed")
+        self.assertEqual(record["accessibility"]["status"], "gap")
+        self.assertEqual(record["os_key_sequence"][0], "Tab x12")
+        self.assertTrue(session.finished)
+
+    def test_bevy_rejects_selection_change_from_shift_tab(self):
+        root, _, _ = browser_tree()
+        bridge = FakeBridge(root)
+        bridge.root = None
+        session = FakeSession(
+            [
+                accessibility.INITIAL_ROUTE,
+                accessibility.INITIAL_ROUTE,
+                accessibility.BROWSER2_ROUTE,
+                accessibility.INITIAL_ROUTE,
+            ],
+            implementation="bevy-egui",
+        )
+        with mock.patch.object(accessibility.time, "sleep"):
+            with self.assertRaises(core.SmokeFailure):
+                accessibility.run_bevy_sequence(
+                    session, bridge, RecordingKeyboard(), settle=0
                 )
         self.assertFalse(session.quit_acknowledged)
 
