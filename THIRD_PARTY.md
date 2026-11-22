@@ -25,7 +25,7 @@ These links require access to the private implementation repositories. Parent gi
 ### Target-specific development inventories
 
 - [Slint Cargo target-resolution inventory](https://github.com/johnokyle/slint-ui-test/blob/master/THIRD_PARTY_TARGET.md): 484 non-workspace Linux x86-64 packages, including 42 without package-root license/notice files in the local package copies.
-- [QML Qt development inventory](https://github.com/johnokyle/qml-ui-test/blob/master/THIRD_PARTY_TARGET.md): audited Qt 6.11.1 Release linkage and available SPDX/CycloneDX SBOM inputs.
+- [QML Qt development inventory](https://github.com/johnokyle/qml-ui-test/blob/master/THIRD_PARTY_TARGET.md): audited Qt 6.11.1 Release linkage, all-enabled-route runtime loading, imported QML modules, and available SPDX/CycloneDX SBOM inputs.
 - [Bevy + egui Cargo target-resolution inventory](https://github.com/johnokyle/bevy-egui-test/blob/master/THIRD_PARTY_TARGET.md): 449 non-workspace Linux x86-64 packages, including 25 without package-root license/notice files in the local package copies.
 
 Regenerate either Rust inventory from the parent repository with the corresponding implementation root:
@@ -47,6 +47,8 @@ On 2026-11-21, the default `cargo build --release --locked` executables were ins
 
 - Slint's active Linux normal/build graph enables FemtoVG and software rendering with the separate Rust `tiny-skia` crates. It does not activate native `skia-safe`/`skia-bindings`, and no native Skia build output, executable symbol/string, or dynamic dependency was found. `drm-fourcc` is outside the active default build. `simd_helpers` is a host proc-macro build dependency through the Slint compiler image/AVIF chain; its host dynamic object is not an application runtime dependency. Macro-generated output and alternate feature configurations remain separate review questions.
 - Bevy's executable contains defined `hexf-parse` parsing symbols, confirming linked code in the audited artifact. Constgebra remains in the active normal graph and Hexasphere code is present, but no Constgebra-named symbol or compilation-unit string survived in the executable. Its exact contribution after constant evaluation, inlining, and dead-code elimination is therefore unproven rather than disproved.
+
+- QML's maintained Release executable was traced at revision `df0dd1baeaa263dea5523d6d7172ea47060b065c` across every enabled canonical route in the audited GNOME Wayland session. The run mapped 48 Qt-provided shared objects and one translation catalog, including Qt Graphs, Quick 3D, Quick Controls, ShaderTools, Svg, and Wayland components beyond direct executable linkage. The implementation inventory records the exact names, imported QML modules, executable hash, and SBOM inputs.
 
 The Cargo metadata inventories are conservative resolution inputs and can include packages or features outside a default build. These artifact observations do not change the locked archives' license evidence, select a licensing route, or establish complete release-artifact coverage.
 
