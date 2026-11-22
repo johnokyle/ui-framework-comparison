@@ -37,9 +37,18 @@ python3 tools/cargo_license_inventory.py \
   --output "$IMPLEMENTATION_ROOT/THIRD_PARTY_TARGET.md"
 ```
 
-The generator uses locked Cargo metadata filtered to the target and records the current source revision. The implementation notices now record an exact-revision upstream review of all 67 package-root gaps. Four locked archives remain manifest-only: Slint's `drm-fourcc` and `simd_helpers`, and Bevy's `constgebra` and `hexf-parse`. Later artifacts clarify licensing intent for `drm-fourcc`, `simd_helpers`, and `hexf-parse`, but do not explicitly name their published locked archives; `constgebra` has no later notice. The records also identify incomplete alternative-route texts, additional copyright/asset notices, and Slint's dirty `skia-bindings` VCS record and unverified native Skia payloads.
+The generator uses locked Cargo metadata filtered to the target and records the current source revision. The implementation notices now record an exact-revision upstream review of all 67 package-root gaps. Four locked archives remain manifest-only: Slint's `drm-fourcc` and `simd_helpers`, and Bevy's `constgebra` and `hexf-parse`. Later artifacts clarify licensing intent for `drm-fourcc`, `simd_helpers`, and `hexf-parse`, but do not explicitly name their published locked archives; `constgebra` has no later notice. The records also identify incomplete alternative-route texts, additional copyright/asset notices, Slint's dirty `skia-bindings` VCS record, and native Skia payload obligations for configurations that enable it.
 
 These development inventories and upstream references are not linked-binary proofs or complete legal notice bundles. Actual release features, linked and runtime-loaded components, shipped artifacts, and applicable license texts must still be verified. Later-license applicability to the locked archives requires release-specific legal review, `constgebra` still needs authoritative clarification, and all applicable notices must be included in the release archive.
+
+### Default Linux Release artifact audit
+
+On 2026-11-21, the default `cargo build --release --locked` executables were inspected at Slint revision `063d183c04b967176208e02aa8a4faf00682a72d` and Bevy revision `1fd97c4ee25f46d04624707f8e82187b456620aa`. The implementation notices record the executable hashes and command-scoped evidence.
+
+- Slint's active Linux normal/build graph enables FemtoVG and software rendering with the separate Rust `tiny-skia` crates. It does not activate native `skia-safe`/`skia-bindings`, and no native Skia build output, executable symbol/string, or dynamic dependency was found. `drm-fourcc` is outside the active default build. `simd_helpers` is a host proc-macro build dependency through the Slint compiler image/AVIF chain; its host dynamic object is not an application runtime dependency. Macro-generated output and alternate feature configurations remain separate review questions.
+- Bevy's executable contains defined `hexf-parse` parsing symbols, confirming linked code in the audited artifact. Constgebra remains in the active normal graph and Hexasphere code is present, but no Constgebra-named symbol or compilation-unit string survived in the executable. Its exact contribution after constant evaluation, inlining, and dead-code elimination is therefore unproven rather than disproved.
+
+The Cargo metadata inventories are conservative resolution inputs and can include packages or features outside a default build. These artifact observations do not change the locked archives' license evidence, select a licensing route, or establish complete release-artifact coverage.
 
 ## Source and binary scope
 
