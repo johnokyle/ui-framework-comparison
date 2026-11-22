@@ -476,6 +476,45 @@ The default-disabled `quant.order-book` was deliberately excluded. This batch do
 
 The tested executable hashes remained Slint `49022ade231309e7f34e794832de390b4a2582cc4fbf9cb5d29fe9e946737557`, QML `4b1bf027fb5587b580b227a64f15f60ae0f72b81c6d8cb121971131523fe759e`, and Bevy + egui `7e2f2c281bfbd3b3cc9b975b98bee489bee3986002e45efa684105cd1cc81931`. Exact capture/review hashes, route metadata, crop boxes, clean exits, and assistant observations are in each directory's `manifest.jsonl` and `assistant-review.jsonl`. No source or test code changed. All 61 parent Python tests and repository validation passed. Raw desktop images are not publication artifacts; durable attachment, other variants, active accessibility, human equivalence acceptance, controlled results, and scenario activation remain unestablished.
 
+### Charting theme/scale screenshot variants (2026-11-22)
+
+The accepted native-size Charting matrix used 36 separate runner invocations: three routes × three implementations × light/dark × 100%/200%. Every variant had a fresh application process and a fresh Screenshot portal connection. The checkout-independent invocation pattern was:
+
+```bash
+set -e
+for route in chart.analytical chart.stock chart.pivot; do
+  root="/tmp/ui-framework-screenshots-2026-11-22-${route//./-}-fresh-matrix-01"
+  for implementation in slint qml bevy-egui; do
+    case "$implementation" in
+      slint) executable=(--slint "$SLINT_ROOT/target/release/slintuitest") ;;
+      qml) executable=(--qml "$QML_ROOT/build-fixture-tests/appQmlUITest") ;;
+      bevy-egui) executable=(--bevy-egui "$BEVY_ROOT/target/release/bevy_egui_test" --bevy-asset-root "$BEVY_ROOT") ;;
+    esac
+    for theme in light dark; do
+      for scale in 100 200; do
+        python3 "$COMPARISON_ROOT/tools/runtime_screenshot.py" \
+          "${executable[@]}" \
+          --output-dir "$root/$implementation-$theme-$scale" \
+          --route "$route" \
+          --themes "$theme" \
+          --scales "$scale" \
+          --sizes native \
+          --qml-host-scale 1.6666666269302368 \
+          --timeout 30
+      done
+    done
+  done
+done
+```
+
+All 36 cases returned the requested canonical route, retained it after capture, acknowledged `quit`, and exited with status 0. QML responses were canonicalized from its local aliases. Each raw desktop PNG measured 5120×2160. Pillow 12.1.1 produced isolated decorated review copies using half-open crop `(1815, 579, 3415, 1639)` at 100%, yielding 1600×1060, and `(1015, 53, 4215, 2140)` at 200%, yielding 3200×2087. QML's relative factors were normalized against the measured `1.6666666269302368` host scale.
+
+Individual assistant inspection of every review crop found the requested light/dark shell, expected relative 100%/200% geometry, and selected route content without unrelated desktop content. Analytical showed populated multi-series charts; Stock showed populated price, volume, and indicator panels; Pivot showed populated charts with controls and navigators. Bevy + egui retained denser diagnostics/readouts and a shorter Analytical plot. No stale initial Browser content was observed. Together with the Browser matrices, all common Browser and Charting routes now have explicit light/dark × 100%/200% native-size development captures.
+
+The tested executable hashes remained Slint `34fc038090dc7f14d5a08d9e529d347f18de20bb747c196f4e333e905776ce33`, QML `881597209f79148d8b5b807d22cf6cdd483cef54f636f1ab32df8117e148801c`, and Bevy + egui `f60ebe4eb6f90e56529838ac7a1b5a104b06d7019a6e98743bf569ed3e345fa1`. Exact source/review hashes, crop boxes, requested variants, route results, executable identities, clean exits, and assistant observations are in each root's `manifest.jsonl`, `review-captures.jsonl`, and `assistant-review.jsonl` under `/tmp/ui-framework-screenshots-2026-11-22-chart-analytical-fresh-matrix-01`, `/tmp/ui-framework-screenshots-2026-11-22-chart-stock-fresh-matrix-01`, and `/tmp/ui-framework-screenshots-2026-11-22-chart-pivot-fresh-matrix-01`.
+
+Default construction remained at analytical 500 days, stock daily-only data, and pivot SPY-only data; no analytical 100K/1M, stock 20K intraday, or all-nine-symbol pivot variant was constructed. No source or test code changed. All 77 parent Python tests, repository validation, and the parent whitespace check passed. This single-capture-per-variant set is not repeated-run reliability, OS-input, presented-frame timing, numerical-equivalence, active-accessibility, human-equivalence, durable-attachment, controlled-result, or scenario-acceptance evidence.
+
 ### Browser 1 AT-SPI and focused-keyboard development evidence (2026-11-21)
 
 A parent-only `tools/runtime_accessibility_smoke.py` runner reads the host AT-SPI `IsEnabled` status without changing it, launches fresh light/100% 1200×750 processes, and restricts desktop traversal to each child's PID. QML alone receives `QT_LINUX_ACCESSIBILITY_ALWAYS_ON=1`, in addition to its existing capture overrides. The runner uses QML's AT-SPI `SetFocus` action only to establish initial tab focus; subsequent Right, Return, and Left input is delivered through the existing authorized RemoteDesktop keyboard session. Stable-ID route readback remains the application-state oracle. No absolute coordinates, pointer events, direct selection calls, screenshots, or host settings changes are used.
