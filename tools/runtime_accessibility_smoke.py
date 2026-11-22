@@ -269,12 +269,6 @@ def run_slint_sequence(
     }
 
 
-def shift_tab(keyboard) -> None:
-    keyboard.keysym(os_smoke.SHIFT_L, 1)
-    tap(keyboard, os_smoke.TAB)
-    keyboard.keysym(os_smoke.SHIFT_L, 0)
-
-
 def run_bevy_sequence(
     session: core.ProcessSession,
     bridge,
@@ -282,24 +276,29 @@ def run_bevy_sequence(
     *,
     settle: float = 1.0,
 ) -> dict[str, object]:
-    """Use egui's ordinary widget traversal, not application-owned selection shortcuts."""
+    """Use ordinary egui focus traversal and tab-bar arrows, with Return activation."""
     core.require_route(session.request("state"), INITIAL_ROUTE, "OS keyboard initial state")
     time.sleep(settle)
     accessibility = observe_application(session, bridge)
 
-    for _ in range(12):
+    for _ in range(11):
         tap(keyboard, os_smoke.TAB)
     time.sleep(settle)
     core.require_route(
-        session.request("state"), INITIAL_ROUTE, "Tab traversal must focus Browser 2 without selection"
+        session.request("state"), INITIAL_ROUTE, "Tab traversal must focus Browser 1 without selection"
+    )
+    tap(keyboard, RIGHT)
+    time.sleep(settle)
+    core.require_route(
+        session.request("state"), INITIAL_ROUTE, "Right must focus Browser 2 without selection"
     )
     tap(keyboard, RETURN)
     time.sleep(settle)
     core.require_route(session.request("state"), BROWSER2_ROUTE, "Return selects focused Browser 2")
-    shift_tab(keyboard)
+    tap(keyboard, LEFT)
     time.sleep(settle)
     core.require_route(
-        session.request("state"), BROWSER2_ROUTE, "Shift+Tab must focus Browser 1 without selection"
+        session.request("state"), BROWSER2_ROUTE, "Left must focus Browser 1 without selection"
     )
     tap(keyboard, RETURN)
     time.sleep(settle)
@@ -310,9 +309,10 @@ def run_bevy_sequence(
         "implementation": "bevy-egui",
         "status": "passed",
         "outcome": "focused-tab-keyboard-selection",
-        "focus_action": "ordinary egui Tab traversal",
-        "os_key_sequence": ["Tab x12", "Return", "Shift+Tab", "Return"],
+        "focus_action": "ordinary egui Tab traversal to Browser 1",
+        "os_key_sequence": ["Tab x11", "Right", "Return", "Left", "Return"],
         "route_sequence": [
+            "browser.browser1",
             "browser.browser1",
             "browser.browser1",
             "browser.browser2",

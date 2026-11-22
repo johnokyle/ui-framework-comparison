@@ -263,13 +263,14 @@ class RuntimeAccessibilitySmokeTests(unittest.TestCase):
                 )
         self.assertFalse(session.quit_acknowledged)
 
-    def test_bevy_tab_traversal_return_and_clean_restoration(self):
+    def test_bevy_tab_traversal_arrows_return_and_clean_restoration(self):
         root, _, _ = browser_tree()
         bridge = FakeBridge(root)
         bridge.root = None
         keyboard = RecordingKeyboard()
         session = FakeSession(
             [
+                accessibility.INITIAL_ROUTE,
                 accessibility.INITIAL_ROUTE,
                 accessibility.INITIAL_ROUTE,
                 accessibility.BROWSER2_ROUTE,
@@ -284,25 +285,26 @@ class RuntimeAccessibilitySmokeTests(unittest.TestCase):
             )
         self.assertEqual(
             keyboard.keys,
-            [os_smoke.TAB] * 12
+            [os_smoke.TAB] * 11
             + [
+                accessibility.RIGHT,
                 accessibility.RETURN,
-                os_smoke.SHIFT_L,
-                os_smoke.TAB,
+                accessibility.LEFT,
                 accessibility.RETURN,
             ],
         )
         self.assertEqual(record["status"], "passed")
         self.assertEqual(record["accessibility"]["status"], "gap")
-        self.assertEqual(record["os_key_sequence"][0], "Tab x12")
+        self.assertEqual(record["os_key_sequence"][0], "Tab x11")
         self.assertTrue(session.finished)
 
-    def test_bevy_rejects_selection_change_from_shift_tab(self):
+    def test_bevy_rejects_selection_change_from_left(self):
         root, _, _ = browser_tree()
         bridge = FakeBridge(root)
         bridge.root = None
         session = FakeSession(
             [
+                accessibility.INITIAL_ROUTE,
                 accessibility.INITIAL_ROUTE,
                 accessibility.INITIAL_ROUTE,
                 accessibility.BROWSER2_ROUTE,
