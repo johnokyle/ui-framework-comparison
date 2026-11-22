@@ -505,4 +505,123 @@ QML entered with its canonical Order Book default. AT-SPI `SetFocus` established
 
 Executable hashes were unchanged from the Charting run: Slint `34fc038090dc7f14d5a08d9e529d347f18de20bb747c196f4e333e905776ce33`, QML `4b1bf027fb5587b580b227a64f15f60ae0f72b81c6d8cb121971131523fe759e`, and Bevy + egui `f60ebe4eb6f90e56529838ac7a1b5a104b06d7019a6e98743bf569ed3e345fa1`. A native Slint regression covered the Quantitative focus and activation sequence; its locked suite passed 96 tests with four explicit large cases ignored, and formatting passed. All 16 focused parent accessibility tests, all 68 parent discovery tests, repository validation, and parent/Slint whitespace checks passed. No production application source changed in this batch. Host AT-SPI remained disabled, Slint and Bevy + egui retained their separate process-scoped AT-SPI gaps, and no active screen reader was used. Pointer/touch and scrolling, disabled-route behavior, rendered-frame correctness, human equivalence, durable attachment, controlled results, and scenario acceptance remain unestablished.
 
+### Common OS-pointer Browser and Charting tab activation (2026-11-22)
+
+The new `tools/runtime_pointer_smoke.py` completed real pointer-only tab activation in all three implementations. It requests RemoteDesktop device type 2 without keyboard or ScreenCast access. Before each click, two large negative `NotifyPointerMotion` deltas normalize the pointer to the desktop's top-left; a subsequent relative delta reaches the supplied compositor-logical target, followed by left-button press/release. The stable-ID adapter is used only for state readback and acknowledged quit, never route selection. Every application was a fresh light/100% 1200×750 process. The coordinates are specific to the audited desktop layout and are not resolution-independent application geometry.
+
+The passing sequential invocation was:
+
+```bash
+python3 "$COMPARISON_ROOT/tools/runtime_pointer_smoke.py" \
+  --slint "$SLINT_ROOT/target/release/slintuitest" \
+  --qml "$QML_ROOT/build-fixture-tests/appQmlUITest" \
+  --qml-host-scale 1.6666666269302368 \
+  --bevy-egui "$BEVY_ROOT/target/release/bevy_egui_test" \
+  --bevy-asset-root "$BEVY_ROOT" \
+  --target slint:browser.browser2=1414.2,523.2 \
+  --target slint:browser.browser3=1546.2,523.2 \
+  --target slint:primary.charting=1452.6,498 \
+  --target slint:primary.browser=1296.6,498 \
+  --target slint:browser.browser1=1282.2,523.2 \
+  --target qml:browser.browser2=1303.2,522 \
+  --target qml:browser.browser3=1372.2,522 \
+  --target qml:primary.charting=1324.8,498 \
+  --target qml:primary.browser=1246.8,498 \
+  --target qml:browser.browser1=1242,522 \
+  --target bevy-egui:browser.browser2=1317.3,516 \
+  --target bevy-egui:browser.browser3=1390.2,516 \
+  --target bevy-egui:primary.charting=1416,472.2 \
+  --target bevy-egui:primary.browser=1281.9,472.2 \
+  --target bevy-egui:browser.browser1=1248.9,516 \
+  --timeout 30 \
+  --settle 1 \
+  --jsonl /tmp/ui-framework-pointer-2026-11-22-11.jsonl
+```
+
+Each implementation produced the canonical route sequence `browser.browser1 → browser.browser2 → browser.browser3 → chart.analytical → browser.browser3 → browser.browser1`. Thus pointer input selected Browser 2 and Browser 3, switched to Charting with Analytical retained, restored Browser with Browser 3 retained, and restored Browser 1. All three acknowledged `quit` and exited with status 0. Earlier absolute-motion attempts did not activate the intended targets and are not counted as passes. The successful relative-motion diagnostic first exposed QML hover, press, and release on Browser 2 without selection; `NavTabButton.qml` now explicitly calls the existing `activateIndex` helper from `onClicked`, after which the complete QML sequence passed.
+
+Executable hashes were Slint `34fc038090dc7f14d5a08d9e529d347f18de20bb747c196f4e333e905776ce33`, QML `881597209f79148d8b5b807d22cf6cdd483cef54f636f1ab32df8117e148801c` after the pointer-fix rebuild, and Bevy + egui `f60ebe4eb6f90e56529838ac7a1b5a104b06d7019a6e98743bf569ed3e345fa1`. Nine focused pointer tests, six existing OS-keyboard tests, all 77 parent discovery tests, repository validation, QML's 12 fixture/model tests, and parent/QML whitespace checks passed. The JSONL records every logical target, route sequence, clean exit, and executable hash.
+
+This establishes only five common tab targets in the audited desktop configuration. It does not establish pointer interaction with page content or other controls, touch input, scrolling, drag behavior, pointer behavior at other geometries or scales, rendered-frame correctness, active-screen-reader behavior, human-reviewed visual equivalence, durable evidence attachment, controlled results, or scenario acceptance. Slint and Bevy + egui retain their previously recorded process-scoped AT-SPI gaps. No scenario was activated.
+
+### Extended common OS-pointer Charting and Quantitative tab activation (2026-11-22)
+
+The unchanged pointer runner then covered all three Browser routes, all three Charting routes, and nine common visible Quantitative routes. An initial same-route Browser-primary click focuses the fresh window and is verified as a selection no-op; every subsequent route change uses real pointer input with stable-ID state readback only. The passing invocation used a temporary `/tmp/run_pointer_with_failure_capture.py` wrapper around the unchanged runner to preserve a desktop capture only if a failure occurred. No failure occurred, so the wrapper added no successful-path screenshots, input, route selection, or settling delays.
+
+The passing sequential invocation was:
+
+```bash
+python3 /tmp/run_pointer_with_failure_capture.py \
+  --slint "$SLINT_ROOT/target/release/slintuitest" \
+  --qml "$QML_ROOT/build-fixture-tests/appQmlUITest" \
+  --qml-host-scale 1.6666666269302368 \
+  --bevy-egui "$BEVY_ROOT/target/release/bevy_egui_test" \
+  --bevy-asset-root "$BEVY_ROOT" \
+  --target slint:browser.browser2=1414.2,523.2 \
+  --target slint:browser.browser3=1546.2,523.2 \
+  --target slint:primary.charting=1452.6,498 \
+  --target slint:chart.stock=1407,523.2 \
+  --target slint:chart.pivot=1539,523.2 \
+  --target slint:chart.analytical=1278,523.2 \
+  --target slint:primary.browser=1296.6,498 \
+  --target slint:browser.browser1=1282.2,523.2 \
+  --target slint:primary.quantviz=1551,498 \
+  --target slint:quant.factor-structure=1314,523.2 \
+  --target slint:quant.correlation=1377,523.2 \
+  --target slint:quant.frontier=1440,523.2 \
+  --target slint:quant.pca=1503,523.2 \
+  --target slint:quant.regime=1566,523.2 \
+  --target slint:quant.projection=1629,523.2 \
+  --target slint:quant.knowledge=1755,523.2 \
+  --target slint:quant.monte-carlo=1818,523.2 \
+  --target slint:quant.vol-surface=1246.2,523.2 \
+  --target qml:browser.browser2=1303.2,522 \
+  --target qml:browser.browser3=1372.2,522 \
+  --target qml:primary.charting=1324.8,498 \
+  --target qml:chart.stock=1374,522 \
+  --target qml:chart.pivot=1310,522 \
+  --target qml:chart.analytical=1245,522 \
+  --target qml:primary.browser=1246.8,498 \
+  --target qml:browser.browser1=1242,522 \
+  --target qml:primary.quantviz=1482,498 \
+  --target qml:quant.factor-structure=1610,522 \
+  --target qml:quant.correlation=1400,522 \
+  --target qml:quant.frontier=1700,522 \
+  --target qml:quant.pca=1790,522 \
+  --target qml:quant.regime=1860,522 \
+  --target qml:quant.projection=1910,522 \
+  --target qml:quant.knowledge=1440,522 \
+  --target qml:quant.monte-carlo=1320,522 \
+  --target qml:quant.vol-surface=1520,522 \
+  --target bevy-egui:browser.browser2=1317.3,516 \
+  --target bevy-egui:browser.browser3=1390.2,516 \
+  --target bevy-egui:primary.charting=1416,472.2 \
+  --target bevy-egui:chart.stock=1318.2,516 \
+  --target bevy-egui:chart.pivot=1383,516 \
+  --target bevy-egui:chart.analytical=1251,516 \
+  --target bevy-egui:primary.browser=1281.9,472.2 \
+  --target bevy-egui:browser.browser1=1248.9,516 \
+  --target bevy-egui:primary.quantviz=1483.2,472.2 \
+  --target bevy-egui:quant.factor-structure=1300,516 \
+  --target bevy-egui:quant.correlation=1360,516 \
+  --target bevy-egui:quant.frontier=1440,516 \
+  --target bevy-egui:quant.pca=1520,516 \
+  --target bevy-egui:quant.regime=1580,516 \
+  --target bevy-egui:quant.projection=1660,516 \
+  --target bevy-egui:quant.knowledge=1840,516 \
+  --target bevy-egui:quant.monte-carlo=1920,516 \
+  --target bevy-egui:quant.vol-surface=1251,516 \
+  --timeout 30 \
+  --settle 1 \
+  --jsonl /tmp/ui-framework-pointer-extended-2026-11-22-12.jsonl
+```
+
+Each implementation passed 20 real clicks: the initial focus/no-op plus 19 route steps. The common route sequence was `browser.browser1 → browser.browser2 → browser.browser3 → chart.analytical → chart.stock → chart.pivot → chart.analytical → browser.browser3 → browser.browser1 → quantitative-default → quant.factor-structure → quant.correlation → quant.frontier → quant.pca → quant.regime → quant.projection → quant.knowledge → quant.monte-carlo → quant.vol-surface → browser.browser1`. The Quantitative default was `quant.vol-surface` for Slint and Bevy + egui and canonical `quant.order-book` for QML. This verified Browser 3 retention, Stock/Pivot/Analytical activation and restoration, nine direct common Quantitative secondary activations, and final Browser 1 retention. All three acknowledged `quit` and exited with status 0.
+
+Direct Network Graph and Order Book activation are excluded: QML's Network Graph tab and Bevy + egui's Order Book tab are outside the visible clickable area at this requested geometry. QML's canonical Order Book default is checked after Quantitative primary activation, but that is not direct Order Book pointer activation or disabled-route fallback evidence. Earlier candidate extended runs included coordinate failures and intermittent initial/early-tab misses; they are not counted as passes and their cause is not established. The successful run establishes one complete sequence in this audited configuration, not repeated-run reliability.
+
+Executable hashes remained Slint `34fc038090dc7f14d5a08d9e529d347f18de20bb747c196f4e333e905776ce33`, QML `881597209f79148d8b5b807d22cf6cdd483cef54f636f1ab32df8117e148801c`, and Bevy + egui `f60ebe4eb6f90e56529838ac7a1b5a104b06d7019a6e98743bf569ed3e345fa1`. Nine focused pointer tests, six OS-keyboard tests, all 77 parent discovery tests, repository validation, and parent/QML whitespace checks passed. The JSONL records every target, canonical route, clean exit, and executable hash.
+
+This remains setup-specific semantic tab-selection evidence only. It does not establish pointer interaction with page content or other controls, touch input, scrolling, drag behavior, other geometries or scales, rendered-frame correctness, active-screen-reader behavior, human-reviewed visual equivalence, durable evidence attachment, controlled results, or scenario acceptance. No scenario was activated.
+
 No scenario activation or implementation hash attestation is part of this parent-only BP-01 fixture deliverable.

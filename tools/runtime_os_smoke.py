@@ -58,7 +58,7 @@ def run_keyboard_sequence(session: core.ProcessSession, keyboard, *, settle: flo
 class RemoteDesktopKeyboard:
     """XDG RemoteDesktop keyboard session using the host's PyGObject bindings."""
 
-    def __init__(self, timeout: float):
+    def __init__(self, timeout: float, *, device_types: int = 1):
         try:
             import gi
 
@@ -71,6 +71,7 @@ class RemoteDesktopKeyboard:
         self.Gio = Gio
         self.GLib = GLib
         self.timeout = timeout
+        self.device_types = device_types
         self.bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
         self.session: str | None = None
         self._counter = 0
@@ -146,7 +147,7 @@ class RemoteDesktopKeyboard:
             self._request(
                 "SelectDevices",
                 "(oa{sv})",
-                (self.session, {"types": self.GLib.Variant("u", 1)}),
+                (self.session, {"types": self.GLib.Variant("u", self.device_types)}),
             )
             self._request("Start", "(osa{sv})", (self.session, "", {}))
             return self
