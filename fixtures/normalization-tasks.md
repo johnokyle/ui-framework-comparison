@@ -1158,6 +1158,33 @@ Independent validation checked all three records' exact focus-click/drag fields,
 
 This adds no verified column-resize interaction. Slint/QML sorting and single-click selection evidence does not generalize to drag behavior, and Bevy + egui page-content interaction remains unverified. Other resize targets/directions, reorder, scrolling, repeated-run reliability, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, and scenario acceptance remain unestablished. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
 
+### Slint Browser 1 two-click Company-toggle pointer captures (2026-11-22)
+
+A Slint-only follow-up extended the previously verified ascending Company interaction to a second click. Repeated activation of the same header toggles direction (`src/browser1.rs:175-188`), and Company uses string comparison (`src/data.rs:238-256`). QML and Bevy + egui were deliberately not rerun: their first Company activation remains unverified, so this task does not retry those unsuccessful interactions or impose a second-click oracle on them.
+
+The development-only `/tmp/run_slint_browser1_company_toggle_pointer.py` driver used one fresh native light/100% Slint process. Its accepted invocation was:
+
+```bash
+python3 /tmp/run_slint_browser1_company_toggle_pointer.py \
+  --work-root "/tmp/ui-framework-slint-browser1-company-toggle-pointer-2026-11-22-01/slint" \
+  --jsonl "/tmp/ui-framework-slint-browser1-company-toggle-pointer-2026-11-22-01/slint.jsonl" \
+  --settle 2
+```
+
+The process attempted one Browser-primary focus click at `(1128,423.6)` and two Company-header clicks at `(1209,493.2)`, corresponding to review-crop point `(200,243)`. It parked at logical `(100,100)` before each capture, passed seven Browser 1 readbacks, acknowledged `quit`, and exited with status 0 without keyboard input or programmatic route selection. Desktop PNGs are 5120×2160 and review PNGs are 1600×1060 from `(1815,579,3415,1639)`.
+
+Procedural `status=passed` requires three attempted clicks, unchanged route, three pairwise-distinct decodable review captures, and clean exit. The JSONL retains `ascending_company_sort_visually_verified=false`, `descending_company_sort_visually_verified=false`, and `capture_pixel_content_reviewed=false`; subsequent assistant inspection is the sorting oracle.
+
+| Capture | Subsequent visual review |
+|---|---|
+| Before | Canonical source order with no Company sort marker |
+| After first Company click | Ascending Company marker and repeated `Apex` leaders |
+| After second Company click | Descending Company marker and repeated `Union` leaders in descending lexical order |
+
+Independent RGB comparison found differences in `(6,202,1425,1057)` for before/after-first and before/after-second and `(8,202,1425,1057)` for after-first/after-second, including the expected header and row changes. Independent validation checked the exact three-click/seven-route sequence, executable hash, visual-review flags, clean exit, capture modes/dimensions/byte counts, pairwise-distinctness fields, and SHA-256 values: 3 clicks, 7 Browser 1 readbacks, and 6 recorded PNGs. Before/after-first/after-second review SHA-256 values were `68350037b7765ffc1cb09a8a5ef2eee4acb09eff0a67d37a5fa26480d312483b`, `634dffc94f239301b8bd2f8a21213b7c6e03179290a618672698eb4c38b83657`, and `7547a0a4ce0e7d8902a52b8ffdca45a9d3604c5fc1a94e947c74a392f54a6d44`; the JSONL SHA-256 was `7bd9081ed28e7ebc61316252dd6054cd2e17bb7b9ec5685d48f9cd24ea53f148`.
+
+This establishes one real Slint ascending/descending Company sequence, adding string-column direction-toggle evidence without changing QML or Bevy + egui Company status. It is not repeated-run reliability, another string column, editing, drag, scrolling, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, or scenario acceptance. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
+
 ### Bevy + egui Export View pointer and application capture (2026-11-22)
 
 A development-only `/tmp/run_bevy_export_view_pointer.py` driver launched the unchanged Bevy + egui Release executable at native light/100% with a fresh `/tmp` working directory. It used the existing stable-ID adapter only for initial/final route readback and acknowledged quit, never route selection. Two same-route Browser-primary clicks established focus, followed by one real Export View toolbar click. The accepted invocation was:
