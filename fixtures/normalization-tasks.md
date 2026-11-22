@@ -216,4 +216,30 @@ The corresponding Slint invocation did not pass: after real portal Ctrl+Tab inpu
 
 This is development OS-keyboard evidence only. It does not establish pointer/touch input, rendered content or presented frames, screenshots, accessibility-tree behavior, theme/DPI behavior, cadence, performance, or controlled scenario acceptance. No scenario was activated.
 
+### External Browser 1 development screenshots (2026-11-21)
+
+The parent-owned `tools/runtime_screenshot.py` used the host PyGObject bindings and a non-interactive `org.freedesktop.portal.Screenshot` request to capture each Release application at its initial `primary.browser/browser.browser1` route. The existing stable-ID adapters verified the same route before and after capture and supplied clean quit only; they did not generate the images. No application source or dependency changed.
+
+The passing sequential invocation was:
+
+```bash
+python3 "$COMPARISON_ROOT/tools/runtime_screenshot.py" \
+  --slint "$SLINT_ROOT/target/release/slintuitest" \
+  --qml "$QML_ROOT/build-fixture-tests/appQmlUITest" \
+  --bevy-egui "$BEVY_ROOT/target/release/bevy_egui_test" \
+  --bevy-asset-root "$BEVY_ROOT" \
+  --output-dir /tmp/ui-framework-screenshots-2026-11-21-01 \
+  --timeout 30
+```
+
+All three applications acknowledged `quit` and exited with status 0. The default two-second settling delay was used. Every raw capture is a 5120×2160 full-desktop PNG; the exact source and artifact identities are:
+
+- Slint source `510fb6c2740ca84b84a7467691be5ae538b6635d`, executable SHA-256 `c1bd8b690b9e497949c3fd0fe65bca2ba2833412549425b3789f44be210ae0e5`, raw capture `109e69df712973922af05fb93f684396b484c1a836091eb46769c9ee2c800937`, and window review copy `41924c0e2219641cc3020e48d7b6a2592ac74ae64ddb357db1a78653ea753556`.
+- QML source `84760e4b0e74997084bd2a4c89860690da0b1e3b`, executable SHA-256 `7fa6e28a9b024b6c8b0df8ceda9bda3485152f495272101ae0d6a11e97dddbb8`, raw capture `d0b9c8f0669b28388e459ae3929e90eda5fc4d88c87c1c905869c3f7dd895c0a`, and window review copy `9da7b503159309123aa5a638e79003d938c98bdfa7f191baf8abafefbb69337f`.
+- Bevy + egui source `63767a424990c69980fa2443c8dd11f2b8e9e08d`, executable SHA-256 `ae874feac30f81e731cde84b7ed0aa9aeb77094ad543075f95ade3f4678be502`, raw capture `ae55485c96e31900fb65c8310616b6bf405258b1443970e28148a2734964d93d`, and window review copy `4025b05eee4239c7780e2284b8a87faff94dbf24bed2e9c1b50f4eb7e17d41f6`.
+
+Host Pillow 12.1.1 produced the three 2667×1756 window review copies with the half-open crop rectangle `(1280, 216, 3947, 1972)`. Assistant visual inspection found the intended Browser 1 application window, table, and controls in each isolated copy, without unrelated desktop content. Slint and QML displayed light System rendering; Bevy + egui displayed dark System rendering. This is not an equivalent light/dark or 100%/200% screenshot set, and the required human review has not occurred.
+
+The raw desktop captures include unrelated desktop content and are not publication artifacts. `manifest.jsonl`, `review-captures.jsonl`, `assistant-review.jsonl`, and the PNGs remain only under `/tmp/ui-framework-screenshots-2026-11-21-01`; no durable CI/release attachment or controlled result document was created. Six new dependency-free runner tests passed. No capability status, scenario activation, or implementation hash attestation changed.
+
 No scenario activation or implementation hash attestation is part of this parent-only BP-01 fixture deliverable.

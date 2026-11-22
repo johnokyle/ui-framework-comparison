@@ -8,7 +8,7 @@ This inventory records the 2026-11-21 source review. It is not a legal opinion o
 
 `tools/requirements.txt` pins `jsonschema==4.25.1`, used by `tools/validate_repository.py`. Its declared license is MIT, with copyright held by Julian Berman. The package is installed into the validation environment by pip; its source is not vendored in this repository.
 
-The optional `tools/runtime_os_smoke.py` development harness uses the host's PyGObject `Gio`/`GLib` bindings for the session RemoteDesktop portal. PyGObject and GLib are LGPL-2.1-or-later system dependencies; they are not pinned by `tools/requirements.txt`, vendored, or redistributed by the parent repository.
+The optional `tools/runtime_os_smoke.py` and `tools/runtime_screenshot.py` development harnesses use the host's PyGObject `Gio`/`GLib` bindings for the session RemoteDesktop and Screenshot portals. PyGObject and GLib are LGPL-2.1-or-later system dependencies; they are not pinned by `tools/requirements.txt`, vendored, or redistributed by the parent repository. Host Pillow 12.1.1 was used only to crop the initial screenshot review copies. Pillow's main declared license is HPND, with copyright held by Secret Labs AB, Fredrik Lundh, Alex Clark, and contributors; it is likewise not pinned, vendored, or redistributed.
 
 The GitHub Actions referenced by `.github/workflows/validate.yml` execute in CI and are not redistributed application content.
 
