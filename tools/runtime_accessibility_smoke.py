@@ -26,6 +26,11 @@ BROWSER3_ROUTE = core.Route("primary.browser", "browser.browser3")
 CHARTING_ROUTE = core.Route("primary.charting", "chart.analytical")
 CHARTING_STOCK_ROUTE = core.Route("primary.charting", "chart.stock")
 CHARTING_PIVOT_ROUTE = core.Route("primary.charting", "chart.pivot")
+QUANT_ROUTE = core.Route("primary.quantviz", "quant.vol-surface")
+QUANT_FACTOR_ROUTE = core.Route("primary.quantviz", "quant.factor-structure")
+QUANT_MONTE_CARLO_ROUTE = core.Route("primary.quantviz", "quant.monte-carlo")
+QUANT_ORDER_BOOK_ROUTE = core.Route("primary.quantviz", "quant.order-book")
+QUANT_PROJECTION_ROUTE = core.Route("primary.quantviz", "quant.projection")
 CHARTING_KEY_SEQUENCE = [
     "Ctrl+Tab",
     "End",
@@ -40,24 +45,29 @@ CHARTING_KEY_SEQUENCE = [
     "Home",
     "Return",
 ]
+QUANT_KEY_SEQUENCE = CHARTING_KEY_SEQUENCE.copy()
 MAX_NODES = 4000
 
 
-def charting_route_sequence(second_route: core.Route) -> list[str]:
-    """Return canonical secondary readbacks for the Ctrl+Tab and Charting steps."""
+def end_and_wrap_route_sequence(
+    initial_route: core.Route,
+    second_route: core.Route,
+    left_route: core.Route,
+) -> list[str]:
+    """Return canonical secondary readbacks for one End/Home/arrow-wrap sequence."""
     return [
-        CHARTING_ROUTE.secondary,
-        CHARTING_ROUTE.secondary,
-        CHARTING_ROUTE.secondary,
-        CHARTING_ROUTE.secondary,
+        initial_route.secondary,
+        initial_route.secondary,
+        initial_route.secondary,
+        initial_route.secondary,
         second_route.secondary,
         second_route.secondary,
-        CHARTING_ROUTE.secondary,
-        CHARTING_ROUTE.secondary,
-        CHARTING_ROUTE.secondary,
-        CHARTING_STOCK_ROUTE.secondary,
-        CHARTING_STOCK_ROUTE.secondary,
-        CHARTING_ROUTE.secondary,
+        initial_route.secondary,
+        initial_route.secondary,
+        initial_route.secondary,
+        left_route.secondary,
+        left_route.secondary,
+        initial_route.secondary,
     ]
 
 
@@ -162,41 +172,41 @@ def run_browser3_and_home_sequence(
         core.require_route(session.request("state"), expected, description)
 
 
-def select_charting_from_keyboard(
+def cycle_primary_from_keyboard(
     session: core.ProcessSession,
     keyboard,
     settle: float,
+    expected: core.Route,
+    description: str,
 ) -> None:
-    """Move from the focused Browser bar to Charting through the global shortcut."""
+    """Cycle the primary route through the global shortcut and read actual state."""
     keyboard.ctrl_tab()
     time.sleep(settle)
-    core.require_route(
-        session.request("state"),
-        CHARTING_ROUTE,
-        "Ctrl+Tab selects Charting and retains Analytical",
-    )
+    core.require_route(session.request("state"), expected, description)
 
 
-def run_charting_end_and_wrap_sequence(
+def run_end_and_wrap_sequence(
     session: core.ProcessSession,
     keyboard,
     settle: float,
     *,
+    initial_route: core.Route,
     second_route: core.Route,
+    left_route: core.Route,
 ) -> None:
-    """Prove Charting End and both arrow wraps by focus retention and activation."""
+    """Prove End, Home, and both arrow wraps by focus retention and activation."""
     steps = [
-        (END, CHARTING_ROUTE, "End must focus the last Charting tab without selection"),
-        (RIGHT, CHARTING_ROUTE, "Right must wrap from the last Charting tab to Analytical"),
-        (RIGHT, CHARTING_ROUTE, "Right must focus the second canonical Charting route"),
-        (RETURN, second_route, "Return selects the focused second canonical Charting route"),
-        (HOME, second_route, "Home must focus Analytical without changing Charting selection"),
-        (RETURN, CHARTING_ROUTE, "Return restores Analytical after right wraparound"),
-        (LEFT, CHARTING_ROUTE, "Left must wrap from Analytical to the last Charting tab"),
-        (LEFT, CHARTING_ROUTE, "Left must focus Stock without selection"),
-        (RETURN, CHARTING_STOCK_ROUTE, "Return selects Stock after left wraparound"),
-        (HOME, CHARTING_STOCK_ROUTE, "Home must focus Analytical without changing Stock"),
-        (RETURN, CHARTING_ROUTE, "Return restores Analytical after left wraparound"),
+        (END, initial_route, "End must focus the last enabled tab without selection"),
+        (RIGHT, initial_route, "Right must wrap from the last enabled tab"),
+        (RIGHT, initial_route, "Right must move focus without selection"),
+        (RETURN, second_route, "Return selects the focused route after right wraparound"),
+        (HOME, second_route, "Home must focus the first enabled tab without selection"),
+        (RETURN, initial_route, "Return selects the first enabled route after right wraparound"),
+        (LEFT, initial_route, "Left must wrap from the first enabled tab"),
+        (LEFT, initial_route, "Left must move focus without selection"),
+        (RETURN, left_route, "Return selects the focused route after left wraparound"),
+        (HOME, left_route, "Home must focus the first enabled tab without changing selection"),
+        (RETURN, initial_route, "Return restores the initial route after left wraparound"),
     ]
     for key, expected, description in steps:
         tap(keyboard, key)
@@ -279,7 +289,13 @@ def run_qml_sequence(
     run_browser3_and_home_sequence(session, keyboard, settle)
     final_summary, _ = tree_summary(bridge, root)
 
-    select_charting_from_keyboard(session, keyboard, settle)
+    cycle_primary_from_keyboard(
+        session,
+        keyboard,
+        settle,
+        CHARTING_ROUTE,
+        "Ctrl+Tab selects Charting and retains Analytical",
+    )
     root = bridge.application_for_pid(session.process.pid)
     if root is None:
         raise core.SmokeFailure("QML lost its process-scoped AT-SPI application on Charting")
@@ -288,11 +304,36 @@ def run_qml_sequence(
     set_focus(bridge, analytical)
     time.sleep(0.2)
     require_focus(bridge, analytical)
-    run_charting_end_and_wrap_sequence(
+    run_end_and_wrap_sequence(
         session,
         keyboard,
         settle,
+        initial_route=CHARTING_ROUTE,
         second_route=CHARTING_PIVOT_ROUTE,
+        left_route=CHARTING_STOCK_ROUTE,
+    )
+    cycle_primary_from_keyboard(
+        session,
+        keyboard,
+        settle,
+        QUANT_ORDER_BOOK_ROUTE,
+        "Ctrl+Tab selects Quantitative Visualization and retains Order Book",
+    )
+    root = bridge.application_for_pid(session.process.pid)
+    if root is None:
+        raise core.SmokeFailure("QML lost its process-scoped AT-SPI application on Quantitative")
+    nodes = list(walk_tree(root))
+    volatility = visible_tab(bridge, nodes, "Volatility Surface")
+    set_focus(bridge, volatility)
+    time.sleep(0.2)
+    require_focus(bridge, volatility)
+    run_end_and_wrap_sequence(
+        session,
+        keyboard,
+        settle,
+        initial_route=QUANT_ORDER_BOOK_ROUTE,
+        second_route=QUANT_MONTE_CARLO_ROUTE,
+        left_route=QUANT_PROJECTION_ROUTE,
     )
     finish_cleanly(session)
     return {
@@ -302,7 +343,7 @@ def run_qml_sequence(
         "outcome": "focused-tab-keyboard-selection",
         "initial_tree": initial_summary,
         "final_tree": final_summary,
-        "focus_action": "AT-SPI SetFocus for Browser #1 and Basic Charts",
+        "focus_action": "AT-SPI SetFocus for Browser #1, Basic Charts, and Volatility Surface",
         "os_key_sequence": [
             "Right",
             "Return",
@@ -313,7 +354,9 @@ def run_qml_sequence(
             "Return",
             "Home",
             "Return",
-        ] + CHARTING_KEY_SEQUENCE,
+        ]
+        + CHARTING_KEY_SEQUENCE
+        + QUANT_KEY_SEQUENCE,
         "route_sequence": [
             "browser.browser1",
             "browser.browser1",
@@ -325,10 +368,17 @@ def run_qml_sequence(
             "browser.browser3",
             "browser.browser3",
             "browser.browser1",
-        ] + charting_route_sequence(CHARTING_PIVOT_ROUTE),
+        ]
+        + end_and_wrap_route_sequence(
+            CHARTING_ROUTE, CHARTING_PIVOT_ROUTE, CHARTING_STOCK_ROUTE
+        )
+        + end_and_wrap_route_sequence(
+            QUANT_ORDER_BOOK_ROUTE, QUANT_MONTE_CARLO_ROUTE, QUANT_PROJECTION_ROUTE
+        ),
         "focus_without_selection_verified": True,
         "home_and_browser3_navigation_verified": True,
         "charting_end_and_wrap_verified": True,
+        "quant_end_and_wrap_verified": True,
         "pointer_input": False,
         "clean_exit": True,
     }
@@ -381,12 +431,35 @@ def run_slint_sequence(
     time.sleep(settle)
     core.require_route(session.request("state"), INITIAL_ROUTE, "Return restores Browser 1")
     run_browser3_and_home_sequence(session, keyboard, settle)
-    select_charting_from_keyboard(session, keyboard, settle)
-    run_charting_end_and_wrap_sequence(
+    cycle_primary_from_keyboard(
         session,
         keyboard,
         settle,
+        CHARTING_ROUTE,
+        "Ctrl+Tab selects Charting and retains Analytical",
+    )
+    run_end_and_wrap_sequence(
+        session,
+        keyboard,
+        settle,
+        initial_route=CHARTING_ROUTE,
         second_route=CHARTING_STOCK_ROUTE,
+        left_route=CHARTING_STOCK_ROUTE,
+    )
+    cycle_primary_from_keyboard(
+        session,
+        keyboard,
+        settle,
+        QUANT_ROUTE,
+        "Ctrl+Tab selects Quantitative Visualization and retains Volatility Surface",
+    )
+    run_end_and_wrap_sequence(
+        session,
+        keyboard,
+        settle,
+        initial_route=QUANT_ROUTE,
+        second_route=QUANT_FACTOR_ROUTE,
+        left_route=QUANT_MONTE_CARLO_ROUTE,
     )
     finish_cleanly(session)
     return {
@@ -405,7 +478,9 @@ def run_slint_sequence(
             "Return",
             "Home",
             "Return",
-        ] + CHARTING_KEY_SEQUENCE,
+        ]
+        + CHARTING_KEY_SEQUENCE
+        + QUANT_KEY_SEQUENCE,
         "route_sequence": [
             "browser.browser1",
             "browser.browser1",
@@ -417,10 +492,17 @@ def run_slint_sequence(
             "browser.browser3",
             "browser.browser3",
             "browser.browser1",
-        ] + charting_route_sequence(CHARTING_STOCK_ROUTE),
+        ]
+        + end_and_wrap_route_sequence(
+            CHARTING_ROUTE, CHARTING_STOCK_ROUTE, CHARTING_STOCK_ROUTE
+        )
+        + end_and_wrap_route_sequence(
+            QUANT_ROUTE, QUANT_FACTOR_ROUTE, QUANT_MONTE_CARLO_ROUTE
+        ),
         "focus_without_selection_verified": True,
         "home_and_browser3_navigation_verified": True,
         "charting_end_and_wrap_verified": True,
+        "quant_end_and_wrap_verified": True,
         "accessibility": accessibility,
         "pointer_input": False,
         "clean_exit": True,
@@ -462,12 +544,35 @@ def run_bevy_sequence(
     time.sleep(settle)
     core.require_route(session.request("state"), INITIAL_ROUTE, "Return restores Browser 1")
     run_browser3_and_home_sequence(session, keyboard, settle)
-    select_charting_from_keyboard(session, keyboard, settle)
-    run_charting_end_and_wrap_sequence(
+    cycle_primary_from_keyboard(
         session,
         keyboard,
         settle,
+        CHARTING_ROUTE,
+        "Ctrl+Tab selects Charting and retains Analytical",
+    )
+    run_end_and_wrap_sequence(
+        session,
+        keyboard,
+        settle,
+        initial_route=CHARTING_ROUTE,
         second_route=CHARTING_STOCK_ROUTE,
+        left_route=CHARTING_STOCK_ROUTE,
+    )
+    cycle_primary_from_keyboard(
+        session,
+        keyboard,
+        settle,
+        QUANT_ROUTE,
+        "Ctrl+Tab selects Quantitative Visualization and retains Volatility Surface",
+    )
+    run_end_and_wrap_sequence(
+        session,
+        keyboard,
+        settle,
+        initial_route=QUANT_ROUTE,
+        second_route=QUANT_FACTOR_ROUTE,
+        left_route=QUANT_MONTE_CARLO_ROUTE,
     )
     finish_cleanly(session)
     return {
@@ -475,7 +580,7 @@ def run_bevy_sequence(
         "implementation": "bevy-egui",
         "status": "passed",
         "outcome": "focused-tab-keyboard-selection",
-        "focus_action": "ordinary egui Tab traversal to Browser 1 and primary-switch focus on Charting",
+        "focus_action": "ordinary egui Tab traversal to Browser 1 and primary-switch secondary focus",
         "os_key_sequence": [
             "Tab x11",
             "Right",
@@ -487,7 +592,9 @@ def run_bevy_sequence(
             "Return",
             "Home",
             "Return",
-        ] + CHARTING_KEY_SEQUENCE,
+        ]
+        + CHARTING_KEY_SEQUENCE
+        + QUANT_KEY_SEQUENCE,
         "route_sequence": [
             "browser.browser1",
             "browser.browser1",
@@ -500,10 +607,17 @@ def run_bevy_sequence(
             "browser.browser3",
             "browser.browser3",
             "browser.browser1",
-        ] + charting_route_sequence(CHARTING_STOCK_ROUTE),
+        ]
+        + end_and_wrap_route_sequence(
+            CHARTING_ROUTE, CHARTING_STOCK_ROUTE, CHARTING_STOCK_ROUTE
+        )
+        + end_and_wrap_route_sequence(
+            QUANT_ROUTE, QUANT_FACTOR_ROUTE, QUANT_MONTE_CARLO_ROUTE
+        ),
         "focus_without_selection_verified": True,
         "home_and_browser3_navigation_verified": True,
         "charting_end_and_wrap_verified": True,
+        "quant_end_and_wrap_verified": True,
         "accessibility": accessibility,
         "pointer_input": False,
         "clean_exit": True,
