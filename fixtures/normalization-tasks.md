@@ -922,6 +922,45 @@ Every passing record retained the exact 22-click/22-route sequence described abo
 
 This small repeat matrix demonstrates that complete pointer navigation did not repeat consistently for Slint and QML in this setup. Bevy + egui's 4/4 passes are only the observed result for these four fresh processes, not generalized reliability. All 82 parent discovery tests, repository validation, and `git diff --check` passed after the documentation update. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed. Page-content/other-control input, touch, scrolling, drag, other geometries/scales, rendered-frame correctness, presented-frame timing, active-screen-reader behavior, human-reviewed equivalence, durable artifact attachment, controlled results, and scenario acceptance remain unestablished.
 
+### Browser 1 Price-header page-content pointer captures (2026-11-22)
+
+A development-only `/tmp/run_browser1_price_pointer.py` driver combined the existing RemoteDesktop pointer, Screenshot Portal, semantic route readback, and clean-quit primitives without changing application source. Browser 1's first activation of a new header requests ascending sort in Slint (`src/browser1.rs:175-188` and `ui/grid.slint:479-497`), QML (`Browser1Page.qml:40-52,118-160` and `browser1sortproxymodel.cpp:11-56`), and Bevy + egui (`src/ui/tabs/browser/browser_1.rs:505-591` and `src/ui/state/browser_1_state.rs:157-166`). The canonical initial leading prices are `IM 350.88`, `BEDD 584.32`, `AZFF 593.91`, `MTM 679.39`, and `UI 788.88`; one ascending Price activation should instead lead with `NHP 2.39`, `MJC 4.33`, `IRQK 4.54`, `ACFN 4.56`, and `HPQB 4.78` and show Price's ascending marker.
+
+Each fresh native light/100% process received one same-route Browser-primary focus click, parked the pointer at logical `(100,100)` outside the application before the before-capture, sent exactly one Price-header click, parked there again before the after-capture, and required Browser 1 at all five state checks. Neutral parking prevents hover-only differences from being treated as sorting. The run-02 invocation for each implementation was:
+
+```bash
+python3 /tmp/run_browser1_price_pointer.py \
+  --implementation "$IMPLEMENTATION" \
+  --work-root "/tmp/ui-framework-browser1-price-pointer-2026-11-22-02/$IMPLEMENTATION" \
+  --jsonl "/tmp/ui-framework-browser1-price-pointer-2026-11-22-02/$IMPLEMENTATION.jsonl" \
+  --settle 2
+```
+
+The initial Slint-only attempt used the same command with root `01`; the centered Bevy + egui diagnostic used root `03`. Coordinates were measured from the common native review crop and converted with the same `(1815,579)` raw origin and `1.6666666269302368` host scale as the native shell-tab runs:
+
+| Implementation | Browser-primary focus logical point | Price review-crop point | Price logical point |
+|---|---:|---:|---:|
+| Slint | `(1128,423.6)` | `(500,243)` | `(1389,493.2)` |
+| QML | `(1128,422.4)` | `(500,271)` | `(1389,510)` |
+| Bevy + egui run 02 | `(1161,396.6)` | `(500,263)` | `(1389,505.2)` |
+| Bevy + egui run 03 | `(1161,396.6)` | `(540,263)` | `(1413,505.2)` |
+
+Every external desktop PNG is 5120×2160. The isolated half-open crop `(1815,579,3415,1639)` produced 1600×1060 review PNGs. Procedural JSONL `status=passed` means only that both clicks were attempted, Browser 1 was preserved, two decodable distinct capture pairs were produced, and `quit` was acknowledged with status 0. It deliberately retains `price_sort_visually_verified=false` and `capture_pixel_content_reviewed=false`; subsequent assistant inspection, not image inequality or route readback, is the sorting oracle.
+
+| Attempt | Subsequent visual review | Clean exit |
+|---|---|---|
+| Slint 01 | Before-capture and Price click completed, but the after-capture failed; sorting not verified | Not claimed |
+| Slint 02 | Expected ascending Price marker and leading rows | Acknowledged quit, status 0 |
+| QML 02 | Expected ascending Price marker and leading rows; prices display `$` prefixes | Acknowledged quit, status 0 |
+| Bevy + egui 02 | Original row order retained; no ascending Price sort observed | Acknowledged quit, status 0 |
+| Bevy + egui 03 | Original row order retained again with the centered target | Acknowledged quit, status 0 |
+
+Slint 01's after-capture returned portal response 2. Host journals showed `xdg-desktop-portal-gnome` exhausting file descriptors, failing Vulkan/GL allocations, crashing, and being restarted by systemd. This is retained as host infrastructure failure, not a Slint sorting failure or clean exit. Slint 02 was a fresh post-restart attempt in a separate directory, not evidence that the original attempt passed. Bevy + egui 03 changed only the Price x-coordinate after the run-02 coordinate grid inspection; it was not a repeat of the same accepted result. No further Bevy retry was made. Both Bevy attempts had pixel differences only in review rectangle `(13,64,582,276)`, above the data rows, while the leading `IM 350.88 → BEDD 584.32 → AZFF 593.91` order remained unchanged. The evidence does not distinguish input-delivery failure from application behavior and does not establish a Bevy implementation defect.
+
+Independent validation checked every JSONL executable hash, route sequence, click coordinates, flags, clean-exit claim, PNG decode/mode/dimensions/byte count, and SHA-256. Run-02/03 records have exactly two clicks, five Browser 1 readbacks, no programmatic route selection or keyboard input, and `rendered_frame_verified=false`. After-review SHA-256 values were Slint `1171393f4fccd93323877cbf98e2719074d7b87cf44af903e35aa389eb030bbb`, QML `7f3b6676a46b3d509e3b9239df7e5788a15229cc2d87dfedde0588130530dfa3`, Bevy run 02 `e5a99d31b9bafd10c47553ccc76deb7652f89af325f8c965f093d9f93e6eab3e`, and Bevy run 03 `7231066dc2efa297af336b30205610d022bf07354ccdcaeaaab103573d504a62`; the original Slint before-review hash was `8f98bc1bc6cb4680206ecefb5548541aea88ece997a64e3e6baa552bd5dc9d01`. JSONL SHA-256 values were Slint 01 `338e703a6e03ca37f7ae51812da8ad5860cf226950c894942d9634b9449b0307`, Slint 02 `e7d2fcb63d89ba5456c9cc2f865423afd8bd8b3dbb7746669ed03eb4f13e8306`, QML 02 `0f5d56a286dfd6e28f31def0c186d5f4c552760d480738abff08f50f0163a721`, Bevy 02 `653c2bfdc4e1e2a749d475cf999e0841ca8de81f9ea25339e75fd0ec0a467a62`, and Bevy 03 `54053532437a6efc538a6d8db60c8812fee6e4da0f36bbe48816bd4697a005b5`.
+
+This establishes one real page-content Price-sort interaction for Slint and QML only. Bevy + egui page-content sorting remains unverified after two preserved unsuccessful attempts. These single positive runs do not establish repeated-run reliability, other headers or descending sort, row/cell editing, scrolling, drag, touch, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, or scenario acceptance. All 82 parent discovery tests, repository validation, and `git diff --check` passed after the documentation update. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
+
 ### Bevy + egui Export View pointer and application capture (2026-11-22)
 
 A development-only `/tmp/run_bevy_export_view_pointer.py` driver launched the unchanged Bevy + egui Release executable at native light/100% with a fresh `/tmp` working directory. It used the existing stable-ID adapter only for initial/final route readback and acknowledged quit, never route selection. Two same-route Browser-primary clicks established focus, followed by one real Export View toolbar click. The accepted invocation was:
