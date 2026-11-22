@@ -408,6 +408,45 @@ Assistant inspection found populated Browser 2 advanced grids and populated 8×8
 
 The tested executable hashes remained Slint `49022ade231309e7f34e794832de390b4a2582cc4fbf9cb5d29fe9e946737557`, QML `4b1bf027fb5587b580b227a64f15f60ae0f72b81c6d8cb121971131523fe759e`, and Bevy + egui `7e2f2c281bfbd3b3cc9b975b98bee489bee3986002e45efa684105cd1cc81931`. Exact capture/review hashes, route metadata, crop boxes, clean exits, and assistant observations are in each directory's `manifest.jsonl` and `assistant-review.jsonl`. No source or test code changed. All 61 parent Python tests and repository validation remained passing. Raw desktop images are not publication artifacts; durable attachment, other variants, active accessibility, human equivalence acceptance, controlled results, and scenario activation remain unestablished.
 
+### Browser 2 and Browser 3 theme/scale screenshot variants (2026-11-22)
+
+The accepted native-size matrix used 24 separate runner invocations: two routes × three implementations × light/dark × 100%/200%. Every variant had a fresh application process and a fresh Screenshot portal connection. The checkout-independent invocation pattern was:
+
+```bash
+set -e
+for route in browser.browser2 browser.browser3; do
+  root="/tmp/ui-framework-screenshots-2026-11-22-${route//./-}-fresh-matrix-01"
+  for implementation in slint qml bevy-egui; do
+    case "$implementation" in
+      slint) executable=(--slint "$SLINT_ROOT/target/release/slintuitest") ;;
+      qml) executable=(--qml "$QML_ROOT/build-fixture-tests/appQmlUITest") ;;
+      bevy-egui) executable=(--bevy-egui "$BEVY_ROOT/target/release/bevy_egui_test" --bevy-asset-root "$BEVY_ROOT") ;;
+    esac
+    for theme in light dark; do
+      for scale in 100 200; do
+        python3 "$COMPARISON_ROOT/tools/runtime_screenshot.py" \
+          "${executable[@]}" \
+          --output-dir "$root/$implementation-$theme-$scale" \
+          --route "$route" \
+          --themes "$theme" \
+          --scales "$scale" \
+          --sizes native \
+          --qml-host-scale 1.6666666269302368 \
+          --timeout 30
+      done
+    done
+  done
+done
+```
+
+All 24 cases returned the requested canonical route, retained it after capture, acknowledged `quit`, and exited with status 0. Each raw desktop PNG measured 5120×2160. Pillow 12.1.1 produced isolated decorated review copies using half-open crop `(1815, 579, 3415, 1639)` at 100%, yielding 1600×1060, and `(1015, 53, 4215, 2140)` at 200%, yielding 3200×2087. QML's relative factors were normalized against the measured `1.6666666269302368` host scale; the fixed raw desktop dimensions are not application-scale evidence.
+
+Individual assistant inspection of every raw capture and review crop found the requested light/dark shell, expected relative 100%/200% geometry, and selected route content without unrelated desktop content in the crops. Browser 2 showed populated advanced grids with filters, colored cells, and implementation-specific controls/diagnostics. Browser 3 showed populated 8×8 correlation matrices with visible values and canonical SPY/QQQ/IWM/DIA/AAPL/MSFT/NVDA/XLE order; the previously recorded large-Slint, centered-QML, and compact-upper-left-Bevy layouts remained visible. No stale initial Browser 1 content was observed. Together with the earlier Browser 1 matrix, this completes explicit light/dark × 100%/200% native-size development captures for all common Browser routes.
+
+The tested executable hashes were Slint `34fc038090dc7f14d5a08d9e529d347f18de20bb747c196f4e333e905776ce33`, QML `881597209f79148d8b5b807d22cf6cdd483cef54f636f1ab32df8117e148801c`, and Bevy + egui `f60ebe4eb6f90e56529838ac7a1b5a104b06d7019a6e98743bf569ed3e345fa1`. Exact source/review hashes, crop boxes, requested variants, route results, executable identities, clean exits, and assistant observations are aggregated in each root's `manifest.jsonl`, `review-captures.jsonl`, and `assistant-review.jsonl` under `/tmp/ui-framework-screenshots-2026-11-22-browser-browser2-fresh-matrix-01` and `/tmp/ui-framework-screenshots-2026-11-22-browser-browser3-fresh-matrix-01`.
+
+Earlier explicit-size and shared-portal matrices were exploratory and are not cited for final visual acceptance. This accepted set contains one capture per variant and is not a repeated-run reliability result. Programmatic stable-ID selection supplied no OS-input evidence. No large/on-demand variant was constructed and no source or test code changed. All 77 parent Python tests, repository validation, and the parent whitespace check passed. No human-reviewed equivalence, presented-frame timing, numerical equivalence, active accessibility, durable attachment, controlled result, or scenario acceptance was established.
+
 ### Enabled Quantitative development screenshots (2026-11-22)
 
 The unchanged route-aware runner captured all ten enabled common Quantitative routes with this sequential loop:
