@@ -9,9 +9,13 @@ import runtime_smoke as core
 class FakeKeyboard:
     def __init__(self):
         self.ctrl_tab_count = 0
+        self.ctrl_shift_tab_count = 0
 
     def ctrl_tab(self):
         self.ctrl_tab_count += 1
+
+    def ctrl_shift_tab(self):
+        self.ctrl_shift_tab_count += 1
 
 
 class FakeSession:
@@ -22,6 +26,7 @@ class FakeSession:
             or (
                 os_smoke.INITIAL_ROUTE,
                 *os_smoke.cycling_routes(implementation),
+                *os_smoke.reverse_cycling_routes(implementation),
             )
         )
         self.state_count = 0
@@ -51,12 +56,13 @@ class RuntimeOsSmokeTests(unittest.TestCase):
             "/org/freedesktop/portal/desktop/request/1_234/token",
         )
 
-    def test_three_ctrl_tab_cycles_and_clean_quit(self):
+    def test_forward_and_reverse_cycles_and_clean_quit(self):
         session = FakeSession()
         keyboard = FakeKeyboard()
         os_smoke.run_keyboard_sequence(session, keyboard, settle=0)
         self.assertEqual(keyboard.ctrl_tab_count, 3)
-        self.assertEqual(session.state_count, 4)
+        self.assertEqual(keyboard.ctrl_shift_tab_count, 3)
+        self.assertEqual(session.state_count, 7)
         self.assertTrue(session.quit_acknowledged)
         self.assertTrue(session.finished)
 
@@ -65,7 +71,23 @@ class RuntimeOsSmokeTests(unittest.TestCase):
         keyboard = FakeKeyboard()
         os_smoke.run_keyboard_sequence(session, keyboard, settle=0)
         self.assertEqual(keyboard.ctrl_tab_count, 3)
+        self.assertEqual(keyboard.ctrl_shift_tab_count, 3)
         self.assertTrue(session.finished)
+
+    def test_wrong_reverse_route_is_rejected_without_quit(self):
+        session = FakeSession(
+            [
+                os_smoke.INITIAL_ROUTE,
+                *os_smoke.cycling_routes("slint"),
+                os_smoke.INITIAL_ROUTE,
+            ]
+        )
+        keyboard = FakeKeyboard()
+        with self.assertRaises(core.SmokeFailure):
+            os_smoke.run_keyboard_sequence(session, keyboard, settle=0)
+        self.assertEqual(keyboard.ctrl_tab_count, 3)
+        self.assertEqual(keyboard.ctrl_shift_tab_count, 1)
+        self.assertFalse(session.quit_acknowledged)
 
     def test_wrong_initial_route_is_rejected_without_input(self):
         session = FakeSession(

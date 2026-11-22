@@ -12,6 +12,7 @@ from types import TracebackType
 import runtime_smoke as core
 
 CONTROL_L = 0xFFE3
+SHIFT_L = 0xFFE1
 TAB = 0xFF09
 INITIAL_ROUTE = core.Route("primary.browser", "browser.browser1")
 CHARTING_ROUTE = core.Route("primary.charting", "chart.analytical")
@@ -26,19 +27,28 @@ def cycling_routes(implementation: str) -> tuple[core.Route, core.Route, core.Ro
     return CHARTING_ROUTE, quant, INITIAL_ROUTE
 
 
+def reverse_cycling_routes(implementation: str) -> tuple[core.Route, core.Route, core.Route]:
+    quant = QUANT_DEFAULT_BY_IMPLEMENTATION.get(implementation, DEFAULT_QUANT_ROUTE)
+    return quant, CHARTING_ROUTE, INITIAL_ROUTE
+
+
 def request_path(unique_name: str, token: str) -> str:
     sender = unique_name.removeprefix(":").replace(".", "_")
     return f"/org/freedesktop/portal/desktop/request/{sender}/{token}"
 
 
 def run_keyboard_sequence(session: core.ProcessSession, keyboard, *, settle: float = 1.0) -> None:
-    """Require three real Ctrl+Tab route changes, then exit through the adapter."""
+    """Require forward and reverse primary cycling, then exit through the adapter."""
     core.require_route(session.request("state"), INITIAL_ROUTE, "OS keyboard initial state")
     time.sleep(settle)
     for expected in cycling_routes(session.adapter.implementation):
         keyboard.ctrl_tab()
         time.sleep(settle)
         core.require_route(session.request("state"), expected, "state after OS Ctrl+Tab")
+    for expected in reverse_cycling_routes(session.adapter.implementation):
+        keyboard.ctrl_shift_tab()
+        time.sleep(settle)
+        core.require_route(session.request("state"), expected, "state after OS Ctrl+Shift+Tab")
     reply = session.request("quit")
     if reply.status != "ok":
         raise core.SmokeFailure("OS keyboard smoke quit was not acknowledged")
@@ -197,10 +207,22 @@ class RemoteDesktopKeyboard:
         self.keysym(CONTROL_L, 0)
         time.sleep(0.05)
 
+    def ctrl_shift_tab(self) -> None:
+        self.keysym(CONTROL_L, 1)
+        self.keysym(SHIFT_L, 1)
+        time.sleep(0.05)
+        self.keysym(TAB, 1)
+        time.sleep(0.05)
+        self.keysym(TAB, 0)
+        time.sleep(0.05)
+        self.keysym(SHIFT_L, 0)
+        self.keysym(CONTROL_L, 0)
+        time.sleep(0.05)
+
 
 def parser() -> argparse.ArgumentParser:
     result = argparse.ArgumentParser(
-        description="Development OS-level Ctrl+Tab smoke; not a performance or rendering test."
+        description="Development OS-level primary-keyboard smoke; not a performance or rendering test."
     )
     result.add_argument("--slint")
     result.add_argument("--qml")
@@ -242,7 +264,7 @@ def main(argv: list[str] | None = None) -> int:
                     session.close()
                 print(
                     f"PASS {adapter.implementation}: "
-                    "three OS Ctrl+Tab transitions and clean exit"
+                    "three OS Ctrl+Tab and three Ctrl+Shift+Tab transitions and clean exit"
                 )
     except Exception as error:
         print(f"FAIL OS runtime smoke: {error}", file=sys.stderr)
