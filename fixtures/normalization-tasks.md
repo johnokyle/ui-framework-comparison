@@ -1185,6 +1185,40 @@ Independent RGB comparison found differences in `(6,202,1425,1057)` for before/a
 
 This establishes one real Slint ascending/descending Company sequence, adding string-column direction-toggle evidence without changing QML or Bevy + egui Company status. It is not repeated-run reliability, another string column, editing, drag, scrolling, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, or scenario acceptance. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
 
+### Browser 1 sorted-first-row selection pointer captures (2026-11-22)
+
+A Slint/QML-only follow-up tested stable row identity after sorting. Slint maps the clicked display index through its current ordering to a stable source-row identity (`src/browser1.rs:146-160`); QML delegates supply their stable `rowId` to the selection toggle (`Browser1Page.qml:21-38,176-219`). After an ascending Price sort, the displayed first row is `NHP`, not canonical source-first `IM`. Bevy + egui was deliberately excluded because its prerequisite Price sort remains unverified after three preserved unsuccessful attempts.
+
+The development-only `/tmp/run_browser1_sorted_first_row_pointer.py` driver used one fresh native light/100% process per implementation. Its accepted invocation used the driver's 60-second default timeout:
+
+```bash
+python3 /tmp/run_browser1_sorted_first_row_pointer.py \
+  --implementation "$IMPLEMENTATION" \
+  --work-root "/tmp/ui-framework-browser1-sorted-first-row-pointer-2026-11-22-01/$IMPLEMENTATION" \
+  --jsonl "/tmp/ui-framework-browser1-sorted-first-row-pointer-2026-11-22-01/$IMPLEMENTATION.jsonl" \
+  --settle 2
+```
+
+| Implementation | Browser-primary focus logical point | Price review/logical point | Sorted first-row Company review/logical point |
+|---|---:|---:|---:|
+| Slint | `(1128,423.6)` | `(500,243)` / `(1389,493.2)` | `(200,273)` / `(1209,511.2)` |
+| QML | `(1128,422.4)` | `(500,271)` / `(1389,510)` | `(200,302)` / `(1209,528.6)` |
+
+Each process attempted one focus click, one Price-header click, and one click on the newly leading row's Company cell. It parked at logical `(100,100)` before every capture, passed seven Browser 1 readbacks, acknowledged `quit`, and exited with status 0 without keyboard input or programmatic route selection. Desktop PNGs are 5120×2160 and review PNGs are 1600×1060 from `(1815,579,3415,1639)`.
+
+Procedural `status=passed` for both records means only that all three clicks were attempted, the route remained unchanged, three pairwise-distinct decodable review captures were produced, and clean exit completed. Both JSONL records retain `price_sort_visually_verified=false`, `sorted_row_selection_visually_verified=false`, and `capture_pixel_content_reviewed=false`; subsequent assistant inspection of the labeled contact sheet is the page-content oracle.
+
+| Implementation | Before | After Price click | After sorted-first-row click | Clean exit |
+|---|---|---|---|---|
+| Slint | Canonical source order with source-first `IM` | Ascending Price marker and leading `NHP 2.39` | Leading `NHP` highlighted and selection status `Rows: NHP`, not source-first `IM` | Acknowledged quit, status 0 |
+| QML | Canonical source order with source-first `IM` | Ascending Price marker and leading `NHP $2.39` | Leading `NHP` highlighted and selected-row status identifies `NHP`, not source-first `IM` | Acknowledged quit, status 0 |
+
+Independent RGB comparison measured Slint difference bounds `(1,202,1460,1057)` for before/after-sort and before/after-selection and `(1,202,1460,286)` for after-sort/after-selection. QML bounds were `(8,257,1447,1060)` for before/after-sort, `(0,224,1471,316)` for after-sort/after-selection, and `(0,224,1471,1060)` for before/after-selection. These bounds support capture review but are not the interaction oracle.
+
+Independent validation checked both records' exact three-click/seven-route sequences, executable hashes, visual-review flags, clean exits, capture modes/dimensions/byte counts, pairwise-distinctness fields, and SHA-256 values: 6 clicks, 14 Browser 1 readbacks, and 12 recorded PNGs. Before/after-sort/after-selection review SHA-256 values were Slint `4c5bad6dd14baf6fc675aba7a9dac8504ee692455d335337fddee864c988e0fd`, `6028c56d81e50f34d5c865ecefce79a092df35ed4a93765cd5100370d4ac68d2`, and `c3ac8a0a94960e802624cfc7f688a38e27ca0a99e38deaef441ac8822774afa3`; QML `a09da9f43afc6233a32bc872747760e0391d082ffee55041c8caa2a8c9cdd3f9`, `fb0593fc3a2060ef96e46423651c33035e2341b1efa7205cdbcadc16c290aefe`, and `2cab46a9121dea07cefc73489c1bd4cb5c9f0a77e6b2efb9170caffa9105a5d6`. JSONL SHA-256 values were Slint `31bf793d350078d92ff6f88c0382da8d4801e2590a8804048c171e252c63dc30` and QML `894e69dba4d19601189f9668113c26c69d71dd9e13c5565587edf7f5bbb6bd74`.
+
+This establishes one sorted-view stable-identity selection sequence for each of Slint and QML: pointer sorting led with `NHP`, and clicking that displayed row selected `NHP` rather than source-first `IM`. It does not establish repeated-run reliability, repeated-row deselection, modified/multi-selection, Bevy + egui behavior, other sorted columns, editing, scrolling, drag, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, or scenario acceptance. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
+
 ### Bevy + egui Export View pointer and application capture (2026-11-22)
 
 A development-only `/tmp/run_bevy_export_view_pointer.py` driver launched the unchanged Bevy + egui Release executable at native light/100% with a fresh `/tmp` working directory. It used the existing stable-ID adapter only for initial/final route readback and acknowledged quit, never route selection. Two same-route Browser-primary clicks established focus, followed by one real Export View toolbar click. The accepted invocation was:
