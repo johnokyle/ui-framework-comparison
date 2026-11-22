@@ -408,6 +408,35 @@ Assistant inspection found populated Browser 2 advanced grids and populated 8×8
 
 The tested executable hashes remained Slint `49022ade231309e7f34e794832de390b4a2582cc4fbf9cb5d29fe9e946737557`, QML `4b1bf027fb5587b580b227a64f15f60ae0f72b81c6d8cb121971131523fe759e`, and Bevy + egui `7e2f2c281bfbd3b3cc9b975b98bee489bee3986002e45efa684105cd1cc81931`. Exact capture/review hashes, route metadata, crop boxes, clean exits, and assistant observations are in each directory's `manifest.jsonl` and `assistant-review.jsonl`. No source or test code changed. All 61 parent Python tests and repository validation remained passing. Raw desktop images are not publication artifacts; durable attachment, other variants, active accessibility, human equivalence acceptance, controlled results, and scenario activation remain unestablished.
 
+### Enabled Quantitative development screenshots (2026-11-22)
+
+The unchanged route-aware runner captured all ten enabled common Quantitative routes with this sequential loop:
+
+```bash
+set -e
+for route in quant.vol-surface quant.factor-structure quant.correlation quant.frontier quant.pca quant.regime quant.projection quant.network quant.knowledge quant.monte-carlo; do
+  python3 "$COMPARISON_ROOT/tools/runtime_screenshot.py" \
+    --slint "$SLINT_ROOT/target/release/slintuitest" \
+    --qml "$QML_ROOT/build-fixture-tests/appQmlUITest" \
+    --bevy-egui "$BEVY_ROOT/target/release/bevy_egui_test" \
+    --bevy-asset-root "$BEVY_ROOT" \
+    --output-dir "/tmp/ui-framework-screenshots-2026-11-22-${route//./-}-01" \
+    --route "$route" \
+    --themes light \
+    --scales 100 \
+    --qml-host-scale 1.6666666269302368 \
+    --timeout 30
+done
+```
+
+All 30 cases returned the requested canonical route, retained it after capture, acknowledged `quit`, and exited with status 0. Quantitative views used their existing startup defaults; no large/on-demand Browser or analytical stress variant was constructed. Every raw desktop PNG measured 5120×2160, and each isolated decorated review copy measured 1600×1060 using half-open crop `(1815, 579, 3415, 1639)`.
+
+Assistant inspection found populated expected visualizations on all ten routes in all three implementations. Layouts are not equivalent: Slint's Knowledge Graph is a small three-node cluster with a clipped bottom legend; QML's Regime Map is sparse and its Advanced knowledge alias shows only a small central cluster; Bevy + egui's Network Graph and lower Monte Carlo histogram are truncated at the capture bottom. Compact 3D plots, dense networks/traces, and whitespace-heavy layouts are also recorded in the individual observations. These are captured-layout findings, not interaction, numerical-equivalence, human-equivalence, or frame-timing acceptance.
+
+The default-disabled `quant.order-book` was deliberately excluded. This batch does not capture its disabled fallback as an Order Book result or change its existing capability status. Exact artifacts are under `/tmp/ui-framework-screenshots-2026-11-22-quant-<route>-01` for `vol-surface`, `factor-structure`, `correlation`, `frontier`, `pca`, `regime`, `projection`, `network`, `knowledge`, and `monte-carlo`.
+
+The tested executable hashes remained Slint `49022ade231309e7f34e794832de390b4a2582cc4fbf9cb5d29fe9e946737557`, QML `4b1bf027fb5587b580b227a64f15f60ae0f72b81c6d8cb121971131523fe759e`, and Bevy + egui `7e2f2c281bfbd3b3cc9b975b98bee489bee3986002e45efa684105cd1cc81931`. Exact capture/review hashes, route metadata, crop boxes, clean exits, and assistant observations are in each directory's `manifest.jsonl` and `assistant-review.jsonl`. No source or test code changed. All 61 parent Python tests and repository validation passed. Raw desktop images are not publication artifacts; durable attachment, other variants, active accessibility, human equivalence acceptance, controlled results, and scenario activation remain unestablished.
+
 ### Browser 1 AT-SPI and focused-keyboard development evidence (2026-11-21)
 
 A parent-only `tools/runtime_accessibility_smoke.py` runner reads the host AT-SPI `IsEnabled` status without changing it, launches fresh light/100% 1200×750 processes, and restricts desktop traversal to each child's PID. QML alone receives `QT_LINUX_ACCESSIBILITY_ALWAYS_ON=1`, in addition to its existing capture overrides. The runner uses QML's AT-SPI `SetFocus` action only to establish initial tab focus; subsequent Right, Return, and Left input is delivered through the existing authorized RemoteDesktop keyboard session. Stable-ID route readback remains the application-state oracle. No absolute coordinates, pointer events, direct selection calls, screenshots, or host settings changes are used.
