@@ -1128,6 +1128,36 @@ Independent RGB comparison found QML's after-first/after-second and before/after
 
 This preserves one unsuccessful two-click sequence per implementation without adding a verified second-click interaction. Slint still has only the earlier single-click selection evidence, QML now has an additional delayed single-selection observation but no deselection evidence, and Bevy + egui row selection remains unverified. Repeated-run reliability, modified/multi-selection, editing, scrolling, drag, touch, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, and scenario acceptance remain unestablished. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
 
+### Browser 1 Company-column resize pointer captures (2026-11-22)
+
+A development-only `/tmp/run_browser1_column_resize_pointer.py` driver attempted one real left-button drag on Company's right header edge, the Company/Sector boundary. Slint exposes an 8 px resize handle and updates the persistent column model during motion (`ui/grid.slint:527-538`, `src/browser1.rs:75-79,190-197`); QML enables resizable columns on its horizontal header/table (`Browser1Page.qml:111-116,163-174`); Bevy + egui uses TableBuilder resizing and excludes a 6 px header-edge zone from sorting/reorder handling (`src/ui/tabs/browser/browser_1.rs:174-205,505-523,631-637`). The limited requested action was a 60-review-pixel widening, not an assumption about exact framework geometry after clipping.
+
+The accepted invocation for each implementation used the driver's 60-second default timeout:
+
+```bash
+python3 /tmp/run_browser1_column_resize_pointer.py \
+  --implementation "$IMPLEMENTATION" \
+  --work-root "/tmp/ui-framework-browser1-column-resize-pointer-2026-11-22-01/$IMPLEMENTATION" \
+  --jsonl "/tmp/ui-framework-browser1-column-resize-pointer-2026-11-22-01/$IMPLEMENTATION.jsonl" \
+  --settle 2
+```
+
+The drag began at review x=310 and logical x=1275, then used six relative +6 logical-x motion steps before release, ending at logical x=1311 for a requested +60 review-pixel displacement. Header y targets were Slint review/logical `(310,243)` / `(1275,493.2)`, QML `(310,271)` / `(1275,510)`, and Bevy + egui `(310,263)` / `(1275,505.2)`. The Browser-primary focus points and raw/review crop conversion were unchanged. Every fresh native light/100% process attempted one focus click and one drag, parked at logical `(100,100)` before each capture, passed five Browser 1 readbacks, acknowledged `quit`, and exited with status 0 without keyboard input or programmatic route selection.
+
+Procedural `status=failed` for Slint and QML records only identical before/after review PNGs after clean exit. Bevy + egui passed the capture-distinctness check, but this does not assert resizing. Every record retains `column_resize_visually_verified=false` and `capture_pixel_content_reviewed=false`; subsequent assistant inspection is the interaction oracle.
+
+| Implementation | Subsequent visual review | Clean exit |
+|---|---|---|
+| Slint | Byte-identical before/after review PNGs; Company/Sector boundary and rows unchanged | Acknowledged quit, status 0 |
+| QML | Byte-identical before/after review PNGs; Company/Sector boundary and rows unchanged | Acknowledged quit, status 0 |
+| Bevy + egui | Company/Sector boundary and rows unchanged; only toolbar-region differences | Acknowledged quit, status 0 |
+
+Independent RGB comparison found no Slint or QML review-pixel difference. Bevy + egui's difference was confined to `(13,64,474,276)`, above the data rows, with no observed width change. These unsuccessful drag attempts do not distinguish input-delivery, hit-target, motion-processing, focus, and application causes and do not establish implementation defects. No attempt was retried.
+
+Independent validation checked all three records' exact focus-click/drag fields, five-route sequences, executable hashes, visual-review flags, clean exits, capture modes/dimensions/byte counts, and SHA-256 values: 3 focus clicks, 3 drags, 15 Browser 1 readbacks, and 12 recorded PNGs. Before/after review SHA-256 values were Slint `88f170a008c7c7ab034750fd7652acf9342aab755b510c47f47d48938ebf6ea5` twice; QML `7fb3b33103b6422956f51e508b401eabee2d014d9f8e769f9b78d087e2110e70` twice; and Bevy + egui `99d75234fc062d804311b5592f3f561c2f207db678a99ea8e7f052b618c2ae4e` and `0227980cff1904fea6c3932a2f2bda0546dc38c479019e61cc61489c194b1b54`. JSONL SHA-256 values were Slint `feb490333e125e467a1efea4d84a0715772ec29b0e42d6d3d80a8f2baff18208`, QML `492675adca97c0696d45adfd037b02259d333a0078c8d2f2227d817fa0e25e30`, and Bevy + egui `af1ce5aab5002f52fabbd3b0c3633cc6d337cfadb5072d5254eb63b8112202ef`.
+
+This adds no verified column-resize interaction. Slint/QML sorting and single-click selection evidence does not generalize to drag behavior, and Bevy + egui page-content interaction remains unverified. Other resize targets/directions, reorder, scrolling, repeated-run reliability, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, and scenario acceptance remain unestablished. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
+
 ### Bevy + egui Export View pointer and application capture (2026-11-22)
 
 A development-only `/tmp/run_bevy_export_view_pointer.py` driver launched the unchanged Bevy + egui Release executable at native light/100% with a fresh `/tmp` working directory. It used the existing stable-ID adapter only for initial/final route readback and acknowledged quit, never route selection. Two same-route Browser-primary clicks established focus, followed by one real Export View toolbar click. The accepted invocation was:
