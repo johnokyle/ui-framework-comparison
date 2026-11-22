@@ -472,7 +472,7 @@ All 30 cases returned the requested canonical route, retained it after capture, 
 
 Assistant inspection found populated expected visualizations on all ten routes in all three implementations. Layouts are not equivalent: Slint's Knowledge Graph is a small three-node cluster with a clipped bottom legend; QML's Regime Map is sparse and its Advanced knowledge alias shows only a small central cluster; Bevy + egui's Network Graph and lower Monte Carlo histogram are truncated at the capture bottom. Compact 3D plots, dense networks/traces, and whitespace-heavy layouts are also recorded in the individual observations. These are captured-layout findings, not interaction, numerical-equivalence, human-equivalence, or frame-timing acceptance.
 
-The default-disabled `quant.order-book` was deliberately excluded. This batch does not capture its disabled fallback as an Order Book result or change its existing capability status. Exact artifacts are under `/tmp/ui-framework-screenshots-2026-11-22-quant-<route>-01` for `vol-surface`, `factor-structure`, `correlation`, `frontier`, `pca`, `regime`, `projection`, `network`, `knowledge`, and `monte-carlo`.
+The `quant.order-book` route was deliberately excluded. This batch does not capture its disabled fallback as an Order Book result or change its existing capability status. Exact artifacts are under `/tmp/ui-framework-screenshots-2026-11-22-quant-<route>-01` for `vol-surface`, `factor-structure`, `correlation`, `frontier`, `pca`, `regime`, `projection`, `network`, `knowledge`, and `monte-carlo`.
 
 The tested executable hashes remained Slint `49022ade231309e7f34e794832de390b4a2582cc4fbf9cb5d29fe9e946737557`, QML `4b1bf027fb5587b580b227a64f15f60ae0f72b81c6d8cb121971131523fe759e`, and Bevy + egui `7e2f2c281bfbd3b3cc9b975b98bee489bee3986002e45efa684105cd1cc81931`. Exact capture/review hashes, route metadata, crop boxes, clean exits, and assistant observations are in each directory's `manifest.jsonl` and `assistant-review.jsonl`. No source or test code changed. All 61 parent Python tests and repository validation passed. Raw desktop images are not publication artifacts; durable attachment, other variants, active accessibility, human equivalence acceptance, controlled results, and scenario activation remain unestablished.
 
@@ -552,7 +552,7 @@ Individual assistant inspection of every review crop found the requested light/d
 
 The tested executable hashes remained Slint `34fc038090dc7f14d5a08d9e529d347f18de20bb747c196f4e333e905776ce33`, QML `881597209f79148d8b5b807d22cf6cdd483cef54f636f1ab32df8117e148801c`, and Bevy + egui `f60ebe4eb6f90e56529838ac7a1b5a104b06d7019a6e98743bf569ed3e345fa1`. Exact source/review hashes, crop boxes, requested variants, route results, executable identities, clean exits, and assistant observations are aggregated in each root's `manifest.jsonl`, `review-captures.jsonl`, and `assistant-review.jsonl`. Roots follow `/tmp/ui-framework-screenshots-2026-11-22-quant-<route>-fresh-matrix-01` for `vol-surface`, `factor-structure`, `correlation`, `frontier`, `pca`, `regime`, `projection`, `network`, `knowledge`, and `monte-carlo`. Together with the earlier matrices, all enabled common routes now have explicit native-size light/dark × 100%/200% development captures.
 
-The default-disabled `quant.order-book` was deliberately excluded; its disabled fallback was not represented as an enabled Order Book result. Quantitative views used their existing startup defaults, and no large/on-demand Browser, analytical, stock, or pivot variant was constructed. No source or test code changed. All 77 parent Python tests, repository validation, and the parent whitespace check passed. This single-capture-per-variant set is not repeated-run reliability, OS-input, presented-frame timing, numerical-equivalence, active-accessibility, human-equivalence, durable-attachment, controlled-result, or scenario-acceptance evidence.
+The `quant.order-book` route was deliberately excluded; its disabled fallback was not represented as an enabled Order Book result. Quantitative views used their existing startup defaults, and no large/on-demand Browser, analytical, stock, or pivot variant was constructed. No source or test code changed. All 77 parent Python tests, repository validation, and the parent whitespace check passed. This single-capture-per-variant set is not repeated-run reliability, OS-input, presented-frame timing, numerical-equivalence, active-accessibility, human-equivalence, durable-attachment, controlled-result, or scenario-acceptance evidence.
 
 ### Constrained common-route screenshot variants (2026-11-22)
 
@@ -596,7 +596,7 @@ Individual assistant inspection covered all 90 crops, and subsequent verificatio
 
 The tested executable hashes remained Slint `34fc038090dc7f14d5a08d9e529d347f18de20bb747c196f4e333e905776ce33`, QML `881597209f79148d8b5b807d22cf6cdd483cef54f636f1ab32df8117e148801c`, and Bevy + egui `f60ebe4eb6f90e56529838ac7a1b5a104b06d7019a6e98743bf569ed3e345fa1`. Exact source/review hashes, crop boxes, requested variants, route results, executable identities, clean exits, and per-variant observations are aggregated in each root's `manifest.jsonl`, `review-captures.jsonl`, and `assistant-review.jsonl`. Roots follow `/tmp/ui-framework-screenshots-2026-11-22-<route>-constrained-01` for `browser-browser2`, `browser-browser3`, `chart-analytical`, `chart-stock`, `chart-pivot`, `quant-vol-surface`, `quant-factor-structure`, `quant-correlation`, `quant-frontier`, `quant-pca`, `quant-regime`, `quant-projection`, `quant-network`, `quant-knowledge`, and `quant-monte-carlo`.
 
-Together with the six existing Browser 1 captures, these 90 variants provide 96 constrained development captures covering every enabled common route at both requested sizes. The default-disabled `quant.order-book` remained excluded. Existing startup defaults were retained, no large/on-demand variant was constructed, and no source or test code changed. All 77 parent Python tests, repository validation, and the parent whitespace check passed. This single-capture-per-variant set is not repeated-run reliability, OS-input, presented-frame timing, numerical-equivalence, active-accessibility, working-scroll, responsive-layout-acceptance, human-equivalence, durable-attachment, controlled-result, or scenario-acceptance evidence.
+Together with the six existing Browser 1 captures, these 90 variants provide 96 constrained development captures covering every enabled common route at both requested sizes. The `quant.order-book` route remained excluded. Existing startup defaults were retained, no large/on-demand variant was constructed, and no source or test code changed. All 77 parent Python tests, repository validation, and the parent whitespace check passed. This single-capture-per-variant set is not repeated-run reliability, OS-input, presented-frame timing, numerical-equivalence, active-accessibility, working-scroll, responsive-layout-acceptance, human-equivalence, durable-attachment, controlled-result, or scenario-acceptance evidence.
 
 ### Browser 1 AT-SPI and focused-keyboard development evidence (2026-11-21)
 
@@ -784,5 +784,37 @@ Direct Network Graph and Order Book activation are excluded: QML's Network Graph
 Executable hashes remained Slint `34fc038090dc7f14d5a08d9e529d347f18de20bb747c196f4e333e905776ce33`, QML `881597209f79148d8b5b807d22cf6cdd483cef54f636f1ab32df8117e148801c`, and Bevy + egui `f60ebe4eb6f90e56529838ac7a1b5a104b06d7019a6e98743bf569ed3e345fa1`. Nine focused pointer tests, six OS-keyboard tests, all 77 parent discovery tests, repository validation, and parent/QML whitespace checks passed. The JSONL records every target, canonical route, clean exit, and executable hash.
 
 This remains setup-specific semantic tab-selection evidence only. It does not establish pointer interaction with page content or other controls, touch input, scrolling, drag behavior, other geometries or scales, rendered-frame correctness, active-screen-reader behavior, human-reviewed visual equivalence, durable evidence attachment, controlled results, or scenario acceptance. No scenario was activated.
+
+### Advanced pointer toggling and disabled-route requests (2026-11-22)
+
+`tools/runtime_pointer_smoke.py` now provides an opt-in `--disabled-controls` phase with separate `--control-target` coordinates. The accepted runtime evidence used `/tmp/run_disabled_control_phase.py` to invoke that tested phase directly, rather than claiming another complete tab-matrix pass. Each implementation ran as a fresh unchanged Release process at light/100% 1200×750 with `--settle 2`. Two same-route Browser-primary clicks established focus without changing selection. The exact accepted invocations were:
+
+```bash
+python3 /tmp/run_disabled_control_phase.py slint \
+  --settle 2 \
+  --jsonl /tmp/ui-framework-disabled-phase-2026-11-22-slint.jsonl
+python3 /tmp/run_disabled_control_phase.py qml \
+  --settle 2 \
+  --jsonl /tmp/ui-framework-disabled-phase-2026-11-22-qml-02.jsonl
+python3 /tmp/run_disabled_control_phase.py bevy-egui \
+  --settle 2 \
+  --jsonl /tmp/ui-framework-disabled-phase-2026-11-22-bevy-egui.jsonl
+```
+
+All three start with Advanced enabled; their disabled targets and fallbacks are not identical. The setup-specific compositor-logical targets and verified behavior were:
+
+| Implementation | Setup target | Advanced target | Disabled target | Automatic fallback | Disabled request |
+|---|---|---|---|---|---|
+| Slint | Show Diagnostics `(1626,470.4)` | `(1791,866.4)` | `quant.order-book` | `quant.monte-carlo` | `ok`, actual Monte Carlo |
+| QML | None | Advanced Tab label `(1716,471)` | canonical `quant.knowledge` | `quant.vol-surface` | `rejected`, actual Volatility Surface |
+| Bevy + egui | None | `(1540.2,493.2)` | `quant.order-book` | `quant.monte-carlo` | `ok`, actual Monte Carlo |
+
+For each implementation, programmatic stable-ID selection first required `ok` at the enabled target. Real pointer input then turned Advanced off and semantic state readback required the listed fallback. A programmatic request for the disabled target required the listed status and actual fallback, followed by an independent `state` request proving no additional mutation. Real pointer input re-enabled Advanced; readback required the retained fallback, and a new stable-ID request then required `ok` at the original target. Finally, a real Browser-primary click restored retained Browser 1, `quit` was acknowledged, and every process exited with status 0. Slint's Show Diagnostics click was separately checked as a route-selection no-op before its diagnostics-panel Advanced checkbox was used.
+
+The recorded canonical route sequences were `browser.browser1 → quant.order-book → quant.monte-carlo → quant.order-book → browser.browser1` for Slint and Bevy + egui, and `browser.browser1 → quant.knowledge → quant.vol-surface → quant.knowledge → browser.browser1` for QML. Slint and Bevy's `ok` disabled replies explicitly identify Monte Carlo and are not counted as selecting Order Book. QML's `rejected` reply and unchanged Volatility Surface are not common-equivalence evidence for a different disabled target.
+
+Executable hashes were Slint `34fc038090dc7f14d5a08d9e529d347f18de20bb747c196f4e333e905776ce33`, QML `881597209f79148d8b5b807d22cf6cdd483cef54f636f1ab32df8117e148801c`, and Bevy + egui `f60ebe4eb6f90e56529838ac7a1b5a104b06d7019a6e98743bf569ed3e345fa1`. The JSONL records every accepted focus/control click, programmatic-selection use, canonical route sequence, disabled status, clean exit, and executable hash. Twelve focused pointer tests and all 80 parent discovery tests passed.
+
+An initial QML checkbox-target attempt disabled Knowledge and selected Volatility Surface but missed the re-enable click; it is retained as a failed diagnostic, not a pass. Candidate full-pointer-sequence attempts also stopped before this phase at previously documented tab misses. These are one successful isolated phase run per implementation, not repeated-run pointer-reliability evidence. No page-content interaction, direct pointer selection of the clipped Order Book/Network tabs, touch, scrolling, drag, other geometries or scales, presented-frame correctness, active-screen-reader behavior, human-reviewed equivalence, durable artifact attachment, controlled result, or scenario acceptance is established. No application source, large/on-demand fixture, scenario, or controlled result changed.
 
 No scenario activation or implementation hash attestation is part of this parent-only BP-01 fixture deliverable.

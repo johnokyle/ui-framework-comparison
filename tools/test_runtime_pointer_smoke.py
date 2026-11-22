@@ -43,9 +43,11 @@ def routes_for(implementation):
 
 
 class FakeSession:
-    def __init__(self, routes=None, implementation="slint"):
+    def __init__(self, routes=None, implementation="slint", select_replies=None):
         self.adapter = core.Adapter(implementation, "unused")
         self.routes = list(routes_for(implementation) if routes is None else routes)
+        self.select_replies = list(select_replies or [])
+        self.selection_requests = []
         self.state_count = 0
         self.quit_acknowledged = False
         self.finished = False
@@ -57,6 +59,11 @@ class FakeSession:
             return core.Reply(
                 "state", "ok", primary=route.primary, secondary=route.secondary
             )
+        if command.startswith("select-route "):
+            self.selection_requests.append(command.removeprefix("select-route "))
+            if not self.select_replies:
+                raise AssertionError(command)
+            return self.select_replies.pop(0)
         if command == "quit":
             self.quit_acknowledged = True
             return core.Reply("quit", "ok")
@@ -104,6 +111,42 @@ def complete_targets(implementation="slint"):
     }
 
 
+def complete_disabled_targets(implementation="slint"):
+    targets = complete_targets(implementation)
+    targets[(implementation, "advanced")] = (700.0, 100.0)
+    if implementation == "slint":
+        targets[(implementation, "show-diagnostics")] = (800.0, 100.0)
+    return targets
+
+
+def select_reply(target_id, route, status="ok"):
+    return core.Reply(
+        "select",
+        status,
+        requested=target_id,
+        primary=route.primary,
+        secondary=route.secondary,
+    )
+
+
+def disabled_select_replies(implementation):
+    case = pointer_smoke.DISABLED_ROUTE_CASES[implementation]
+    return [
+        select_reply(case.target_id, case.selected),
+        select_reply(case.target_id, case.fallback, case.disabled_status),
+        select_reply(case.target_id, case.selected),
+    ]
+
+
+def disabled_state_routes(implementation):
+    case = pointer_smoke.DISABLED_ROUTE_CASES[implementation]
+    routes = routes_for(implementation)
+    if implementation == "slint":
+        routes.append(case.selected)
+    routes.extend([case.fallback, case.fallback, case.fallback, pointer_smoke.INITIAL_ROUTE])
+    return routes
+
+
 def bare_pointer():
     pointer = pointer_smoke.RemoteDesktopPointer.__new__(
         pointer_smoke.RemoteDesktopPointer
@@ -133,6 +176,20 @@ class RuntimePointerSmokeTests(unittest.TestCase):
             with self.subTest(invalid=invalid), self.assertRaises(argparse.ArgumentTypeError):
                 pointer_smoke.parse_target(invalid)
 
+    def test_control_target_parser(self):
+        key, point = pointer_smoke.parse_control_target("slint:advanced=123.5,456")
+        self.assertEqual(key, ("slint", "advanced"))
+        self.assertEqual(point, (123.5, 456.0))
+        for invalid in (
+            "qml:unknown=1,2",
+            "other:advanced=1,2",
+            "qml:advanced=-1,2",
+            "qml:advanced=nan,2",
+            "qml:advanced=1",
+        ):
+            with self.subTest(invalid=invalid), self.assertRaises(argparse.ArgumentTypeError):
+                pointer_smoke.parse_control_target(invalid)
+
     def test_duplicate_and_missing_targets_are_rejected(self):
         entries = [
             (("slint", "browser.browser2"), (1.0, 2.0)),
@@ -143,6 +200,16 @@ class RuntimePointerSmokeTests(unittest.TestCase):
         with self.assertRaises(core.SmokeFailure) as caught:
             pointer_smoke.require_targets({}, ["slint"])
         self.assertIn("slint:browser.browser1", str(caught.exception))
+        pointer_smoke.require_targets(complete_targets("slint"), ["slint"])
+        with self.assertRaises(core.SmokeFailure) as caught:
+            pointer_smoke.require_targets(
+                complete_targets("slint"), ["slint"], disabled_controls=True
+            )
+        self.assertIn("slint:advanced", str(caught.exception))
+        self.assertIn("slint:show-diagnostics", str(caught.exception))
+        pointer_smoke.require_targets(
+            complete_disabled_targets("slint"), ["slint"], disabled_controls=True
+        )
 
     def test_complete_pointer_sequence_and_clean_quit(self):
         for implementation in pointer_smoke.IMPLEMENTATIONS:
@@ -180,6 +247,95 @@ class RuntimePointerSmokeTests(unittest.TestCase):
                 self.assertTrue(record["charting_secondary_verified"])
                 self.assertTrue(record["quantitative_secondary_verified"])
                 self.assertFalse(record["rendered_frame_verified"])
+
+    def test_disabled_control_sequence_and_clean_quit(self):
+        for implementation in pointer_smoke.IMPLEMENTATIONS:
+            with self.subTest(implementation=implementation):
+                case = pointer_smoke.DISABLED_ROUTE_CASES[implementation]
+                session = FakeSession(
+                    disabled_state_routes(implementation),
+                    implementation,
+                    disabled_select_replies(implementation),
+                )
+                pointer = FakePointer()
+                with mock.patch.object(pointer_smoke.time, "sleep"):
+                    record = pointer_smoke.run_pointer_sequence(
+                        session,
+                        pointer,
+                        complete_disabled_targets(implementation),
+                        settle=0,
+                        disabled_controls=True,
+                    )
+                self.assertEqual(session.state_count, len(disabled_state_routes(implementation)))
+                self.assertEqual(session.selection_requests, [case.target_id] * 3)
+                self.assertEqual(session.select_replies, [])
+                self.assertTrue(session.quit_acknowledged)
+                self.assertTrue(session.finished)
+                self.assertEqual(
+                    record["route_sequence"],
+                    [
+                        route.secondary
+                        for index, route in enumerate(routes_for(implementation))
+                        if index != 1
+                    ]
+                    + [
+                        case.selected.secondary,
+                        case.fallback.secondary,
+                        case.selected.secondary,
+                        pointer_smoke.INITIAL_ROUTE.secondary,
+                    ],
+                )
+                phase_clicks = 4 if implementation == "slint" else 3
+                self.assertEqual(
+                    len(pointer.clicks), len(pointer_smoke.CLICK_SEQUENCE) + 1 + phase_clicks
+                )
+                self.assertEqual(pointer.normalizations, len(pointer.clicks))
+                purposes = [
+                    click["purpose"] for click in record["click_sequence"][-phase_clicks:]
+                ]
+                expected_purposes = [
+                    "disable Advanced",
+                    "re-enable Advanced",
+                    "restore Browser 1 after disabled-control checks",
+                ]
+                if implementation == "slint":
+                    expected_purposes.insert(0, "reveal Advanced control")
+                self.assertEqual(purposes, expected_purposes)
+                self.assertTrue(record["programmatic_route_selection"])
+                self.assertTrue(record["advanced_pointer_toggle_verified"])
+                self.assertEqual(
+                    record["disabled_control"],
+                    {
+                        "target_id": case.target_id,
+                        "fallback_id": case.fallback.secondary,
+                        "disabled_request_status": case.disabled_status,
+                    },
+                )
+                self.assertEqual(
+                    record["outcome"], "pointer-tab-selection-and-disabled-controls"
+                )
+                self.assertTrue(record["clean_exit"])
+
+    def test_qml_disabled_target_must_be_rejected_without_mutation(self):
+        case = pointer_smoke.DISABLED_ROUTE_CASES["qml"]
+        session = FakeSession(
+            [case.fallback, case.fallback],
+            "qml",
+            [
+                select_reply(case.target_id, case.selected),
+                select_reply(case.target_id, case.fallback),
+            ],
+        )
+        with mock.patch.object(pointer_smoke.time, "sleep"):
+            with self.assertRaises(core.SmokeFailure):
+                pointer_smoke.run_disabled_control_phase(
+                    session,
+                    FakePointer(),
+                    complete_disabled_targets("qml"),
+                    settle=0,
+                )
+        self.assertEqual(session.selection_requests, [case.target_id] * 2)
+        self.assertFalse(session.quit_acknowledged)
 
     def test_wrong_route_stops_without_quit(self):
         session = FakeSession(

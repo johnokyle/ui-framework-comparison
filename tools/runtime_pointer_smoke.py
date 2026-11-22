@@ -35,6 +35,37 @@ class ClickStep:
     description: str
 
 
+@dataclass(frozen=True)
+class DisabledRouteCase:
+    target_id: str
+    selected: core.Route
+    fallback: core.Route
+    disabled_status: str
+
+
+DISABLED_ROUTE_CASES = {
+    "slint": DisabledRouteCase(
+        "quant.order-book",
+        core.Route("primary.quantviz", "quant.order-book"),
+        core.Route("primary.quantviz", "quant.monte-carlo"),
+        "ok",
+    ),
+    "qml": DisabledRouteCase(
+        "quant.knowledge",
+        core.Route("primary.quantviz", "quant.knowledge"),
+        core.Route("primary.quantviz", "quant.vol-surface"),
+        "rejected",
+    ),
+    "bevy-egui": DisabledRouteCase(
+        "quant.order-book",
+        core.Route("primary.quantviz", "quant.order-book"),
+        core.Route("primary.quantviz", "quant.monte-carlo"),
+        "ok",
+    ),
+}
+CONTROL_TARGET_IDS = ("advanced", "show-diagnostics")
+
+
 CLICK_SEQUENCE = (
     ClickStep("browser.browser2", BROWSER2_ROUTE, "pointer selects Browser 2"),
     ClickStep("browser.browser3", BROWSER3_ROUTE, "pointer selects Browser 3"),
@@ -83,6 +114,27 @@ def parse_target(text: str) -> tuple[tuple[str, str], tuple[float, float]]:
     return (implementation, stable_id), point
 
 
+def parse_control_target(text: str) -> tuple[tuple[str, str], tuple[float, float]]:
+    try:
+        owner, coordinates = text.split("=", 1)
+        implementation, control_id = owner.split(":", 1)
+        x_text, y_text = coordinates.split(",", 1)
+        point = float(x_text), float(y_text)
+    except (ValueError, TypeError) as error:
+        raise argparse.ArgumentTypeError(
+            "control target must be implementation:control-id=X,Y"
+        ) from error
+    if implementation not in IMPLEMENTATIONS or control_id not in CONTROL_TARGET_IDS:
+        raise argparse.ArgumentTypeError(
+            "control target names an unknown implementation or control"
+        )
+    if not all(math.isfinite(value) and value >= 0 for value in point):
+        raise argparse.ArgumentTypeError(
+            "control target coordinates must be finite and nonnegative"
+        )
+    return (implementation, control_id), point
+
+
 def target_map(entries) -> dict[tuple[str, str], tuple[float, float]]:
     result = {}
     for key, point in entries:
@@ -92,13 +144,24 @@ def target_map(entries) -> dict[tuple[str, str], tuple[float, float]]:
     return result
 
 
-def require_targets(targets, implementations) -> None:
+def require_targets(targets, implementations, *, disabled_controls=False) -> None:
     missing = [
         f"{implementation}:{stable_id}"
         for implementation in implementations
         for stable_id in TARGET_IDS
         if (implementation, stable_id) not in targets
     ]
+    if disabled_controls:
+        missing.extend(
+            f"{implementation}:{control_id}"
+            for implementation in implementations
+            for control_id in (
+                ("advanced", "show-diagnostics")
+                if implementation == "slint"
+                else ("advanced",)
+            )
+            if (implementation, control_id) not in targets
+        )
     if missing:
         raise core.SmokeFailure(f"missing pointer targets: {', '.join(missing)}")
 
@@ -110,12 +173,101 @@ def finish_cleanly(session: core.ProcessSession) -> None:
     session.finish_quit()
 
 
+def run_disabled_control_phase(
+    session: core.ProcessSession,
+    pointer,
+    targets,
+    *,
+    settle: float,
+) -> dict[str, object]:
+    """Toggle Advanced with real pointer input; use stable IDs for target requests."""
+    implementation = session.adapter.implementation
+    case = DISABLED_ROUTE_CASES[implementation]
+    route_sequence = [case.selected.secondary]
+    click_records = []
+
+    def click(target_id: str, purpose: str) -> None:
+        logical_point = targets[(implementation, target_id)]
+        pointer.click(*logical_point)
+        time.sleep(settle)
+        click_records.append(
+            {
+                "target_id": target_id,
+                "logical_point": logical_point,
+                "purpose": purpose,
+            }
+        )
+
+    enabled = session.request(f"select-route {case.target_id}")
+    core.require_selection(enabled, case.target_id, case.selected)
+
+    if implementation == "slint":
+        click("show-diagnostics", "reveal Advanced control")
+        core.require_route(
+            session.request("state"),
+            case.selected,
+            "Show Diagnostics preserves the enabled target",
+        )
+
+    click("advanced", "disable Advanced")
+    core.require_route(
+        session.request("state"),
+        case.fallback,
+        "disabling Advanced selects the nearest enabled route",
+    )
+    route_sequence.append(case.fallback.secondary)
+
+    disabled = session.request(f"select-route {case.target_id}")
+    if disabled.requested != case.target_id:
+        raise core.SmokeFailure(
+            f"disabled select {case.target_id}: reply identified "
+            f"{disabled.requested!r} as the request"
+        )
+    if disabled.status != case.disabled_status or disabled.route != case.fallback:
+        raise core.SmokeFailure(
+            f"disabled select {case.target_id}: expected {case.disabled_status} at "
+            f"{case.fallback.primary}/{case.fallback.secondary}, received "
+            f"{disabled.status} at {disabled.primary}/{disabled.secondary}"
+        )
+    core.require_route(
+        session.request("state"),
+        case.fallback,
+        "disabled target request preserves the fallback route",
+    )
+
+    click("advanced", "re-enable Advanced")
+    core.require_route(
+        session.request("state"),
+        case.fallback,
+        "re-enabling Advanced retains the fallback route",
+    )
+    reenabled = session.request(f"select-route {case.target_id}")
+    core.require_selection(reenabled, case.target_id, case.selected)
+    route_sequence.append(case.selected.secondary)
+
+    click("primary.browser", "restore Browser 1 after disabled-control checks")
+    core.require_route(
+        session.request("state"),
+        INITIAL_ROUTE,
+        "disabled-control phase restores Browser 1",
+    )
+    route_sequence.append(INITIAL_ROUTE.secondary)
+    return {
+        "target_id": case.target_id,
+        "fallback_id": case.fallback.secondary,
+        "disabled_request_status": disabled.status,
+        "route_sequence": route_sequence,
+        "click_sequence": click_records,
+    }
+
+
 def run_pointer_sequence(
     session: core.ProcessSession,
     pointer,
     targets,
     *,
     settle: float,
+    disabled_controls: bool = False,
 ) -> dict[str, object]:
     """Activate common tabs through real pointer input and semantic readback only."""
     implementation = session.adapter.implementation
@@ -150,24 +302,43 @@ def run_pointer_sequence(
                 "logical_point": logical_point,
             }
         )
+    disabled_record = None
+    if disabled_controls:
+        disabled_record = run_disabled_control_phase(
+            session, pointer, targets, settle=settle
+        )
+        route_sequence.extend(disabled_record["route_sequence"])
+        click_records.extend(disabled_record["click_sequence"])
     finish_cleanly(session)
-    return {
+    record = {
         "evidence": "development-os-pointer",
         "implementation": implementation,
         "status": "passed",
-        "outcome": "pointer-tab-selection",
+        "outcome": (
+            "pointer-tab-selection-and-disabled-controls"
+            if disabled_record is not None
+            else "pointer-tab-selection"
+        ),
         "route_sequence": route_sequence,
         "click_sequence": click_records,
         "pointer_input": True,
         "pointer_motion": "relative-with-top-left-normalization",
         "keyboard_input": False,
-        "programmatic_route_selection": False,
+        "programmatic_route_selection": disabled_record is not None,
         "retained_secondary_verified": True,
         "charting_secondary_verified": True,
         "quantitative_secondary_verified": True,
         "clean_exit": True,
         "rendered_frame_verified": False,
     }
+    if disabled_record is not None:
+        record["disabled_control"] = {
+            key: value
+            for key, value in disabled_record.items()
+            if key not in {"route_sequence", "click_sequence"}
+        }
+        record["advanced_pointer_toggle_verified"] = True
+    return record
 
 
 class RemoteDesktopPointer(os_smoke.RemoteDesktopKeyboard):
@@ -243,6 +414,19 @@ def parser() -> argparse.ArgumentParser:
         metavar="IMPLEMENTATION:STABLE-ID=X,Y",
         help="target center in compositor-logical desktop coordinates; repeat for every selected application",
     )
+    result.add_argument(
+        "--disabled-controls",
+        action="store_true",
+        help="also toggle Advanced and check the implementation-specific disabled route",
+    )
+    result.add_argument(
+        "--control-target",
+        action="append",
+        default=[],
+        type=parse_control_target,
+        metavar="IMPLEMENTATION:CONTROL-ID=X,Y",
+        help="Advanced or Slint Show Diagnostics center; required with --disabled-controls",
+    )
     result.add_argument("--timeout", type=float, default=30.0)
     result.add_argument("--settle", type=float, default=1.0)
     result.add_argument("--jsonl")
@@ -272,8 +456,12 @@ def main(argv: list[str] | None = None) -> int:
         parser().error("at least one implementation executable is required")
 
     try:
-        targets = target_map(args.target)
-        require_targets(targets, [adapter.implementation for adapter in adapters])
+        targets = target_map([*args.target, *args.control_target])
+        require_targets(
+            targets,
+            [adapter.implementation for adapter in adapters],
+            disabled_controls=args.disabled_controls,
+        )
         with (
             Path(args.jsonl).open("x", encoding="utf-8") if args.jsonl else nullcontext()
         ) as manifest, RemoteDesktopPointer(args.timeout) as pointer:
@@ -286,6 +474,7 @@ def main(argv: list[str] | None = None) -> int:
                         pointer,
                         targets,
                         settle=args.settle,
+                        disabled_controls=args.disabled_controls,
                     )
                 except Exception as error:
                     record = {
