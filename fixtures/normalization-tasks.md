@@ -989,6 +989,39 @@ Independent validation checked all three JSONL records' exact flags, two-click/f
 
 This establishes one fresh-state row-selection interaction for Slint and QML, not repeated clicks, multi-selection, modifiers, editing, or equivalent selection semantics. Bevy + egui page-content row selection remains unverified alongside Price sorting. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed; rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, and scenario acceptance remain unestablished.
 
+### Browser 1 two-click Price-toggle pointer captures (2026-11-22)
+
+A development-only `/tmp/run_browser1_price_toggle_pointer.py` driver extended the single-click Price evidence with before, after-first-click, and after-second-click external captures. Repeated activation of the same header toggles ascending/descending in Slint (`src/browser1.rs:175-188`), QML (`Browser1Page.qml:40-52`), and Bevy + egui (`src/ui/state/browser_1_state.rs:157-167`). From a fresh canonical source-order state, the common requested sequence is therefore ascending Price followed by descending Price. The driver parked the pointer at logical `(100,100)` before every capture, required Browser 1 at seven state checks, and used semantic readback only for state and clean quit, never route selection.
+
+The accepted invocation for each implementation was:
+
+```bash
+python3 /tmp/run_browser1_price_toggle_pointer.py \
+  --implementation "$IMPLEMENTATION" \
+  --work-root "/tmp/ui-framework-browser1-price-toggle-pointer-2026-11-22-02/$IMPLEMENTATION" \
+  --jsonl "/tmp/ui-framework-browser1-price-toggle-pointer-2026-11-22-02/$IMPLEMENTATION.jsonl" \
+  --timeout 60 \
+  --settle 2
+```
+
+The Browser-primary focus points were unchanged. Slint and QML reused Price logical points `(1389,493.2)` and `(1389,510)`; Bevy + egui used its centered target `(1413,505.2)`, corresponding to review-crop points `(500,243)`, `(500,271)`, and `(540,263)`, respectively. Every process attempted one focus click and two Price clicks. Every external desktop PNG is 5120×2160, and the half-open crop `(1815,579,3415,1639)` produced 1600×1060 review PNGs for all three states.
+
+An initial root-01 command stopped before application launch because its parent evidence directory was absent. After that directory was created, RemoteDesktop `Start` timed out at 30 seconds, again before application launch or a runtime JSONL record. D-Bus introspection then responded and an independent Screenshot Portal probe succeeded; its PNG was moved under `/tmp/ui-framework-browser1-price-toggle-pointer-2026-11-22-01/portal-probe.png`. The fresh root-02 attempts used a 60-second timeout. No root-01 sorting, page-content, or clean-exit claim is made.
+
+Procedural `status=passed` for Slint and QML means that all three clicks were attempted, seven Browser 1 readbacks passed, three decodable pairwise-distinct capture sets were produced, and `quit` was acknowledged with status 0. Bevy + egui completed those route checks and clean exit but has `status=failed` because its after-first and after-second review captures were identical, so the driver's pairwise-distinctness requirement failed after the clean-exit flag had been recorded. Every JSONL deliberately retains `ascending_price_sort_visually_verified=false`, `descending_price_sort_visually_verified=false`, and `capture_pixel_content_reviewed=false`; subsequent assistant inspection is the sorting oracle.
+
+| Implementation | Before | After first Price click | After second Price click | Clean exit |
+|---|---|---|---|---|
+| Slint | Canonical source order | Expected ascending marker and leading `NHP 2.39`, `MJC 4.33`, `IRQK 4.54`, `ACFN 4.56`, `HPQB 4.78` | Descending marker and monotonically decreasing visible prices | Acknowledged quit, status 0 |
+| QML | Canonical source order | Expected ascending marker and rows with `$` prefixes | Descending marker and monotonically decreasing visible prices | Acknowledged quit, status 0 |
+| Bevy + egui | Canonical source order | Original row order; no ascending sort observed | Identical review PNG; original order and no descending sort observed | Acknowledged quit, status 0 |
+
+Independent RGB comparison found Bevy + egui's before/after-first and before/after-second differences confined to review rectangle `(13,64,582,276)`, above the data rows, and no pixel difference between after-first and after-second. This third unsuccessful Bevy Price process does not distinguish input-delivery failure from application behavior and does not establish an implementation defect. Slint and QML each demonstrate one ascending-to-descending sequence, not repeated-run reliability.
+
+Independent validation checked all three records' exact three-click/seven-route sequences, executable hashes, visual-review flags, clean exits, capture modes/dimensions/byte counts, and SHA-256 values: 9 clicks, 21 Browser 1 readbacks, and 18 PNGs in total. Before/after-first/after-second review SHA-256 values were Slint `d0070073c61174296dd8268d9705582ca57d9945ac840e6b06b2b0e3868a1ba5`, `1171393f4fccd93323877cbf98e2719074d7b87cf44af903e35aa389eb030bbb`, `5bb6cfd196f074403413936187c3e12c21a4ba8909c5ba5d2053b38af110f56b`; QML `1642aa857af4a49af6392c29c5cc772e3b7c0a5b742bd0f7a08bb79a079ab875`, `d7aca7ec5ff0eca6122014d314851ddf31e518232930dff59e3d2a2e1194351f`, `4819854419b25109d183f8018dbf9f2ab9cde78803753fe51e3a570c41f3fc89`; and Bevy + egui `06693f6a63291eebba355df558b3fad72f6553b5907f5c9f1ac656e6aa50f42d`, `2272b2d7b5616ef672d4767c7fb73165b5fa5637f810bea6e21f04d1f0f77d0c`, `2272b2d7b5616ef672d4767c7fb73165b5fa5637f810bea6e21f04d1f0f77d0c`. JSONL SHA-256 values were Slint `a428884faa247ea9c26b12982ca45fe4a5482adbb1e5516cd4a5896b420da7f7`, QML `b1cdb856aebffa77b0c4aa646c787857712ed137b8d0668fb3fdb26af163a060`, and Bevy + egui `1caaf63f5397acb7e74ce5e0d4d662ba428825c7b68c9d9d13e208f81ff8fbea`.
+
+This establishes one real two-click ascending/descending Price interaction for Slint and QML. Bevy + egui Price sorting remains unverified after three preserved unsuccessful processes. Other headers, repeated-run reliability, editing, scrolling, drag, touch, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, and scenario acceptance remain unestablished. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
+
 ### Bevy + egui Export View pointer and application capture (2026-11-22)
 
 A development-only `/tmp/run_bevy_export_view_pointer.py` driver launched the unchanged Bevy + egui Release executable at native light/100% with a fresh `/tmp` working directory. It used the existing stable-ID adapter only for initial/final route readback and acknowledged quit, never route selection. Two same-route Browser-primary clicks established focus, followed by one real Export View toolbar click. The accepted invocation was:
