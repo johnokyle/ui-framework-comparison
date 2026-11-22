@@ -299,4 +299,30 @@ Executable SHA-256 hashes are Slint `7254d2dc8f349a08c4523f3ef7066f4bfbd74efd3b2
 
 Verification comprised 23 stable-ID runner tests, five OS-smoke tests, ten screenshot-runner tests, repository validation, 92 Slint ordinary tests plus Release build and format check, all 12 QML ordinary CTest entries, and 569 Bevy + egui ordinary tests plus Release build. Raw desktop images contain unrelated content and are not publication artifacts. All matrix artifacts remain only under `/tmp`; no durable CI/release attachment, controlled result, scenario activation, capability-status change, or human equivalence claim was created.
 
+### Browser 1 AT-SPI and focused-keyboard development evidence (2026-11-21)
+
+A parent-only `tools/runtime_accessibility_smoke.py` runner reads the host AT-SPI `IsEnabled` status without changing it, launches fresh light/100% 1200×750 processes, and restricts desktop traversal to each child's PID. QML alone receives `QT_LINUX_ACCESSIBILITY_ALWAYS_ON=1`, in addition to its existing capture overrides. The runner uses QML's AT-SPI `SetFocus` action only to establish initial tab focus; subsequent Right, Return, and Left input is delivered through the existing authorized RemoteDesktop keyboard session. Stable-ID route readback remains the application-state oracle. No absolute coordinates, pointer events, direct selection calls, screenshots, or host settings changes are used.
+
+The passing sequential invocation was:
+
+```bash
+python3 "$COMPARISON_ROOT/tools/runtime_accessibility_smoke.py" \
+  --slint "$SLINT_ROOT/target/release/slintuitest" \
+  --qml "$QML_ROOT/build-fixture-tests/appQmlUITest" \
+  --bevy-egui "$BEVY_ROOT/target/release/bevy_egui_test" \
+  --bevy-asset-root "$BEVY_ROOT" \
+  --qml-host-scale 1.6666666269302368 \
+  --timeout 30 \
+  --settle 1 \
+  --jsonl /tmp/ui-framework-accessibility-2026-11-21.jsonl
+```
+
+The host reported `org.a11y.Status IsEnabled=false`. Slint and Bevy + egui exposed no populated process-scoped AT-SPI application and are recorded as gaps, not accessibility passes. Slint's locked default feature graph does include `accesskit` 0.24.1 and `accesskit_unix` 0.22.1 through `i-slint-backend-winit/accessibility`; its inspected adapter subscribes to AT-SPI enablement, so this disabled-host result does not prove behavior with a running screen reader. Bevy + egui explicitly enables `bevy_egui/accesskit`, but its locked graph contains no Linux `accesskit_unix` adapter. Both preserved `primary.browser/browser.browser1`, acknowledged `quit`, and exited with status 0.
+
+With forced Qt accessibility, QML exposed an application and named frame, visible primary/secondary page tabs, Browser 1 labels including `Symbol` and `Change %`, and the visible stable-ID route label. AT-SPI `SetFocus` focused Browser #1. A real Right key moved focus to Browser #2 while canonical state remained `browser.browser1`; Return then selected `browser.browser2` and the AT-SPI checked states followed. Left moved focus back without changing Browser 2 selection, and Return restored `browser.browser1`. QML acknowledged `quit` and exited with status 0. The JSONL records the exact initial/final summaries, focus and checked states, key sequence, route sequence, host status, clean exits, and executable hashes: Slint `7254d2dc8f349a08c4523f3ef7066f4bfbd74efd3b2c57eada43033106dc2a91`, QML `4b1bf027fb5587b580b227a64f15f60ae0f72b81c6d8cb121971131523fe759e`, and Bevy + egui `7e2f2c281bfbd3b3cc9b975b98bee489bee3986002e45efa684105cd1cc81931`. These hashes match the currently pinned constrained-capture executables.
+
+Verification comprised all 58 parent runtime-harness tests, including nine focused AT-SPI/focused-keyboard tests, plus repository validation of 3 schemas, 17 fixture manifests, 29 variants, 73 artifacts, 4 scenarios, and 0 result documents. Application sources and binaries were unchanged, so implementation test suites were not rerun for this parent-only evidence batch.
+
+This is focused semantic/accessibility evidence, not an actual screen-reader session, standards-compliance assessment, pointer/touch result, or human-reviewed visual equivalence claim. Other routes and controls remain unverified. No capability cell, controlled result, or inactive performance scenario changed.
+
 No scenario activation or implementation hash attestation is part of this parent-only BP-01 fixture deliverable.
