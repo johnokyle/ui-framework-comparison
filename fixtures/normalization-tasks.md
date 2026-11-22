@@ -212,7 +212,20 @@ python3 "$COMPARISON_ROOT/tools/runtime_os_smoke.py" \
 
 QML and Bevy + egui each started at `primary.browser/browser.browser1`, then produced `primary.charting/chart.analytical`, their default quantitative route, and the initial Browser 1 route after three successive Ctrl+Tab presses. QML's quantitative route was `quant.order-book`, canonicalized from its local `quant.heatmap`; Bevy + egui's was `quant.vol-surface`. Both acknowledged `quit` and exited with status 0. Five dependency-free unit tests also passed for the OS sequence and its assertions; the existing 22 stable-ID runner tests remained passing.
 
-The corresponding Slint invocation did not pass: after real portal Ctrl+Tab input, semantic readback remained `primary.browser/browser.browser1` rather than changing to `primary.charting/chart.analytical`. Additional Tab/focus-traversal probes did not establish a working Slint keyboard route. These observations do not distinguish window focus, event delivery, and the focus-scoped tab handler, and are not evidence of a semantic stable-ID regression. Slint OS-level interaction therefore remains unverified.
+The corresponding Slint invocation did not pass: after real portal Ctrl+Tab input, semantic readback remained `primary.browser/browser.browser1` rather than changing to `primary.charting/chart.analytical`. Additional Tab/focus-traversal probes did not establish a working Slint keyboard route. These observations did not distinguish window focus, event delivery, and the focus-scoped tab handler, and were not evidence of a semantic stable-ID regression.
+
+A 2026-11-22 follow-up reproduced the failure with both real input and a focused Slint regression test. Slint's shortcut had been local to tab-bar focus scopes, with no initially focused shell handler; the grid also consumes ordinary Tab/Backtab. The narrow fix gives the application shell initial focus and captures only Ctrl+Tab/Ctrl+Shift+Backtab before focused controls, leaving other key handling unchanged. The new test drives actual Slint `WindowEvent` key press/release records through three forward route transitions. The passing sequential invocation was:
+
+```bash
+python3 "$COMPARISON_ROOT/tools/runtime_os_smoke.py" \
+  --slint "$SLINT_ROOT/target/release/slintuitest" \
+  --qml "$QML_ROOT/build-fixture-tests/appQmlUITest" \
+  --bevy-egui "$BEVY_ROOT/target/release/bevy_egui_test" \
+  --bevy-asset-root "$BEVY_ROOT" \
+  --timeout 30
+```
+
+Slint, QML, and Bevy + egui each passed all three Ctrl+Tab transitions and exited cleanly. Slint and Bevy + egui used `quant.vol-surface`; QML used canonical `quant.order-book`. Tested executable SHA-256 hashes were Slint `a10ea3c566ff809837fa218f2ae2526a4ea469aea5c71e1956d8a20da1b16132`, QML `4b1bf027fb5587b580b227a64f15f60ae0f72b81c6d8cb121971131523fe759e`, and Bevy + egui `7e2f2c281bfbd3b3cc9b975b98bee489bee3986002e45efa684105cd1cc81931`. The test-time dirty Slint tree was subsequently committed unchanged as `af9bfb3f740b9bf95b7ffa6dcf071059da872e94`, which exactly identifies the tested source and is the new parent pin. Verification comprised 93 active Slint tests with four isolated large cases, format/diff checks, locked Release build, all 58 parent Python tests, and repository validation.
 
 This is development OS-keyboard evidence only. It does not establish pointer/touch input, rendered content or presented frames, screenshots, accessibility-tree behavior, theme/DPI behavior, cadence, performance, or controlled scenario acceptance. No scenario was activated.
 
