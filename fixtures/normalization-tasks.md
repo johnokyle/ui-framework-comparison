@@ -196,4 +196,24 @@ The result was `PASS slint: passed`, `PASS qml: passed`, and `PASS bevy-egui: pa
 
 This establishes programmatic stable-ID navigation and semantic active-route readback only. It does not establish OS-level pointer/keyboard input, rendered content or presented-frame correctness, screenshots, accessibility, theme/DPI behavior, cadence, performance, disabled-route behavior, or scenario acceptance. No scenario was activated and no implementation hash attestation was added.
 
+### OS-level keyboard development smoke (2026-11-21)
+
+The parent-owned `tools/runtime_os_smoke.py` used the host's PyGObject `Gio`/`GLib` bindings and an authorized `org.freedesktop.portal.RemoteDesktop` keyboard session to inject actual Ctrl+Tab key events. The existing stable-ID adapters supplied readback and clean quit only; they did not synthesize the navigation being tested. No application source or dependency changed.
+
+The passing QML and Bevy + egui invocation was:
+
+```bash
+python3 "$COMPARISON_ROOT/tools/runtime_os_smoke.py" \
+  --qml "$QML_ROOT/build-fixture-tests/appQmlUITest" \
+  --bevy-egui "$BEVY_ROOT/target/release/bevy_egui_test" \
+  --bevy-asset-root "$BEVY_ROOT" \
+  --timeout 30
+```
+
+QML and Bevy + egui each started at `primary.browser/browser.browser1`, then produced `primary.charting/chart.analytical`, their default quantitative route, and the initial Browser 1 route after three successive Ctrl+Tab presses. QML's quantitative route was `quant.order-book`, canonicalized from its local `quant.heatmap`; Bevy + egui's was `quant.vol-surface`. Both acknowledged `quit` and exited with status 0. Five dependency-free unit tests also passed for the OS sequence and its assertions; the existing 22 stable-ID runner tests remained passing.
+
+The corresponding Slint invocation did not pass: after real portal Ctrl+Tab input, semantic readback remained `primary.browser/browser.browser1` rather than changing to `primary.charting/chart.analytical`. Additional Tab/focus-traversal probes did not establish a working Slint keyboard route. These observations do not distinguish window focus, event delivery, and the focus-scoped tab handler, and are not evidence of a semantic stable-ID regression. Slint OS-level interaction therefore remains unverified.
+
+This is development OS-keyboard evidence only. It does not establish pointer/touch input, rendered content or presented frames, screenshots, accessibility-tree behavior, theme/DPI behavior, cadence, performance, or controlled scenario acceptance. No scenario was activated.
+
 No scenario activation or implementation hash attestation is part of this parent-only BP-01 fixture deliverable.
