@@ -554,6 +554,50 @@ The tested executable hashes remained Slint `34fc038090dc7f14d5a08d9e529d347f18d
 
 The default-disabled `quant.order-book` was deliberately excluded; its disabled fallback was not represented as an enabled Order Book result. Quantitative views used their existing startup defaults, and no large/on-demand Browser, analytical, stock, or pivot variant was constructed. No source or test code changed. All 77 parent Python tests, repository validation, and the parent whitespace check passed. This single-capture-per-variant set is not repeated-run reliability, OS-input, presented-frame timing, numerical-equivalence, active-accessibility, human-equivalence, durable-attachment, controlled-result, or scenario-acceptance evidence.
 
+### Constrained common-route screenshot variants (2026-11-22)
+
+The accepted constrained matrix used 90 separate runner invocations: Browser 2/3, all three common Charting routes, and all ten enabled common Quantitative routes × three implementations × 1200×750/660×750. Every variant used explicit light/100%, a fresh application process, and a fresh Screenshot portal connection. The checkout-independent invocation pattern was:
+
+```bash
+set -e
+for route in browser.browser2 browser.browser3 chart.analytical chart.stock chart.pivot quant.vol-surface quant.factor-structure quant.correlation quant.frontier quant.pca quant.regime quant.projection quant.network quant.knowledge quant.monte-carlo; do
+  root="/tmp/ui-framework-screenshots-2026-11-22-${route//./-}-constrained-01"
+  for implementation in slint qml bevy-egui; do
+    case "$implementation" in
+      slint) executable=(--slint "$SLINT_ROOT/target/release/slintuitest") ;;
+      qml) executable=(--qml "$QML_ROOT/build-fixture-tests/appQmlUITest") ;;
+      bevy-egui) executable=(--bevy-egui "$BEVY_ROOT/target/release/bevy_egui_test" --bevy-asset-root "$BEVY_ROOT") ;;
+    esac
+    for size in 1200x750 660x750; do
+      python3 "$COMPARISON_ROOT/tools/runtime_screenshot.py" \
+        "${executable[@]}" \
+        --output-dir "$root/$implementation-light-100-$size" \
+        --route "$route" \
+        --themes light \
+        --scales 100 \
+        --sizes "$size" \
+        --qml-host-scale 1.6666666269302368 \
+        --timeout 30 \
+        --settle 2
+    done
+  done
+done
+```
+
+All 90 cases returned the requested canonical route, retained it after capture, acknowledged `quit`, and exited with status 0. QML responses were canonicalized from its local aliases. Each raw desktop PNG measured 5120×2160. Pillow 12.1.1 produced isolated decorated review copies using half-open crop `(2015, 704, 3215, 1514)` at 1200×750, yielding 1200×810, and `(2285, 704, 2945, 1514)` at 660×750, yielding 660×810. QML's relative scale factor remained `0.6000000143051151` against the measured `1.6666666269302368` host scale.
+
+Individual assistant inspection covered all 90 crops, and subsequent verification checked all 90 review records and 180 source/review SHA-256 identities. The principal route-specific observations were:
+
+- Browser 2 grids and Browser 3 8×8 matrices remained populated at both sizes. At 660×750, Browser 2 navigation/toolbars/table columns were clipped; Bevy + egui retained visible primary/secondary tabs. Slint Browser 3 controls overlapped the final matrix column, QML pair statistics were clipped, and Bevy + egui controls wrapped.
+- Slint and QML Analytical retained populated charts with right-side clipping; Bevy + egui had a short populated chart at 1200×750, but its chart canvas was below the visible area at 660×750. Slint/QML Stock retained price, volume, and indicator panels; Bevy + egui retained price/volume at 1200×750, but its indicator was below the visible area and volume reached the bottom boundary at 660×750. Slint Pivot's navigator was below the visible area at both sizes; QML retained its chart and navigator with right clipping and bottom text overlap at 660×750; Bevy + egui had a full navigator at 1200×750 but only its upper portion at 660×750.
+- Slint and Bevy + egui retained full Volatility Surfaces. QML showed only a narrow inspector portion at 1200×750 and clipped the surface's right side plus inspector at 660×750. Slint and Bevy + egui retained full Factor Structure scatters; QML's 660×750 crop showed only the left portion of its right-aligned scatter. Slint Correlation peaks remained top-clipped, QML clipped the right surface edge at 660×750, and Bevy + egui retained its full compact peak field.
+- Slint/QML Efficient Frontier retained left-concentrated clouds; QML clipped right axis/legend/status content at 660×750. Bevy + egui retained its wide cloud and frontier. Slint and Bevy + egui retained full PCA scatters; QML's scatter was outside the visible 660×750 area except for a narrow axis-grid portion at the right boundary. Slint Regime retained colored regions and trajectory; QML remained sparse without apparent colored regions and clipped the positive axis/current-state area at 660×750; Bevy + egui retained dense overlapping traces. Slint Projection retained both diagonal clouds, QML clipped right-hand cloud portions and legend/hints at 660×750, and Bevy + egui retained its clustered scatter.
+- Network retained dense populated graphs, with QML's right-hand graph/controls clipped at 660×750 and later secondary tabs clipped in the narrow layouts. Slint/QML Knowledge retained sparse small central company-node clusters with substantial empty canvas; Bevy + egui showed a populated connected graph at 1200×750 but only its upper portion at 660×750 beneath extensive controls and legends. Monte Carlo retained populated path fans; QML clipped its right-side histogram, replay controls, and guidance at 660×750, while Slint retained its terminal histogram and Bevy + egui retained its path fan and right-side legend.
+
+The tested executable hashes remained Slint `34fc038090dc7f14d5a08d9e529d347f18de20bb747c196f4e333e905776ce33`, QML `881597209f79148d8b5b807d22cf6cdd483cef54f636f1ab32df8117e148801c`, and Bevy + egui `f60ebe4eb6f90e56529838ac7a1b5a104b06d7019a6e98743bf569ed3e345fa1`. Exact source/review hashes, crop boxes, requested variants, route results, executable identities, clean exits, and per-variant observations are aggregated in each root's `manifest.jsonl`, `review-captures.jsonl`, and `assistant-review.jsonl`. Roots follow `/tmp/ui-framework-screenshots-2026-11-22-<route>-constrained-01` for `browser-browser2`, `browser-browser3`, `chart-analytical`, `chart-stock`, `chart-pivot`, `quant-vol-surface`, `quant-factor-structure`, `quant-correlation`, `quant-frontier`, `quant-pca`, `quant-regime`, `quant-projection`, `quant-network`, `quant-knowledge`, and `quant-monte-carlo`.
+
+Together with the six existing Browser 1 captures, these 90 variants provide 96 constrained development captures covering every enabled common route at both requested sizes. The default-disabled `quant.order-book` remained excluded. Existing startup defaults were retained, no large/on-demand variant was constructed, and no source or test code changed. All 77 parent Python tests, repository validation, and the parent whitespace check passed. This single-capture-per-variant set is not repeated-run reliability, OS-input, presented-frame timing, numerical-equivalence, active-accessibility, working-scroll, responsive-layout-acceptance, human-equivalence, durable-attachment, controlled-result, or scenario-acceptance evidence.
+
 ### Browser 1 AT-SPI and focused-keyboard development evidence (2026-11-21)
 
 A parent-only `tools/runtime_accessibility_smoke.py` runner reads the host AT-SPI `IsEnabled` status without changing it, launches fresh light/100% 1200×750 processes, and restricts desktop traversal to each child's PID. QML alone receives `QT_LINUX_ACCESSIBILITY_ALWAYS_ON=1`, in addition to its existing capture overrides. The runner uses QML's AT-SPI `SetFocus` action only to establish initial tab focus; subsequent Right, Return, and Left input is delivered through the existing authorized RemoteDesktop keyboard session. Stable-ID route readback remains the application-state oracle. No absolute coordinates, pointer events, direct selection calls, screenshots, or host settings changes are used.
