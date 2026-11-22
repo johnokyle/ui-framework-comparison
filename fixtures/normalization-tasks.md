@@ -515,6 +515,45 @@ The tested executable hashes remained Slint `34fc038090dc7f14d5a08d9e529d347f18d
 
 Default construction remained at analytical 500 days, stock daily-only data, and pivot SPY-only data; no analytical 100K/1M, stock 20K intraday, or all-nine-symbol pivot variant was constructed. No source or test code changed. All 77 parent Python tests, repository validation, and the parent whitespace check passed. This single-capture-per-variant set is not repeated-run reliability, OS-input, presented-frame timing, numerical-equivalence, active-accessibility, human-equivalence, durable-attachment, controlled-result, or scenario-acceptance evidence.
 
+### Quantitative theme/scale screenshot variants (2026-11-22)
+
+The accepted native-size Quantitative matrix used 120 separate runner invocations: ten enabled routes × three implementations × light/dark × 100%/200%. Every variant had a fresh application process and a fresh Screenshot portal connection. The checkout-independent invocation pattern was:
+
+```bash
+set -e
+for route in quant.vol-surface quant.factor-structure quant.correlation quant.frontier quant.pca quant.regime quant.projection quant.network quant.knowledge quant.monte-carlo; do
+  root="/tmp/ui-framework-screenshots-2026-11-22-${route//./-}-fresh-matrix-01"
+  for implementation in slint qml bevy-egui; do
+    case "$implementation" in
+      slint) executable=(--slint "$SLINT_ROOT/target/release/slintuitest") ;;
+      qml) executable=(--qml "$QML_ROOT/build-fixture-tests/appQmlUITest") ;;
+      bevy-egui) executable=(--bevy-egui "$BEVY_ROOT/target/release/bevy_egui_test" --bevy-asset-root "$BEVY_ROOT") ;;
+    esac
+    for theme in light dark; do
+      for scale in 100 200; do
+        python3 "$COMPARISON_ROOT/tools/runtime_screenshot.py" \
+          "${executable[@]}" \
+          --output-dir "$root/$implementation-$theme-$scale" \
+          --route "$route" \
+          --themes "$theme" \
+          --scales "$scale" \
+          --sizes native \
+          --qml-host-scale 1.6666666269302368 \
+          --timeout 30
+      done
+    done
+  done
+done
+```
+
+All 120 cases returned the requested canonical route, retained it after capture, acknowledged `quit`, and exited with status 0. QML responses were canonicalized from its local aliases. Each raw desktop PNG measured 5120×2160. Pillow 12.1.1 produced isolated decorated review copies using half-open crop `(1815, 579, 3415, 1639)` at 100%, yielding 1600×1060, and `(1015, 53, 4215, 2140)` at 200%, yielding 3200×2087. QML's relative factors were normalized against the measured `1.6666666269302368` host scale; the fixed raw desktop dimensions are not application-scale evidence.
+
+Individual assistant inspection of every review crop found the requested light/dark shell, expected relative 100%/200% geometry, and selected route content without stale initial Browser content or unrelated desktop content. Volatility Surface, Factor Structure, Correlation, and PCA showed populated 3D surfaces/scatters; Efficient Frontier and Projection showed populated point clouds. Regime retained substantial implementation differences: Slint showed colored regime regions and a trajectory, QML showed a sparse central path without apparent colored regions, and Bevy + egui showed dense overlapping traces. Network showed dense Slint/QML graphs and Bevy + egui's circular graph; Bevy's lower graph was clipped at 100% but fully visible within the 200% decorated bounds. Slint Knowledge remained a small three-node cluster with a clipped bottom legend, QML's Advanced alias showed a small central cluster with overlapping labels, and Bevy + egui showed a sparse connected labelled graph. Monte Carlo showed populated simulation fans; Slint included its terminal distribution, while Bevy + egui's lower histogram remained clipped at both scales. Compact 3D plots, dense diagnostics, and whitespace-heavy layouts remain visible in the individual observations.
+
+The tested executable hashes remained Slint `34fc038090dc7f14d5a08d9e529d347f18de20bb747c196f4e333e905776ce33`, QML `881597209f79148d8b5b807d22cf6cdd483cef54f636f1ab32df8117e148801c`, and Bevy + egui `f60ebe4eb6f90e56529838ac7a1b5a104b06d7019a6e98743bf569ed3e345fa1`. Exact source/review hashes, crop boxes, requested variants, route results, executable identities, clean exits, and assistant observations are aggregated in each root's `manifest.jsonl`, `review-captures.jsonl`, and `assistant-review.jsonl`. Roots follow `/tmp/ui-framework-screenshots-2026-11-22-quant-<route>-fresh-matrix-01` for `vol-surface`, `factor-structure`, `correlation`, `frontier`, `pca`, `regime`, `projection`, `network`, `knowledge`, and `monte-carlo`. Together with the earlier matrices, all enabled common routes now have explicit native-size light/dark × 100%/200% development captures.
+
+The default-disabled `quant.order-book` was deliberately excluded; its disabled fallback was not represented as an enabled Order Book result. Quantitative views used their existing startup defaults, and no large/on-demand Browser, analytical, stock, or pivot variant was constructed. No source or test code changed. All 77 parent Python tests, repository validation, and the parent whitespace check passed. This single-capture-per-variant set is not repeated-run reliability, OS-input, presented-frame timing, numerical-equivalence, active-accessibility, human-equivalence, durable-attachment, controlled-result, or scenario-acceptance evidence.
+
 ### Browser 1 AT-SPI and focused-keyboard development evidence (2026-11-21)
 
 A parent-only `tools/runtime_accessibility_smoke.py` runner reads the host AT-SPI `IsEnabled` status without changing it, launches fresh light/100% 1200×750 processes, and restricts desktop traversal to each child's PID. QML alone receives `QT_LINUX_ACCESSIBILITY_ALWAYS_ON=1`, in addition to its existing capture overrides. The runner uses QML's AT-SPI `SetFocus` action only to establish initial tab focus; subsequent Right, Return, and Left input is delivered through the existing authorized RemoteDesktop keyboard session. Stable-ID route readback remains the application-state oracle. No absolute coordinates, pointer events, direct selection calls, screenshots, or host settings changes are used.
