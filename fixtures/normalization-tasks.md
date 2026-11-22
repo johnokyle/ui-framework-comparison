@@ -372,6 +372,42 @@ All six cases returned the requested canonical route, retained it after capture,
 
 The tested executable hashes remained Slint `49022ade231309e7f34e794832de390b4a2582cc4fbf9cb5d29fe9e946737557`, QML `4b1bf027fb5587b580b227a64f15f60ae0f72b81c6d8cb121971131523fe759e`, and Bevy + egui `7e2f2c281bfbd3b3cc9b975b98bee489bee3986002e45efa684105cd1cc81931`. Exact capture/review hashes, route metadata, crop boxes, clean exits, and assistant observations are in each directory's `manifest.jsonl` and `assistant-review.jsonl`. No source or test code changed in this batch. All 61 parent Python tests and repository validation remained passing. Raw desktop images are not publication artifacts; durable attachment, other variants, active accessibility, human equivalence acceptance, controlled results, and scenario activation remain unestablished.
 
+### Browser 2 and Browser 3 development screenshots (2026-11-22)
+
+The unchanged route-aware runner completed the remaining common Browser routes with these two sequential invocations:
+
+```bash
+python3 "$COMPARISON_ROOT/tools/runtime_screenshot.py" \
+  --slint "$SLINT_ROOT/target/release/slintuitest" \
+  --qml "$QML_ROOT/build-fixture-tests/appQmlUITest" \
+  --bevy-egui "$BEVY_ROOT/target/release/bevy_egui_test" \
+  --bevy-asset-root "$BEVY_ROOT" \
+  --output-dir /tmp/ui-framework-screenshots-2026-11-22-browser2-01 \
+  --route browser.browser2 \
+  --themes light \
+  --scales 100 \
+  --qml-host-scale 1.6666666269302368 \
+  --timeout 30
+
+python3 "$COMPARISON_ROOT/tools/runtime_screenshot.py" \
+  --slint "$SLINT_ROOT/target/release/slintuitest" \
+  --qml "$QML_ROOT/build-fixture-tests/appQmlUITest" \
+  --bevy-egui "$BEVY_ROOT/target/release/bevy_egui_test" \
+  --bevy-asset-root "$BEVY_ROOT" \
+  --output-dir /tmp/ui-framework-screenshots-2026-11-22-browser3-01 \
+  --route browser.browser3 \
+  --themes light \
+  --scales 100 \
+  --qml-host-scale 1.6666666269302368 \
+  --timeout 30
+```
+
+All six cases returned the requested canonical route, retained it after capture, acknowledged `quit`, and exited with status 0. Default construction remained on the existing small Browser 2 and Browser 3 datasets; no large/on-demand variant was constructed. Every raw desktop PNG measured 5120×2160, and each isolated decorated review copy measured 1600×1060 using half-open crop `(1815, 579, 3415, 1639)`.
+
+Assistant inspection found populated Browser 2 advanced grids and populated 8×8 Browser 3 correlation matrices with canonical symbol order and visible values in all three implementations. Slint uses a large correlation matrix with right-side controls, QML centers its matrix beside pair statistics, and Bevy + egui uses a compact upper-left matrix. These are captured-layout observations, not interaction, human-equivalence, or frame-timing acceptance.
+
+The tested executable hashes remained Slint `49022ade231309e7f34e794832de390b4a2582cc4fbf9cb5d29fe9e946737557`, QML `4b1bf027fb5587b580b227a64f15f60ae0f72b81c6d8cb121971131523fe759e`, and Bevy + egui `7e2f2c281bfbd3b3cc9b975b98bee489bee3986002e45efa684105cd1cc81931`. Exact capture/review hashes, route metadata, crop boxes, clean exits, and assistant observations are in each directory's `manifest.jsonl` and `assistant-review.jsonl`. No source or test code changed. All 61 parent Python tests and repository validation remained passing. Raw desktop images are not publication artifacts; durable attachment, other variants, active accessibility, human equivalence acceptance, controlled results, and scenario activation remain unestablished.
+
 ### Browser 1 AT-SPI and focused-keyboard development evidence (2026-11-21)
 
 A parent-only `tools/runtime_accessibility_smoke.py` runner reads the host AT-SPI `IsEnabled` status without changing it, launches fresh light/100% 1200×750 processes, and restricts desktop traversal to each child's PID. QML alone receives `QT_LINUX_ACCESSIBILITY_ALWAYS_ON=1`, in addition to its existing capture overrides. The runner uses QML's AT-SPI `SetFocus` action only to establish initial tab focus; subsequent Right, Return, and Left input is delivered through the existing authorized RemoteDesktop keyboard session. Stable-ID route readback remains the application-state oracle. No absolute coordinates, pointer events, direct selection calls, screenshots, or host settings changes are used.
