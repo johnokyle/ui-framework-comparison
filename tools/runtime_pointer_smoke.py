@@ -87,7 +87,22 @@ CLICK_SEQUENCE = (
     ClickStep("quant.vol-surface", QUANT_DEFAULT_ROUTE, "pointer selects Volatility Surface"),
     ClickStep("primary.browser", INITIAL_ROUTE, "pointer restores Browser with retained Browser 1"),
 )
-TARGET_IDS = tuple(step.target_id for step in CLICK_SEQUENCE)
+COMPLETE_QUANT_CLICK_SEQUENCE = (
+    ClickStep(
+        "quant.network",
+        core.Route("primary.quantviz", "quant.network"),
+        "pointer selects Network Graph",
+    ),
+    ClickStep(
+        "quant.order-book",
+        core.Route("primary.quantviz", "quant.order-book"),
+        "pointer selects Order Book",
+    ),
+)
+BASE_TARGET_IDS = tuple(step.target_id for step in CLICK_SEQUENCE)
+TARGET_IDS = BASE_TARGET_IDS + tuple(
+    step.target_id for step in COMPLETE_QUANT_CLICK_SEQUENCE
+)
 IMPLEMENTATIONS = ("slint", "qml", "bevy-egui")
 
 
@@ -144,11 +159,14 @@ def target_map(entries) -> dict[tuple[str, str], tuple[float, float]]:
     return result
 
 
-def require_targets(targets, implementations, *, disabled_controls=False) -> None:
+def require_targets(
+    targets, implementations, *, disabled_controls=False, complete_quantitative=False
+) -> None:
+    stable_ids = TARGET_IDS if complete_quantitative else BASE_TARGET_IDS
     missing = [
         f"{implementation}:{stable_id}"
         for implementation in implementations
-        for stable_id in TARGET_IDS
+        for stable_id in stable_ids
         if (implementation, stable_id) not in targets
     ]
     if disabled_controls:
@@ -268,6 +286,7 @@ def run_pointer_sequence(
     *,
     settle: float,
     disabled_controls: bool = False,
+    complete_quantitative: bool = False,
 ) -> dict[str, object]:
     """Activate common tabs through real pointer input and semantic readback only."""
     implementation = session.adapter.implementation
@@ -289,7 +308,14 @@ def run_pointer_sequence(
             "purpose": "initial-focus-no-op",
         }
     ]
-    for step in CLICK_SEQUENCE:
+    click_sequence = CLICK_SEQUENCE
+    if complete_quantitative:
+        click_sequence = (
+            CLICK_SEQUENCE[:-1]
+            + COMPLETE_QUANT_CLICK_SEQUENCE
+            + CLICK_SEQUENCE[-1:]
+        )
+    for step in click_sequence:
         expected = expected_route(step, implementation)
         logical_point = targets[(implementation, step.target_id)]
         pointer.click(*logical_point)
@@ -310,15 +336,18 @@ def run_pointer_sequence(
         route_sequence.extend(disabled_record["route_sequence"])
         click_records.extend(disabled_record["click_sequence"])
     finish_cleanly(session)
+    outcome = (
+        "complete-quantitative-pointer-tab-selection"
+        if complete_quantitative
+        else "pointer-tab-selection"
+    )
+    if disabled_record is not None:
+        outcome += "-and-disabled-controls"
     record = {
         "evidence": "development-os-pointer",
         "implementation": implementation,
         "status": "passed",
-        "outcome": (
-            "pointer-tab-selection-and-disabled-controls"
-            if disabled_record is not None
-            else "pointer-tab-selection"
-        ),
+        "outcome": outcome,
         "route_sequence": route_sequence,
         "click_sequence": click_records,
         "pointer_input": True,
@@ -331,6 +360,8 @@ def run_pointer_sequence(
         "clean_exit": True,
         "rendered_frame_verified": False,
     }
+    if complete_quantitative:
+        record["complete_quantitative_pointer_verified"] = True
     if disabled_record is not None:
         record["disabled_control"] = {
             key: value
@@ -393,8 +424,10 @@ class RemoteDesktopPointer(os_smoke.RemoteDesktopKeyboard):
         )
 
 
-def configured_adapter(base: core.Adapter, qml_host_scale: float | None) -> core.Adapter:
-    return screenshots.variant_adapter(base, "light", "100", "1200x750", qml_host_scale)
+def configured_adapter(
+    base: core.Adapter, qml_host_scale: float | None, *, size: str = "1200x750"
+) -> core.Adapter:
+    return screenshots.variant_adapter(base, "light", "100", size, qml_host_scale)
 
 
 def parser() -> argparse.ArgumentParser:
@@ -413,6 +446,17 @@ def parser() -> argparse.ArgumentParser:
         type=parse_target,
         metavar="IMPLEMENTATION:STABLE-ID=X,Y",
         help="target center in compositor-logical desktop coordinates; repeat for every selected application",
+    )
+    result.add_argument(
+        "--size",
+        choices=("1200x750", "native"),
+        default="1200x750",
+        help="requested client geometry; native uses each application's existing default",
+    )
+    result.add_argument(
+        "--complete-quantitative",
+        action="store_true",
+        help="also click Network Graph and Order Book before restoring Browser 1",
     )
     result.add_argument(
         "--disabled-controls",
@@ -461,12 +505,15 @@ def main(argv: list[str] | None = None) -> int:
             targets,
             [adapter.implementation for adapter in adapters],
             disabled_controls=args.disabled_controls,
+            complete_quantitative=args.complete_quantitative,
         )
         with (
             Path(args.jsonl).open("x", encoding="utf-8") if args.jsonl else nullcontext()
         ) as manifest, RemoteDesktopPointer(args.timeout) as pointer:
             for base in adapters:
-                adapter = configured_adapter(base, args.qml_host_scale)
+                adapter = configured_adapter(
+                    base, args.qml_host_scale, size=args.size
+                )
                 session = core.ProcessSession(adapter, args.timeout)
                 try:
                     record = run_pointer_sequence(
@@ -475,6 +522,7 @@ def main(argv: list[str] | None = None) -> int:
                         targets,
                         settle=args.settle,
                         disabled_controls=args.disabled_controls,
+                        complete_quantitative=args.complete_quantitative,
                     )
                 except Exception as error:
                     record = {
@@ -497,7 +545,7 @@ def main(argv: list[str] | None = None) -> int:
                     {
                         "requested_theme": "light",
                         "requested_scale_percent": "100",
-                        "requested_size": "1200x750",
+                        "requested_size": args.size,
                         "executable_sha256": screenshots.executable_sha256(adapter.executable),
                     }
                 )

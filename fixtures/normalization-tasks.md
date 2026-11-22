@@ -815,6 +815,94 @@ The recorded canonical route sequences were `browser.browser1 → quant.order-bo
 
 Executable hashes were Slint `34fc038090dc7f14d5a08d9e529d347f18de20bb747c196f4e333e905776ce33`, QML `881597209f79148d8b5b807d22cf6cdd483cef54f636f1ab32df8117e148801c`, and Bevy + egui `f60ebe4eb6f90e56529838ac7a1b5a104b06d7019a6e98743bf569ed3e345fa1`. The JSONL records every accepted focus/control click, programmatic-selection use, canonical route sequence, disabled status, clean exit, and executable hash. Twelve focused pointer tests and all 80 parent discovery tests passed.
 
-An initial QML checkbox-target attempt disabled Knowledge and selected Volatility Surface but missed the re-enable click; it is retained as a failed diagnostic, not a pass. Candidate full-pointer-sequence attempts also stopped before this phase at previously documented tab misses. These are one successful isolated phase run per implementation, not repeated-run pointer-reliability evidence. No page-content interaction, direct pointer selection of the clipped Order Book/Network tabs, touch, scrolling, drag, other geometries or scales, presented-frame correctness, active-screen-reader behavior, human-reviewed equivalence, durable artifact attachment, controlled result, or scenario acceptance is established. No application source, large/on-demand fixture, scenario, or controlled result changed.
+An initial QML checkbox-target attempt disabled Knowledge and selected Volatility Surface but missed the re-enable click; it is retained as a failed diagnostic, not a pass. Candidate full-pointer-sequence attempts also stopped before this phase at previously documented tab misses. These are one successful isolated phase run per implementation, not repeated-run pointer-reliability evidence. No page-content interaction, direct pointer selection of the clipped Order Book/Network tabs at 1200×750, touch, scrolling, drag, other geometries or scales, presented-frame correctness, active-screen-reader behavior, human-reviewed equivalence, durable artifact attachment, controlled result, or scenario acceptance is established by that isolated phase. The later native-size direct-tab run is recorded below. No application source, large/on-demand fixture, scenario, or controlled result changed.
+
+### Native complete Quantitative pointer tab activation (2026-11-22)
+
+`tools/runtime_pointer_smoke.py` now has independent `--size {1200x750,native}` and `--complete-quantitative` options. The default invocation and route sequence remain unchanged. The complete option inserts real Network Graph and Order Book clicks after Volatility Surface and before final Browser-primary restoration; native size omits only the fixed capture-size override while retaining explicit light/100%. Fourteen focused pointer tests and all 82 parent discovery tests passed before the desktop run.
+
+Targets were measured from the existing native-size light/100% review crops. Their common raw decorated-crop origin was `(1815,579)` on the 5120×2160 desktop. Raw global pixel centers were divided by the measured `1.6666666269302368` host scale to obtain compositor-logical RemoteDesktop coordinates. These coordinates are specific to this desktop and window placement, not resolution-independent application geometry.
+
+The accepted sequential invocation, rendered with checkout variables, was:
+
+```bash
+python3 "$COMPARISON_ROOT/tools/runtime_pointer_smoke.py" \
+  --slint "$SLINT_ROOT/target/release/slintuitest" \
+  --qml "$QML_ROOT/build-fixture-tests/appQmlUITest" \
+  --qml-host-scale 1.6666666269302368 \
+  --bevy-egui "$BEVY_ROOT/target/release/bevy_egui_test" \
+  --bevy-asset-root "$BEVY_ROOT" \
+  --size native \
+  --complete-quantitative \
+  --target slint:primary.browser=1128.0,423.6 \
+  --target slint:browser.browser1=1149.0,449.4 \
+  --target slint:browser.browser2=1293.0,449.4 \
+  --target slint:browser.browser3=1428.0,449.4 \
+  --target slint:primary.charting=1287.0,423.6 \
+  --target slint:chart.analytical=1149.0,449.4 \
+  --target slint:chart.stock=1293.0,449.4 \
+  --target slint:chart.pivot=1428.0,449.4 \
+  --target slint:primary.quantviz=1485.0,423.6 \
+  --target slint:quant.vol-surface=1137.0,449.4 \
+  --target slint:quant.factor-structure=1227.0,449.4 \
+  --target slint:quant.correlation=1317.0,449.4 \
+  --target slint:quant.frontier=1401.0,449.4 \
+  --target slint:quant.pca=1485.0,449.4 \
+  --target slint:quant.regime=1551.0,449.4 \
+  --target slint:quant.projection=1647.0,449.4 \
+  --target slint:quant.network=1740.0,449.4 \
+  --target slint:quant.knowledge=1827.0,449.4 \
+  --target slint:quant.monte-carlo=1917.0,449.4 \
+  --target slint:quant.order-book=1998.0,449.4 \
+  --target qml:primary.browser=1128.0,422.4 \
+  --target qml:browser.browser1=1128.0,446.4 \
+  --target qml:browser.browser2=1200.0,446.4 \
+  --target qml:browser.browser3=1266.0,446.4 \
+  --target qml:primary.charting=1203.0,422.4 \
+  --target qml:chart.analytical=1128.0,446.4 \
+  --target qml:chart.stock=1278.0,446.4 \
+  --target qml:chart.pivot=1197.0,446.4 \
+  --target qml:primary.quantviz=1317.0,422.4 \
+  --target qml:quant.vol-surface=1401.0,446.4 \
+  --target qml:quant.factor-structure=1485.0,446.4 \
+  --target qml:quant.correlation=1257.0,446.4 \
+  --target qml:quant.frontier=1563.0,446.4 \
+  --target qml:quant.pca=1665.0,446.4 \
+  --target qml:quant.regime=1743.0,446.4 \
+  --target qml:quant.projection=1833.0,446.4 \
+  --target qml:quant.network=1923.0,446.4 \
+  --target qml:quant.knowledge=1329.0,446.4 \
+  --target qml:quant.monte-carlo=1191.0,446.4 \
+  --target qml:quant.order-book=1125.0,446.4 \
+  --target bevy-egui:primary.browser=1161.0,396.6 \
+  --target bevy-egui:browser.browser1=1128.0,441.0 \
+  --target bevy-egui:browser.browser2=1203.0,441.0 \
+  --target bevy-egui:browser.browser3=1275.0,441.0 \
+  --target bevy-egui:primary.charting=1296.0,396.6 \
+  --target bevy-egui:chart.analytical=1128.0,441.0 \
+  --target bevy-egui:chart.stock=1203.0,441.0 \
+  --target bevy-egui:chart.pivot=1275.0,441.0 \
+  --target bevy-egui:primary.quantviz=1428.0,396.6 \
+  --target bevy-egui:quant.vol-surface=1128.0,441.0 \
+  --target bevy-egui:quant.factor-structure=1206.0,441.0 \
+  --target bevy-egui:quant.correlation=1278.0,441.0 \
+  --target bevy-egui:quant.frontier=1356.0,441.0 \
+  --target bevy-egui:quant.pca=1419.0,441.0 \
+  --target bevy-egui:quant.regime=1488.0,441.0 \
+  --target bevy-egui:quant.projection=1596.0,441.0 \
+  --target bevy-egui:quant.network=1675.8,441.0 \
+  --target bevy-egui:quant.knowledge=1750.8,441.0 \
+  --target bevy-egui:quant.monte-carlo=1824.0,441.0 \
+  --target bevy-egui:quant.order-book=1905.0,441.0 \
+  --timeout 30 \
+  --settle 2 \
+  --jsonl /tmp/ui-framework-pointer-native-complete-2026-11-22-01.jsonl
+```
+
+Each fresh unchanged Release process passed 22 real clicks: one initial focus/no-op plus 21 route steps. The common route sequence was `browser.browser1 → browser.browser2 → browser.browser3 → chart.analytical → chart.stock → chart.pivot → chart.analytical → browser.browser3 → browser.browser1 → quantitative-default → quant.factor-structure → quant.correlation → quant.frontier → quant.pca → quant.regime → quant.projection → quant.knowledge → quant.monte-carlo → quant.vol-surface → quant.network → quant.order-book → browser.browser1`. The default was `quant.vol-surface` for Slint and Bevy + egui and canonical `quant.order-book` for QML. QML's final Order Book step was a separate real-pointer activation of its Heatmap tab, not the earlier default readback. Every click had exact semantic active-route readback, every final Browser-primary click restored retained Browser 1, and all three acknowledged `quit` and exited with status 0. Every JSONL record has `complete_quantitative_pointer_verified=true`, `programmatic_route_selection=false`, `keyboard_input=false`, and `rendered_frame_verified=false`.
+
+Executable hashes remained Slint `34fc038090dc7f14d5a08d9e529d347f18de20bb747c196f4e333e905776ce33`, QML `881597209f79148d8b5b807d22cf6cdd483cef54f636f1ab32df8117e148801c`, and Bevy + egui `f60ebe4eb6f90e56529838ac7a1b5a104b06d7019a6e98743bf569ed3e345fa1`. The accepted development log is `/tmp/ui-framework-pointer-native-complete-2026-11-22-01.jsonl`. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
+
+This closes the previous direct Network Graph and Order Book shell-tab pointer gap only at the audited native geometry. It is one passing complete run per implementation, not repeated-run reliability. It does not establish page-content or other-control interaction, touch, scrolling, drag, behavior at other geometries or scales, rendered-frame correctness, presented-frame timing, active-screen-reader behavior, human-reviewed equivalence, durable artifact attachment, controlled results, or scenario acceptance.
 
 No scenario activation or implementation hash attestation is part of this parent-only BP-01 fixture deliverable.

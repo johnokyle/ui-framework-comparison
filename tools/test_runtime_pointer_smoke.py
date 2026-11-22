@@ -42,6 +42,17 @@ def routes_for(implementation):
     ]
 
 
+def complete_quant_routes_for(implementation):
+    return (
+        routes_for(implementation)[:-1]
+        + [
+            core.Route("primary.quantviz", "quant.network"),
+            core.Route("primary.quantviz", "quant.order-book"),
+        ]
+        + routes_for(implementation)[-1:]
+    )
+
+
 class FakeSession:
     def __init__(self, routes=None, implementation="slint", select_replies=None):
         self.adapter = core.Adapter(implementation, "unused")
@@ -210,6 +221,18 @@ class RuntimePointerSmokeTests(unittest.TestCase):
         pointer_smoke.require_targets(
             complete_disabled_targets("slint"), ["slint"], disabled_controls=True
         )
+        base_targets = {
+            key: point
+            for key, point in complete_targets("slint").items()
+            if key[1] in pointer_smoke.BASE_TARGET_IDS
+        }
+        pointer_smoke.require_targets(base_targets, ["slint"])
+        with self.assertRaises(core.SmokeFailure) as caught:
+            pointer_smoke.require_targets(
+                base_targets, ["slint"], complete_quantitative=True
+            )
+        self.assertIn("slint:quant.network", str(caught.exception))
+        self.assertIn("slint:quant.order-book", str(caught.exception))
 
     def test_complete_pointer_sequence_and_clean_quit(self):
         for implementation in pointer_smoke.IMPLEMENTATIONS:
@@ -247,6 +270,77 @@ class RuntimePointerSmokeTests(unittest.TestCase):
                 self.assertTrue(record["charting_secondary_verified"])
                 self.assertTrue(record["quantitative_secondary_verified"])
                 self.assertFalse(record["rendered_frame_verified"])
+                self.assertNotIn("complete_quantitative_pointer_verified", record)
+
+    def test_complete_quantitative_sequence_and_clean_quit(self):
+        for implementation in pointer_smoke.IMPLEMENTATIONS:
+            with self.subTest(implementation=implementation):
+                routes = complete_quant_routes_for(implementation)
+                session = FakeSession(routes, implementation)
+                pointer = FakePointer()
+                with mock.patch.object(pointer_smoke.time, "sleep"):
+                    record = pointer_smoke.run_pointer_sequence(
+                        session,
+                        pointer,
+                        complete_targets(implementation),
+                        settle=0,
+                        complete_quantitative=True,
+                    )
+                self.assertEqual(session.state_count, len(routes))
+                self.assertTrue(session.quit_acknowledged)
+                self.assertTrue(session.finished)
+                self.assertEqual(
+                    record["route_sequence"],
+                    [
+                        route.secondary
+                        for index, route in enumerate(routes)
+                        if index != 1
+                    ],
+                )
+                self.assertEqual(
+                    record["route_sequence"][-3:],
+                    ["quant.network", "quant.order-book", "browser.browser1"],
+                )
+                self.assertEqual(
+                    len(pointer.clicks), len(pointer_smoke.CLICK_SEQUENCE) + 3
+                )
+                self.assertEqual(pointer.normalizations, len(pointer.clicks))
+                self.assertEqual(
+                    [
+                        click["target_id"]
+                        for click in record["click_sequence"][-3:]
+                    ],
+                    ["quant.network", "quant.order-book", "primary.browser"],
+                )
+                self.assertTrue(record["complete_quantitative_pointer_verified"])
+                self.assertFalse(record["programmatic_route_selection"])
+                self.assertEqual(
+                    record["outcome"], "complete-quantitative-pointer-tab-selection"
+                )
+
+    def test_native_adapter_omits_only_the_fixed_size_override(self):
+        size_variables = {
+            "slint": "SLINTUITEST_CAPTURE_SIZE",
+            "qml": "QMLUITEST_CAPTURE_SIZE",
+            "bevy-egui": "BEVY_EGUI_CAPTURE_SIZE",
+        }
+        for implementation in pointer_smoke.IMPLEMENTATIONS:
+            with self.subTest(implementation=implementation):
+                base = core.Adapter(implementation, "unused")
+                default = pointer_smoke.configured_adapter(base, 1.5)
+                native = pointer_smoke.configured_adapter(base, 1.5, size="native")
+                self.assertIn(
+                    (size_variables[implementation], "1200x750"), default.environment
+                )
+                self.assertNotIn(size_variables[implementation], dict(native.environment))
+                self.assertEqual(
+                    native.environment,
+                    tuple(
+                        (name, value)
+                        for name, value in default.environment
+                        if name != size_variables[implementation]
+                    ),
+                )
 
     def test_disabled_control_sequence_and_clean_quit(self):
         for implementation in pointer_smoke.IMPLEMENTATIONS:
