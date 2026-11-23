@@ -1553,6 +1553,35 @@ Independent validation checked all three records' exact two-click/five-route seq
 
 This establishes one real ascending numeric Market Cap-sort interaction for QML. Slint and Bevy + egui Market Cap sorting remain unverified after one preserved unsuccessful new-target attempt each. Other headers and directions, sort ties, repeated-run reliability, editing, scrolling, drag, touch, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, and scenario acceptance remain unestablished. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
 
+### Browser 1 Market Cap-toggle pointer captures (2026-11-22)
+
+A QML-only follow-up tested a second fresh-state Market Cap header activation. The existing repeated-header path toggles ascending/descending direction (`Browser1Page.qml:40-52`), with numeric comparison in `browser1sortproxymodel.cpp:11-56`. The executable parent generator's raw-value oracle expects ascending `FLVP 679777313.4407552`, `AN 711349241.0462298`, `ITH 921043887.6278162`, `EI 968828828.4036916`, `XLC 1052061392.8930393` and descending `AK 4826983499312.0625`, `QM 4782252988314.29`, `UAWX 4760830380882.155`, `YKL 4713914733136.068`, `DTOG 4712117762643.022`. No tie occurs among those leaders, so this run does not claim tie-oracle coverage. Slint and Bevy + egui remained excluded because their first Market Cap activations are unverified; neither unsuccessful attempt was retried.
+
+The development-only `/tmp/run_browser1_market_cap_toggle_pointer.py` driver used one fresh native light/100% QML process. Its accepted invocation used the driver's 60-second default timeout:
+
+```bash
+python3 /tmp/run_browser1_market_cap_toggle_pointer.py \
+  --work-root "/tmp/ui-framework-browser1-market-cap-toggle-pointer-2026-11-22-01/qml" \
+  --jsonl "/tmp/ui-framework-browser1-market-cap-toggle-pointer-2026-11-22-01/qml.jsonl" \
+  --settle 2
+```
+
+The QML Market Cap target exactly reused the preceding fresh-state run: review/logical `(835,271)` / `(1590,510)`. The Browser-primary focus target was unchanged. The process attempted one focus click and two Market Cap-header clicks, parked at logical `(100,100)` before every capture, passed seven Browser 1 readbacks, acknowledged `quit`, and exited with status 0 without keyboard input or programmatic route selection. Desktop PNGs are 5120×2160 and review PNGs are 1600×1060 from `(1815,579,3415,1639)`.
+
+Procedural `status=passed` means only that all three clicks were attempted, the route remained unchanged, all three review-capture pairs were distinct, and clean exit completed. The JSONL retains `ascending_market_cap_sort_visually_verified=false`, `descending_market_cap_sort_visually_verified=false`, `capture_pixel_content_reviewed=false`, `rendered_frame_verified=false`, and `equivalence_established=false`; subsequent assistant inspection of the labeled detail sheet is the page-content oracle.
+
+| Capture | QML visual review |
+|---|---|
+| Before | Canonical source leaders `IM`, `BEDD`, `AZFF`, `MTM`, `UI` |
+| After first Market Cap click | Ascending marker and numeric leaders `FLVP 679,777,313`, `AN 711,349,241`, `ITH 921,043,888`, `EI 968,828,828`, `XLC 1,052,061,393` |
+| After second Market Cap click | Descending marker and numeric leaders `AK 4,826,983,499,312`, `QM 4,782,252,988,314`, `UAWX 4,760,830,380,882`, `YKL 4,713,914,733,136`, `DTOG 4,712,117,762,643` |
+
+Independent RGB comparison measured difference bounds `(8,257,1447,1060)` for before/after-first and before/after-second, and `(8,267,1447,1060)` for after-first/after-second. Capture inequality alone was not treated as sorting evidence.
+
+Independent validation checked the record's exact three-click/seven-route sequence, target coordinates, executable hash, expected leaders and values, visual-review flags, clean exit, capture modes/dimensions/byte counts, pairwise-distinctness fields, and SHA-256 values: 3 clicks, 7 Browser 1 readbacks, and 6 recorded PNGs. Before/after-first/after-second review SHA-256 values were `0fe9217720342ce98c9962ad85509dfa84cffdc74d410c1d9b15c7ecb681b91b`, `f4776786187f94100e8be0118dc1db1a05193bedd9bfce0a8ced64263badf073`, and `f31462e76b36de2b4fbb4eafc6b06b2aba0fc89bb574d6e3eadc927050b8dd7d`. The JSONL SHA-256 was `2df2e6acf1d355c8270c937c1889b211917c6bcd4fe8343c900be5d42d1fe019`.
+
+This establishes one real ascending-then-descending numeric Market Cap-sort sequence for QML. It does not establish Slint or Bevy + egui Market Cap sorting, sort ties, other headers/directions, repeated-run reliability, editing, scrolling, drag, touch, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, or scenario acceptance. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
+
 ### Bevy + egui Export View pointer and application capture (2026-11-22)
 
 A development-only `/tmp/run_bevy_export_view_pointer.py` driver launched the unchanged Bevy + egui Release executable at native light/100% with a fresh `/tmp` working directory. It used the existing stable-ID adapter only for initial/final route readback and acknowledged quit, never route selection. Two same-route Browser-primary clicks established focus, followed by one real Export View toolbar click. The accepted invocation was:
