@@ -1311,6 +1311,36 @@ Independent validation checked both records' exact five-click/eleven-route seque
 
 This establishes one selective-deselection sequence for each of Slint and QML: removing `NHP` preserved `MJC` and the ascending row order. It does not establish modified/disjoint selection, canonical-source-row multi-selection, repeated-run reliability, Bevy + egui behavior, other sorted columns, editing, scrolling, drag, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, or scenario acceptance. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
 
+### Browser 1 Symbol-header page-content pointer captures (2026-11-22)
+
+A new-target Browser 1 run tested one fresh-state Symbol-header click in each implementation. Symbol is a string column with typed lexical comparison (`src/data.rs:238-256`, `Browser1Page.qml:40-52`, `browser1sortproxymodel.cpp:11-56`, and Bevy + egui `src/ui/tabs/browser/browser_1_model.rs:5-24`). First activation requests ascending order (`src/browser1.rs:175-188`, `src/ui/state/browser_1_state.rs:157-166`). This was not a retry of the unsuccessful QML Company or Bevy + egui Price/Company targets.
+
+The development-only `/tmp/run_browser1_symbol_pointer.py` driver used one fresh native light/100% process per implementation. Its accepted invocation used the driver's 60-second default timeout:
+
+```bash
+python3 /tmp/run_browser1_symbol_pointer.py \
+  --implementation "$IMPLEMENTATION" \
+  --work-root "/tmp/ui-framework-browser1-symbol-pointer-2026-11-22-01/$IMPLEMENTATION" \
+  --jsonl "/tmp/ui-framework-browser1-symbol-pointer-2026-11-22-01/$IMPLEMENTATION.jsonl" \
+  --settle 2
+```
+
+The shared 90 px Symbol width and following 220 px Company width place their centers at review x=45 and x=200 (`src/data.rs:42-54`, `Browser1Page.qml:24-25`, and `fixtures/manifests/browser1.json:49-53`). Symbol targets were therefore Slint review/logical `(45,243)` / `(1116,493.2)`, QML `(45,271)` / `(1116,510)`, and Bevy + egui `(45,263)` / `(1116,505.2)`. Browser-primary focus targets were unchanged from the Company runs. Every process attempted one focus click and one Symbol-header click, parked at logical `(100,100)` before each capture, passed five Browser 1 readbacks, acknowledged `quit`, and exited with status 0 without keyboard input or programmatic route selection. Desktop PNGs are 5120×2160 and review PNGs are 1600×1060 from `(1815,579,3415,1639)`.
+
+Procedural `status=passed` for all three records means only that both clicks were attempted, the route remained unchanged, distinct decodable before/after review captures were produced, and clean exit completed. Every JSONL retains `symbol_sort_visually_verified=false` and `capture_pixel_content_reviewed=false`; subsequent assistant inspection of labeled contact/detail sheets is the sorting oracle.
+
+| Implementation | Before | After Symbol click | Clean exit |
+|---|---|---|---|
+| Slint | Canonical source order beginning `IM`, `BEDD`, `AZFF`, `MTM`, `UI` | Ascending Symbol marker and lexical leaders `AAR`, `AARR`, `AB`, `ABH`, `ABKH` | Acknowledged quit, status 0 |
+| QML | Canonical source order beginning `IM`, `BEDD`, `AZFF`, `MTM`, `UI` | Ascending Symbol marker and the same lexical leaders | Acknowledged quit, status 0 |
+| Bevy + egui | Canonical source order beginning `IM`, `BEDD`, `AZFF`, `MTM`, `UI` | Original order retained; no ascending marker or sorted rows observed | Acknowledged quit, status 0 |
+
+Independent RGB comparison measured difference bounds Slint `(1,202,1425,1057)` and QML `(0,257,1447,1060)`, including their headers and row changes. Bevy + egui's differences were confined to `(8,64,233,276)`, above the data rows, despite its procedural distinct-capture pass. This unsuccessful new-target interaction does not distinguish input delivery, hit targeting, focus, and application causes and does not establish a defect. No attempt was retried.
+
+Independent validation checked all three records' exact two-click/five-route sequences, executable hashes, visual-review flags, clean exits, capture modes/dimensions/byte counts, and SHA-256 values: 6 clicks, 15 Browser 1 readbacks, and 12 recorded PNGs. Before/after review SHA-256 values were Slint `4c5bad6dd14baf6fc675aba7a9dac8504ee692455d335337fddee864c988e0fd` and `d468edc58a96725f7630f801ad816e8aaf6890470ce6badc06709f93261a48fb`; QML `7074e9fc7ec33abf117a788fed369e763623f8d1495ee5cab5d2f626411473cd` and `ec272e12411bcaa1a3390a3b74cd20614114f02faa69dec1e86669e2f1e752d6`; and Bevy + egui `d21591e9744a59edbb7a46f835f8ef488a098745c47f6f1762acfa86ca790650` and `be7bbb36379eeebbdced188bbe1b915677e346d0ff4b82d434323814921837b1`. JSONL SHA-256 values were Slint `142109b5f60dba89d60df5976890a2c1fcb53b3df418f52bdf6b28e6e41b9c91`, QML `dc2f3ac254fa46137966a3687f68b204c12b4fe2d42b6e67e7ef7880da9bfbd8`, and Bevy + egui `6f21aab2ea335fe80d0fddcaf8dcb1314bac1c6845a8cb28b7b3ddbbaa42faee`.
+
+This establishes one real ascending Symbol-sort interaction for Slint and QML. QML's earlier Company result is unchanged, and Bevy + egui Symbol sorting remains unverified after one preserved unsuccessful new-target attempt. Other headers and directions, repeated-run reliability, editing, scrolling, drag, touch, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, and scenario acceptance remain unestablished. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
+
 ### Bevy + egui Export View pointer and application capture (2026-11-22)
 
 A development-only `/tmp/run_bevy_export_view_pointer.py` driver launched the unchanged Bevy + egui Release executable at native light/100% with a fresh `/tmp` working directory. It used the existing stable-ID adapter only for initial/final route readback and acknowledged quit, never route selection. Two same-route Browser-primary clicks established focus, followed by one real Export View toolbar click. The accepted invocation was:
