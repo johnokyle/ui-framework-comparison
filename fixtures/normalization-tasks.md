@@ -1582,6 +1582,36 @@ Independent validation checked the record's exact three-click/seven-route sequen
 
 This establishes one real ascending-then-descending numeric Market Cap-sort sequence for QML. It does not establish Slint or Bevy + egui Market Cap sorting, sort ties, other headers/directions, repeated-run reliability, editing, scrolling, drag, touch, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, or scenario acceptance. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
 
+### Browser 1 RSI-header page-content pointer captures (2026-11-22)
+
+A new-target Browser 1 run tested one fresh-state RSI header click in each implementation. RSI is a nullable numeric column with typed comparison (`src/data.rs:238-274`, `Browser1Page.qml:40-52`, `browser1sortproxymodel.cpp:11-56`, and Bevy + egui `src/ui/tabs/browser/browser_1_model.rs:5-24`). First activation requests ascending order. Sorting the executable parent generator's `browser1_rows()` by raw non-null `rsi` gives expected leaders `PPGL 15.129161334052545`, `JRT 15.177493020612673`, `GSOJ 15.246760958110844`, `RX 15.299249460019816`, and `IA 15.325847358754949`. No tie occurs among those leaders. Null placement and tie behavior are not claimed from these leading rows. This was a new target, not a retry of earlier unsuccessful headers.
+
+The development-only `/tmp/run_browser1_rsi_pointer.py` driver used one fresh native light/100% process per implementation. Its accepted invocation used the driver's 60-second default timeout:
+
+```bash
+python3 /tmp/run_browser1_rsi_pointer.py \
+  --implementation "$IMPLEMENTATION" \
+  --work-root "/tmp/ui-framework-browser1-rsi-pointer-2026-11-22-01/$IMPLEMENTATION" \
+  --jsonl "/tmp/ui-framework-browser1-rsi-pointer-2026-11-22-01/$IMPLEMENTATION.jsonl" \
+  --settle 2
+```
+
+The shared widths before RSI are 90+220+140+100+100+120+130 px and its own width is 80 px, placing its center at review x=940 (`src/data.rs:42-54`, `Browser1Page.qml:24-25`, and `fixtures/manifests/browser1.json:49-53`). RSI targets were therefore Slint review/logical `(940,243)` / `(1653,493.2)`, QML `(940,271)` / `(1653,510)`, and Bevy + egui `(940,263)` / `(1653,505.2)`. Browser-primary focus targets were unchanged. Every process attempted one focus click and one RSI-header click, parked at logical `(100,100)` before each capture, passed five Browser 1 readbacks, acknowledged `quit`, and exited with status 0 without keyboard input or programmatic route selection. Desktop PNGs are 5120×2160 and review PNGs are 1600×1060 from `(1815,579,3415,1639)`.
+
+Procedural `status=passed` for all three records means only that both clicks were attempted, the route remained unchanged, distinct decodable before/after review captures were produced, and clean exit completed. Every JSONL retains `rsi_sort_visually_verified=false` and `capture_pixel_content_reviewed=false`; subsequent assistant inspection of labeled detail sheets is the sorting oracle.
+
+| Implementation | Before | After RSI click | Clean exit |
+|---|---|---|---|
+| Slint | Canonical source order beginning `IM`, `BEDD`, `AZFF`, `MTM`, `UI` | Ascending marker/status and numeric leaders `PPGL 15.1`, `JRT 15.2`, `GSOJ 15.2`, `RX 15.3`, `IA 15.3` | Acknowledged quit, status 0 |
+| QML | Canonical source order beginning `IM`, `BEDD`, `AZFF`, `MTM`, `UI` | Ascending marker and the same numeric leaders and displayed values | Acknowledged quit, status 0 |
+| Bevy + egui | Canonical source order beginning `IM`, `BEDD`, `AZFF`, `MTM`, `UI` | Original order retained; no ascending marker or sorted rows observed | Acknowledged quit, status 0 |
+
+Independent RGB comparison measured difference bounds Slint `(6,202,1425,1057)` and QML `(8,257,1447,1060)`, including their headers and row changes. Bevy + egui's differences were confined to `(13,64,233,100)`, above the data rows, despite its procedural distinct-capture pass. This unsuccessful new-target interaction does not distinguish input delivery, hit targeting, focus, and application causes and does not establish a defect. No attempt was retried.
+
+Independent validation checked all three records' exact two-click/five-route sequences, target x-coordinates, executable hashes, expected leaders and values, visual-review flags, clean exits, capture modes/dimensions/byte counts, and SHA-256 values: 6 clicks, 15 Browser 1 readbacks, and 12 recorded PNGs. Before/after review SHA-256 values were Slint `4c5bad6dd14baf6fc675aba7a9dac8504ee692455d335337fddee864c988e0fd` and `85fb542df6f2bab8859684c45a25efc14eb9bdc39842d3b2e526e0bf15d4539e`; QML `5caaeaf19a6284b424ed3e31b104813ef32803902a76f186ee436eac533b6e66` and `b6664b4442e053307e26c88b516d00abee3913318744a5921c50f21d6ed76266`; and Bevy + egui `11abc028e348cd1fa043c3fa622a916f97017296d85f6b7d66ab1cdd50a28dc3` and `df9abbc6bc7ce6eb54a7490fb5e39004357db5d305f07e120b2dada1cb50aa3f`. JSONL SHA-256 values were Slint `16b0fe031fb59de00e098c8f0b132a7a280180f50c4855998a9da1c61f1c2517`, QML `46b2c0a8c9f8eeb79cf652e29496766290e59bf994120d260d52a9cbc716207d`, and Bevy + egui `d38b43f5a5519fdb855bc49817ad489687add291fb1e95ea72124cc4ccc5bae7`.
+
+This establishes one real ascending numeric RSI-sort interaction for Slint and QML. Bevy + egui RSI sorting remains unverified after one preserved unsuccessful new-target attempt. Null placement, sort ties, other headers and directions, repeated-run reliability, editing, scrolling, drag, touch, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, and scenario acceptance remain unestablished. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
+
 ### Bevy + egui Export View pointer and application capture (2026-11-22)
 
 A development-only `/tmp/run_bevy_export_view_pointer.py` driver launched the unchanged Bevy + egui Release executable at native light/100% with a fresh `/tmp` working directory. It used the existing stable-ID adapter only for initial/final route readback and acknowledged quit, never route selection. Two same-route Browser-primary clicks established focus, followed by one real Export View toolbar click. The accepted invocation was:
