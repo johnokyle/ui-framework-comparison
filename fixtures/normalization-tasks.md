@@ -1341,6 +1341,36 @@ Independent validation checked all three records' exact two-click/five-route seq
 
 This establishes one real ascending Symbol-sort interaction for Slint and QML. QML's earlier Company result is unchanged, and Bevy + egui Symbol sorting remains unverified after one preserved unsuccessful new-target attempt. Other headers and directions, repeated-run reliability, editing, scrolling, drag, touch, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, and scenario acceptance remain unestablished. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
 
+### Browser 1 Symbol-toggle pointer captures (2026-11-22)
+
+A Slint/QML-only follow-up tested a second fresh-state Symbol-header activation. The existing repeated-header paths toggle ascending/descending direction (`src/browser1.rs:175-188` and `Browser1Page.qml:40-52`), with typed lexical comparison in `src/data.rs:238-256` and `browser1sortproxymodel.cpp:11-56`. The limited sequence requested ascending then descending Symbol order. Bevy + egui remained excluded because its first Symbol activation is unverified.
+
+The development-only `/tmp/run_browser1_symbol_toggle_pointer.py` driver used one fresh native light/100% process per implementation. Its accepted invocation used the driver's 60-second default timeout:
+
+```bash
+python3 /tmp/run_browser1_symbol_toggle_pointer.py \
+  --implementation "$IMPLEMENTATION" \
+  --work-root "/tmp/ui-framework-browser1-symbol-toggle-pointer-2026-11-22-01/$IMPLEMENTATION" \
+  --jsonl "/tmp/ui-framework-browser1-symbol-toggle-pointer-2026-11-22-01/$IMPLEMENTATION.jsonl" \
+  --settle 2
+```
+
+Symbol targets exactly reused the preceding fresh-state run: Slint review/logical `(45,243)` / `(1116,493.2)` and QML `(45,271)` / `(1116,510)`. Browser-primary focus targets were unchanged. Each process attempted one focus click and two Symbol-header clicks, parked at logical `(100,100)` before every capture, passed seven Browser 1 readbacks, acknowledged `quit`, and exited with status 0 without keyboard input or programmatic route selection. Desktop PNGs are 5120×2160 and review PNGs are 1600×1060 from `(1815,579,3415,1639)`.
+
+Procedural `status=passed` means only that all three clicks were attempted, the route remained unchanged, all three review-capture pairs were distinct, and clean exit completed. Both JSONL records retain `ascending_symbol_sort_visually_verified=false`, `descending_symbol_sort_visually_verified=false`, `capture_pixel_content_reviewed=false`, `rendered_frame_verified=false`, and `equivalence_established=false`; subsequent assistant inspection of labeled detail sheets is the page-content oracle.
+
+| Capture | Slint visual review | QML visual review |
+|---|---|---|
+| Before | Canonical source leaders `IM`, `BEDD`, `AZFF`, `MTM`, `UI` | Canonical source leaders `IM`, `BEDD`, `AZFF`, `MTM`, `UI` |
+| After first Symbol click | Ascending marker and lexical leaders `AAR`, `AARR`, `AB`, `ABH`, `ABKH` | Ascending marker and the same lexical leaders |
+| After second Symbol click | Descending marker and lexical leaders `ZZIW`, `ZZE`, `ZYQJ`, `ZX`, `ZX` | Descending marker and the same lexical leaders |
+
+Independent RGB comparison measured Slint difference bounds `(1,202,1425,1057)` for before/after-first and before/after-second, and `(8,202,1425,1057)` for after-first/after-second. QML bounds were `(0,257,1447,1060)` for before/after-first and before/after-second, and `(8,267,1447,1060)` for after-first/after-second. Capture inequality alone was not treated as sorting evidence.
+
+Independent validation checked both records' exact three-click/seven-route sequences, executable hashes, visual-review flags, clean exits, capture modes/dimensions/byte counts, pairwise-distinctness fields, and SHA-256 values: 6 clicks, 14 Browser 1 readbacks, and 12 recorded PNGs. Before/after-first/after-second review SHA-256 values were Slint `4c5bad6dd14baf6fc675aba7a9dac8504ee692455d335337fddee864c988e0fd`, `d468edc58a96725f7630f801ad816e8aaf6890470ce6badc06709f93261a48fb`, and `590fc8fd834ee47ff1b8f12ea5cc8fb9a80618a5eea290ca8dae284cddf46cb1`; QML `f5fc39aff20dc4c6b119dfb71520be951f23a6c553f80aa366e3d37184a15935`, `0094b954318691b5ba51f116e1b58cf4605af0bd8fce16955e3ad41d3fdb358f`, and `31943fa05560ab796c3a6c146fa6d6e1838a10243c81ccf7b21decdfe0aa5e81`. JSONL SHA-256 values were Slint `530e0af7a73d89c300552bf203073e790ac1ef072642b80fae1cdb4cfbbb6409` and QML `a487c2007c2b85a440b4f82c597e3ae8a2b917cd3e394220bae9122defbb28c4`.
+
+This establishes one real ascending-then-descending Symbol-sort sequence for each of Slint and QML. It does not establish Bevy + egui Symbol sorting, QML Company sorting, other headers/directions, repeated-run reliability, editing, scrolling, drag, touch, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, or scenario acceptance. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
+
 ### Bevy + egui Export View pointer and application capture (2026-11-22)
 
 A development-only `/tmp/run_bevy_export_view_pointer.py` driver launched the unchanged Bevy + egui Release executable at native light/100% with a fresh `/tmp` working directory. It used the existing stable-ID adapter only for initial/final route readback and acknowledged quit, never route selection. Two same-route Browser-primary clicks established focus, followed by one real Export View toolbar click. The accepted invocation was:
