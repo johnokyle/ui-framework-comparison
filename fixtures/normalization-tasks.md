@@ -1731,6 +1731,36 @@ Independent validation checked all three records' exact two-click/five-route seq
 
 This establishes one real ascending lexical Sector-sort interaction with ascending source-ordinal tie handling for Slint and QML. Bevy + egui Sector sorting remains unverified after one preserved unsuccessful new-target attempt. The descending direction, other tie cases and headers, repeated-run reliability, editing, scrolling, drag, touch, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, and scenario acceptance remain unestablished. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
 
+### Browser 1 Sector-toggle pointer captures (2026-11-22)
+
+A Slint/QML follow-up tested a second fresh-state Sector header activation. The existing repeated-header paths toggle ascending/descending direction (`src/browser1.rs:175-188` and `Browser1Page.qml:40-52`), with lexical comparison and ascending source-ordinal ties in `src/data.rs:238-274` and `browser1sortproxymodel.cpp:11-56`. The executable parent generator's oracle expects ascending `Communication Services` leaders `EVX` (ordinal 6), `PY` (7), `GID` (10), `XAGI` (16), `YT` (18), followed on the second click by descending `Utilities` leaders `MH` (14), `GAY` (17), `XNDW` (28), `RYBT` (41), `HEV` (66). Both groups directly exercise equal-sector tie ordering rather than lexical symbol order; descending reverses the primary key without reversing source-ordinal ties. Bevy + egui remained excluded because its first Sector activation is unverified.
+
+The development-only `/tmp/run_browser1_sector_toggle_pointer.py` driver used one fresh native light/100% process per implementation. Its accepted invocation used the driver's 60-second default timeout:
+
+```bash
+python3 /tmp/run_browser1_sector_toggle_pointer.py \
+  --implementation "$IMPLEMENTATION" \
+  --work-root "/tmp/ui-framework-browser1-sector-toggle-pointer-2026-11-22-01/$IMPLEMENTATION" \
+  --jsonl "/tmp/ui-framework-browser1-sector-toggle-pointer-2026-11-22-01/$IMPLEMENTATION.jsonl" \
+  --settle 2
+```
+
+Sector targets exactly reused the preceding fresh-state run: Slint review/logical `(380,243)` / `(1317,493.2)` and QML `(380,271)` / `(1317,510)`. Browser-primary focus targets were unchanged. Each process attempted one focus click and two Sector-header clicks, parked at logical `(100,100)` before every capture, passed seven Browser 1 readbacks, acknowledged `quit`, and exited with status 0 without keyboard input or programmatic route selection. Desktop PNGs are 5120×2160 and review PNGs are 1600×1060 from `(1815,579,3415,1639)`.
+
+Procedural `status=passed` means only that all three clicks were attempted, the route remained unchanged, all three review-capture pairs were distinct, and clean exit completed. Both JSONL records retain `ascending_sector_sort_visually_verified=false`, `descending_sector_sort_visually_verified=false`, `capture_pixel_content_reviewed=false`, `rendered_frame_verified=false`, and `equivalence_established=false`; subsequent assistant inspection of labeled detail sheets is the page-content oracle.
+
+| Capture | Slint visual review | QML visual review |
+|---|---|---|
+| Before | Canonical source leaders `IM`, `BEDD`, `AZFF`, `MTM`, `UI` | Canonical source leaders `IM`, `BEDD`, `AZFF`, `MTM`, `UI` |
+| After first Sector click | Ascending marker/status and `Communication Services` leaders `EVX`, `PY`, `GID`, `XAGI`, `YT`, matching source ordinals 6, 7, 10, 16, 18 | Ascending marker and the same lexical/tie-ordered leaders |
+| After second Sector click | Descending marker/status and `Utilities` leaders `MH`, `GAY`, `XNDW`, `RYBT`, `HEV`, matching source ordinals 14, 17, 28, 41, 66 | Descending marker and the same lexical/tie-ordered leaders |
+
+Independent RGB comparison measured Slint difference bounds `(6,202,1425,1057)` for all three capture pairs. QML bounds were `(8,257,1447,1060)` for before/after-first and before/after-second, and `(8,267,1447,1060)` for after-first/after-second. Capture inequality alone was not treated as sorting evidence.
+
+Independent validation checked both records' exact three-click/seven-route sequences, target coordinates, executable hashes, expected leaders/source ordinals/sectors, visual-review flags, clean exits, capture modes/dimensions/byte counts, pairwise-distinctness fields, and SHA-256 values: 6 clicks, 14 Browser 1 readbacks, and 12 recorded PNGs. Before/after-first/after-second review SHA-256 values were Slint `4c5bad6dd14baf6fc675aba7a9dac8504ee692455d335337fddee864c988e0fd`, `7e4fb0eb805b1e61a97b064c475ef65809964cc027f3dfd25954b17731438469`, and `05e93270ee149879fd8e066d3653309df5336a2c4dc7d71ad13989db6ed3257e`; QML `dfbad2c8f972c48ae4c48b545645b1a5af603921c17534f5d98f62a9f13bba35`, `2e28ad6ac4c2d6e57c6d6bde1f6035830cd6bf3f8fb40a8feac81164fa0a8cf8`, and `5fccef06d434d69542fae11554c67e1169ed58af0c3ed6a73c8a6884b01addc0`. JSONL SHA-256 values were Slint `47279a994e707427c8871dc472d70826cdd1edac8b31da489e22e9ea53555938` and QML `e8db067c23222fd43661761fef51e804aff42c47764116764909d015072a3171`.
+
+This establishes one real ascending-then-descending lexical Sector-sort sequence for Slint and QML, including ascending source-ordinal ties in both directions. Bevy + egui Sector sorting, other tie cases and headers, repeated-run reliability, editing, scrolling, drag, touch, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, and scenario acceptance remain unestablished. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
+
 ### Bevy + egui Export View pointer and application capture (2026-11-22)
 
 A development-only `/tmp/run_bevy_export_view_pointer.py` driver launched the unchanged Bevy + egui Release executable at native light/100% with a fresh `/tmp` working directory. It used the existing stable-ID adapter only for initial/final route readback and acknowledged quit, never route selection. Two same-route Browser-primary clicks established focus, followed by one real Export View toolbar click. The accepted invocation was:
