@@ -1761,6 +1761,36 @@ Independent validation checked both records' exact three-click/seven-route seque
 
 This establishes one real ascending-then-descending lexical Sector-sort sequence for Slint and QML, including ascending source-ordinal ties in both directions. Bevy + egui Sector sorting, other tie cases and headers, repeated-run reliability, editing, scrolling, drag, touch, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, and scenario acceptance remain unestablished. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
 
+### Browser 1 Score-header page-content pointer captures (2026-11-22)
+
+A new-target Browser 1 run tested one fresh-state Score header click in each implementation. Score is an integer column with typed comparison and ascending source-ordinal ties (`src/data.rs:238-274`, `Browser1Page.qml:40-52`, `browser1sortproxymodel.cpp:11-56`, and Bevy + egui `src/ui/tabs/browser/browser_1_model.rs:5-24`). First activation requests ascending order. Sorting the executable parent generator's `browser1_rows()` by `(score, source_ordinal)` gives expected zero-score leaders `PY` (ordinal 7), `NI` (207), `YX` (232), `QHBR` (312), and `EIL` (359). These equal-score leaders directly exercise the tie oracle rather than lexical symbol order. This was a new target, not a retry of earlier unsuccessful headers.
+
+The development-only `/tmp/run_browser1_score_pointer.py` driver used one fresh native light/100% process per implementation. Its accepted invocation used the driver's 60-second default timeout:
+
+```bash
+python3 /tmp/run_browser1_score_pointer.py \
+  --implementation "$IMPLEMENTATION" \
+  --work-root "/tmp/ui-framework-browser1-score-pointer-2026-11-22-01/$IMPLEMENTATION" \
+  --jsonl "/tmp/ui-framework-browser1-score-pointer-2026-11-22-01/$IMPLEMENTATION.jsonl" \
+  --settle 2
+```
+
+The shared widths before Score are 90+220+140+100+100+120+130+80+110+110 px and its own width is 90 px, placing its center at review x=1245 (`src/data.rs:42-54`, `Browser1Page.qml:24-25`, and `fixtures/manifests/browser1.json:49-53`). Score targets were therefore Slint review/logical `(1245,243)` / `(1836,493.2)`, QML `(1245,271)` / `(1836,510)`, and Bevy + egui `(1245,263)` / `(1836,505.2)`. Browser-primary focus targets were unchanged. Every process attempted one focus click and one Score-header click, parked at logical `(100,100)` before each capture, passed five Browser 1 readbacks, acknowledged `quit`, and exited with status 0 without keyboard input or programmatic route selection. Desktop PNGs are 5120×2160 and review PNGs are 1600×1060 from `(1815,579,3415,1639)`.
+
+Procedural `status=passed` for all three records means only that both clicks were attempted, the route remained unchanged, distinct decodable before/after review captures were produced, and clean exit completed. Every JSONL retains `score_sort_visually_verified=false`, `capture_pixel_content_reviewed=false`, `rendered_frame_verified=false`, and `equivalence_established=false`; subsequent assistant inspection of labeled detail sheets is the sorting oracle.
+
+| Implementation | Before | After Score click | Clean exit |
+|---|---|---|---|
+| Slint | Canonical source order beginning `IM`, `BEDD`, `AZFF`, `MTM`, `UI` | Ascending marker/status and zero-score leaders `PY`, `NI`, `YX`, `QHBR`, `EIL`, matching source ordinals 7, 207, 232, 312, 359 | Acknowledged quit, status 0 |
+| QML | Canonical source order beginning `IM`, `BEDD`, `AZFF`, `MTM`, `UI` | Ascending marker and the same zero-score/tie-ordered leaders | Acknowledged quit, status 0 |
+| Bevy + egui | Canonical source order beginning `IM`, `BEDD`, `AZFF`, `MTM`, `UI` | Original order retained; no ascending marker or sorted rows observed | Acknowledged quit, status 0 |
+
+Independent RGB comparison measured difference bounds Slint `(6,202,1425,1057)` and QML `(8,257,1447,1060)`, including their headers and row changes. Bevy + egui's differences were confined to `(13,64,1280,276)`, above the data rows, despite its procedural distinct-capture pass. This unsuccessful new-target interaction does not distinguish input delivery, hit targeting, focus, and application causes and does not establish a defect. No attempt was retried.
+
+Independent validation checked all three records' exact two-click/five-route sequences, target x-coordinates, executable hashes, expected leaders/source ordinals/scores, visual-review flags, clean exits, capture modes/dimensions/byte counts, distinctness fields, and SHA-256 values: 6 clicks, 15 Browser 1 readbacks, and 12 recorded PNGs. Before/after review SHA-256 values were Slint `4c5bad6dd14baf6fc675aba7a9dac8504ee692455d335337fddee864c988e0fd` and `a7f088b24b493be05003529424fd09564682d472fec72d710f1d78ea2ba9345f`; QML `fda95d0d2576b578c7a268508b1ef6e4acae4ce88452ee6da187d281f601b375` and `f8a140e912ae0e9eeb2e3d47d02e2ea76410ddcabd466ee1f515b39ee0dee6ba`; and Bevy + egui `85a454e8a49b0e920c9b61dec8116a366d6ed5822915845c29545b104a0a08a2` and `cdd39918881b1cf8fbb082213463a1bedb95fc8d30e147eaaed5be8318d734d4`. JSONL SHA-256 values were Slint `d91e6ece7a2e3cc0e4e7b9c5d829ed8905f7fee6f628f8a44b2cf6a4c1fa7206`, QML `c588798c935ee202c8ab32869ae5e354e300598345bfd859bdeb0ab35a2c1cb3`, and Bevy + egui `a4e9555d519a5032a80791a29aebeeca8ff74393fb0de791145b27ee033e92a4`.
+
+This establishes one real ascending integer Score-sort interaction with ascending source-ordinal tie handling for Slint and QML. Bevy + egui Score sorting remains unverified after one preserved unsuccessful new-target attempt. The descending direction, other tie cases and headers, repeated-run reliability, editing, scrolling, drag, touch, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, and scenario acceptance remain unestablished. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
+
 ### Bevy + egui Export View pointer and application capture (2026-11-22)
 
 A development-only `/tmp/run_bevy_export_view_pointer.py` driver launched the unchanged Bevy + egui Release executable at native light/100% with a fresh `/tmp` working directory. It used the existing stable-ID adapter only for initial/final route readback and acknowledged quit, never route selection. Two same-route Browser-primary clicks established focus, followed by one real Export View toolbar click. The accepted invocation was:
