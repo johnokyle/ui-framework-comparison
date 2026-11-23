@@ -1279,6 +1279,38 @@ Independent validation checked both records' exact four-click/nine-route sequenc
 
 This establishes one unmodified two-row sorted-view selection sequence for each of Slint and QML: clicking `MJC` added it without clearing `NHP`. It does not establish canonical-source-row multi-selection, modified/disjoint selection, repeated-run reliability, Bevy + egui behavior, other sorted columns, editing, scrolling, drag, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, or scenario acceptance. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
 
+### Browser 1 sorted-row selective-deselection pointer captures (2026-11-22)
+
+A Slint/QML-only follow-up tested independent removal from a two-row selection. The same stable-identity toggle paths (`src/browser1.rs:146-160`, `Browser1Page.qml:21-38,176-219`) imply that removing `NHP` must not clear `MJC`. The limited sequence was ascending Price, select `NHP`, add `MJC`, then click `NHP` again and retain only `MJC`. Bevy + egui remained excluded because its basic row selection is unverified.
+
+The development-only `/tmp/run_browser1_selective_deselection_pointer.py` driver used one fresh native light/100% process per implementation. Its accepted invocation used the driver's 60-second default timeout:
+
+```bash
+python3 /tmp/run_browser1_selective_deselection_pointer.py \
+  --implementation "$IMPLEMENTATION" \
+  --work-root "/tmp/ui-framework-browser1-selective-deselection-pointer-2026-11-22-01/$IMPLEMENTATION" \
+  --jsonl "/tmp/ui-framework-browser1-selective-deselection-pointer-2026-11-22-01/$IMPLEMENTATION.jsonl" \
+  --settle 2
+```
+
+All targets exactly reused the preceding multi-selection run. Slint first/second-row Company targets were review/logical `(200,273)` / `(1209,511.2)` and `(200,299)` / `(1209,526.8)`; QML targets were `(200,302)` / `(1209,528.6)` and `(200,331)` / `(1209,546)`. Focus and Price targets were unchanged. Each process attempted five clicks including focus and Price, parked at logical `(100,100)` before every capture, passed eleven Browser 1 readbacks, acknowledged `quit`, and exited with status 0 without keyboard input or programmatic route selection. Desktop PNGs are 5120×2160 and review PNGs are 1600×1060 from `(1815,579,3415,1639)`.
+
+Procedural `status=passed` means only that all five clicks were attempted, the route remained unchanged, the four sequential capture pairs were distinct, and clean exit completed. All ten review pairs were in fact distinct for both records. Both JSONL records retain `price_sort_visually_verified=false`, `sorted_two_row_selection_visually_verified=false`, `selective_deselection_visually_verified=false`, and `capture_pixel_content_reviewed=false`; subsequent assistant inspection of the labeled contact sheet is the page-content oracle.
+
+| Capture | Slint visual review | QML visual review |
+|---|---|---|
+| Before | Canonical source order, empty selection | Canonical source order, empty selection |
+| After Price | Ascending `NHP 2.39`, `MJC 4.33` leaders | Ascending `NHP $2.39`, `MJC $4.33` leaders |
+| After `NHP` selection | Only `NHP` highlighted | Only `NHP` highlighted |
+| After `MJC` selection | Both `NHP` and `MJC` highlighted | Both `NHP` and `MJC` highlighted |
+| After second `NHP` click | `NHP` unselected; only `MJC` remains highlighted and identified in selection status | `NHP` unselected; only `MJC` remains highlighted and identified in selection status |
+
+Both processes acknowledged `quit` and exited with status 0. Independent RGB comparison measured Slint bounds `(1,202,1460,1057)` for every before/sorted-or-selected comparison, `(1,202,1460,286)` for after-sort/after-`NHP` and after-two/after-deselection, and `(1,202,1460,312)` for the other sorted/selected comparisons. QML bounds were `(8,257,1447,1060)` for before/after-sort, `(0,224,1471,1060)` for every other before/after-selection comparison, `(0,224,1471,316)` for after-sort/after-`NHP` and after-two/after-deselection, and `(0,224,1471,345)` for the other sorted/selected comparisons.
+
+Independent validation checked both records' exact five-click/eleven-route sequences, executable hashes, visual-review flags, clean exits, capture modes/dimensions/byte counts, all ten pairwise-distinctness fields, and SHA-256 values: 10 clicks, 22 Browser 1 readbacks, and 20 recorded PNGs. Before/after-sort/after-`NHP`/after-two/after-deselection review SHA-256 values were Slint `4c5bad6dd14baf6fc675aba7a9dac8504ee692455d335337fddee864c988e0fd`, `6028c56d81e50f34d5c865ecefce79a092df35ed4a93765cd5100370d4ac68d2`, `c3ac8a0a94960e802624cfc7f688a38e27ca0a99e38deaef441ac8822774afa3`, `276834f14d21e676c2980ded2d0efe7cd7a08781e5cc29a6d9f5e266b3d3138d`, and `a385071d8a965d7c9b6ecde0edb4ec2c38af4535889f08e59e901574d5003055`; QML `2691e334a5ecc4383c74d8b4a707bb81b2bcd41a8bfc94484a5cac86e5bd3e28`, `12899f3eb2bfd9730b8a0c8dc15dd83cc0a3b62b36a5fde192fe9cf62178912a`, `e20d0b2cc9094dd210cfc9f337faf9ed1d5d41ba12bf6519290ec4c98b58e282`, `c9e81c86a8d2e8ef2629a359cd3eeb216d821e36c35dc551ba6c9571086fc66f`, and `3736defdd895c6b61abd3535f62da65f4b92bfbedc454662574d1e4f243e4836`. JSONL SHA-256 values were Slint `5d795f9b1ee72ac609a6ce982c601b0040ac6d6539371824790e3d84506d91df` and QML `8d75d019499a57744f7b37f4729d2be737c48c5bae1737e200ab845bbb7bc740`.
+
+This establishes one selective-deselection sequence for each of Slint and QML: removing `NHP` preserved `MJC` and the ascending row order. It does not establish modified/disjoint selection, canonical-source-row multi-selection, repeated-run reliability, Bevy + egui behavior, other sorted columns, editing, scrolling, drag, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, or scenario acceptance. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
+
 ### Bevy + egui Export View pointer and application capture (2026-11-22)
 
 A development-only `/tmp/run_bevy_export_view_pointer.py` driver launched the unchanged Bevy + egui Release executable at native light/100% with a fresh `/tmp` working directory. It used the existing stable-ID adapter only for initial/final route readback and acknowledged quit, never route selection. Two same-route Browser-primary clicks established focus, followed by one real Export View toolbar click. The accepted invocation was:
