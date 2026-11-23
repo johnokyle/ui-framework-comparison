@@ -1523,6 +1523,36 @@ Independent validation checked both records' exact three-click/seven-route seque
 
 This establishes one real ascending-then-descending integer Volume-sort sequence for each of Slint and QML. It does not establish Bevy + egui Volume sorting, sort ties, other headers/directions, repeated-run reliability, editing, scrolling, drag, touch, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, or scenario acceptance. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
 
+### Browser 1 Market Cap-header page-content pointer captures (2026-11-22)
+
+A new-target Browser 1 run tested one fresh-state Market Cap header click in each implementation. Market Cap is a non-null numeric column with typed comparison (`src/data.rs:238-274`, `Browser1Page.qml:40-52`, `browser1sortproxymodel.cpp:11-56`, and Bevy + egui `src/ui/tabs/browser/browser_1_model.rs:5-24`). First activation requests ascending order. Sorting the executable parent generator's `browser1_rows()` by raw `market_cap` gives expected leaders `FLVP 679777313.4407552`, `AN 711349241.0462298`, `ITH 921043887.6278162`, `EI 968828828.4036916`, and `XLC 1052061392.8930393`. No tie occurs among those leaders, so this run does not claim tie-oracle coverage. This was a new target, not a retry of earlier unsuccessful headers.
+
+The development-only `/tmp/run_browser1_market_cap_pointer.py` driver used one fresh native light/100% process per implementation. Its accepted invocation used the driver's 60-second default timeout:
+
+```bash
+python3 /tmp/run_browser1_market_cap_pointer.py \
+  --implementation "$IMPLEMENTATION" \
+  --work-root "/tmp/ui-framework-browser1-market-cap-pointer-2026-11-22-01/$IMPLEMENTATION" \
+  --jsonl "/tmp/ui-framework-browser1-market-cap-pointer-2026-11-22-01/$IMPLEMENTATION.jsonl" \
+  --settle 2
+```
+
+The shared widths before Market Cap are 90+220+140+100+100+120 px and its own width is 130 px, placing its center at review x=835 (`src/data.rs:42-54`, `Browser1Page.qml:24-25`, and `fixtures/manifests/browser1.json:49-53`). Market Cap targets were therefore Slint review/logical `(835,243)` / `(1590,493.2)`, QML `(835,271)` / `(1590,510)`, and Bevy + egui `(835,263)` / `(1590,505.2)`. Browser-primary focus targets were unchanged. Every process attempted one focus click and one Market Cap-header click, parked at logical `(100,100)` before each capture, passed five Browser 1 readbacks, acknowledged `quit`, and exited with status 0 without keyboard input or programmatic route selection. Desktop PNGs are 5120×2160 and review PNGs are 1600×1060 from `(1815,579,3415,1639)`.
+
+QML and Bevy + egui procedural `status=passed` means only that both clicks were attempted, the route remained unchanged, distinct decodable before/after review captures were produced, and clean exit completed. Slint's `status=failed` records only its byte-identical before/after review captures; its clicks, route checks, and clean exit also completed. Every JSONL retains `market_cap_sort_visually_verified=false` and `capture_pixel_content_reviewed=false`; subsequent assistant inspection of labeled detail sheets is the sorting oracle.
+
+| Implementation | Before | After Market Cap click | Clean exit |
+|---|---|---|---|
+| Slint | Canonical source order beginning `IM`, `BEDD`, `AZFF`, `MTM`, `UI` | Original order retained with no ascending marker; before/after review PNGs byte-identical | Acknowledged quit, status 0 |
+| QML | Canonical source order beginning `IM`, `BEDD`, `AZFF`, `MTM`, `UI` | Ascending marker and numeric leaders `FLVP 679,777,313`, `AN 711,349,241`, `ITH 921,043,888`, `EI 968,828,828`, `XLC 1,052,061,393` | Acknowledged quit, status 0 |
+| Bevy + egui | Canonical source order beginning `IM`, `BEDD`, `AZFF`, `MTM`, `UI` | Original order retained; no ascending marker or sorted rows observed | Acknowledged quit, status 0 |
+
+Independent RGB comparison measured null Slint difference bounds because its review images were identical. QML bounds were `(8,257,1447,1060)`, including its header and row changes. Bevy + egui's differences were confined to `(13,64,956,276)`, above the data rows, despite its procedural distinct-capture pass. These unsuccessful new-target interactions do not distinguish input delivery, hit targeting, focus, and application causes and do not establish defects. No attempt was retried.
+
+Independent validation checked all three records' exact two-click/five-route sequences, target x-coordinates, executable hashes, expected leaders and values, visual-review flags, clean exits, capture modes/dimensions/byte counts, distinctness fields, and SHA-256 values, including Slint's expected failed status: 6 clicks, 15 Browser 1 readbacks, and 12 recorded PNGs. Before/after review SHA-256 values were Slint `4c5bad6dd14baf6fc675aba7a9dac8504ee692455d335337fddee864c988e0fd` and `4c5bad6dd14baf6fc675aba7a9dac8504ee692455d335337fddee864c988e0fd`; QML `4c96966e42f8a52739ce35e3c647cd874fd356fb4c2aeb5f66f7d2bf7f563296` and `d38e952876225bdf66c420ebb2a0d843001a51892ce23d2cb177884b7cffc829`; and Bevy + egui `11abc028e348cd1fa043c3fa622a916f97017296d85f6b7d66ab1cdd50a28dc3` and `4e2f56904523ea87304170d0cffa2c099c7e26c0498ac84d97833d18e22404ea`. JSONL SHA-256 values were Slint `a3ba490e220ce428a8b241b2618b75bc73dc03368b757726328a4bfd6564a434`, QML `c7ae8d2f3615a58a73be3ae3893bead699a271f6aaabb981170942381bf2e1b0`, and Bevy + egui `aef1c7c7531ef06311c46e2112190dea5015a133c0fc00eb83453c946bce8d9f`.
+
+This establishes one real ascending numeric Market Cap-sort interaction for QML. Slint and Bevy + egui Market Cap sorting remain unverified after one preserved unsuccessful new-target attempt each. Other headers and directions, sort ties, repeated-run reliability, editing, scrolling, drag, touch, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, and scenario acceptance remain unestablished. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
+
 ### Bevy + egui Export View pointer and application capture (2026-11-22)
 
 A development-only `/tmp/run_bevy_export_view_pointer.py` driver launched the unchanged Bevy + egui Release executable at native light/100% with a fresh `/tmp` working directory. It used the existing stable-ID adapter only for initial/final route readback and acknowledged quit, never route selection. Two same-route Browser-primary clicks established focus, followed by one real Export View toolbar click. The accepted invocation was:
