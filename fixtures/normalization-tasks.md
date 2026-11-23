@@ -1371,6 +1371,38 @@ Independent validation checked both records' exact three-click/seven-route seque
 
 This establishes one real ascending-then-descending Symbol-sort sequence for each of Slint and QML. It does not establish Bevy + egui Symbol sorting, QML Company sorting, other headers/directions, repeated-run reliability, editing, scrolling, drag, touch, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, or scenario acceptance. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
 
+### Browser 1 selection-resort pointer captures (2026-11-22)
+
+A Slint/QML-only follow-up tested stable row selection across Symbol direction changes. Slint resolves the displayed row through its current ordering and stores selected source-row identities (`src/browser1.rs:146-187`); QML keys selection by stable source `rowId`, independently of proxy display position (`Browser1Page.qml:21-52,176-219`). The limited sequence was ascending Symbol, select displayed leader `AAR`, descending Symbol, then restored ascending Symbol. Bevy + egui remained excluded because both Symbol sorting and row selection are unverified.
+
+The development-only `/tmp/run_browser1_selection_resort_pointer.py` driver used one fresh native light/100% process per implementation. Its accepted invocation used the driver's 60-second default timeout:
+
+```bash
+python3 /tmp/run_browser1_selection_resort_pointer.py \
+  --implementation "$IMPLEMENTATION" \
+  --work-root "/tmp/ui-framework-browser1-selection-resort-pointer-2026-11-22-01/$IMPLEMENTATION" \
+  --jsonl "/tmp/ui-framework-browser1-selection-resort-pointer-2026-11-22-01/$IMPLEMENTATION.jsonl" \
+  --settle 2
+```
+
+Symbol targets exactly reused the preceding toggle runs. First-row Company targets were Slint review/logical `(200,273)` / `(1209,511.2)` and QML `(200,302)` / `(1209,528.6)`; Browser-primary focus targets were unchanged. Each process attempted five clicks including focus, three Symbol-header activations, and one row activation, parked at logical `(100,100)` before every capture, passed eleven Browser 1 readbacks, acknowledged `quit`, and exited with status 0 without keyboard input or programmatic route selection. Desktop PNGs are 5120×2160 and review PNGs are 1600×1060 from `(1815,579,3415,1639)`.
+
+Procedural `status=passed` means only that all five clicks were attempted, the route remained unchanged, all four sequential review-capture pairs were distinct, and clean exit completed. Both JSONL records retain all sorting, selection, capture-review, rendered-frame, and equivalence flags as false; subsequent assistant inspection of labeled detail/status sheets is the page-content oracle. Exact after-selection/after-restored equality was recorded independently and intentionally accepted rather than treated as a failed all-pairs-distinctness check.
+
+| Capture | Slint visual review | QML visual review |
+|---|---|---|
+| Before | Canonical source leaders `IM`, `BEDD`, `AZFF`, `MTM`, `UI`; empty selection | Canonical source leaders and empty selection |
+| After first Symbol click | Ascending `AAR`, `AARR`, `AB`, `ABH`, `ABKH`; empty selection | Same ascending leaders and empty selection |
+| After `AAR` row click | `AAR` highlighted; status `Rows: AAR` | `AAR` highlighted; status `Selected rows: AAR` |
+| After second Symbol click | Descending `ZZIW`, `ZZE`, `ZYQJ`, `ZX`, `ZX`; `AAR` offscreen and status remains `Rows: AAR` | Same descending leaders; `AAR` offscreen and status remains `Selected rows: AAR` |
+| After third Symbol click | Ascending order and highlighted `AAR` restored; exact after-selection review PNG | Ascending order and highlighted `AAR` restored; exact after-selection review PNG |
+
+Independent RGB comparison measured Slint bounds `(1,202,1425,1057)` for before/after-sort and before/after-descending, `(1,202,1460,1057)` for the other before/later comparisons, `(1,202,1460,286)` for after-sort/after-selection and after-sort/after-restored, `(8,202,1425,1057)` for after-sort/after-descending, and `(1,202,1460,1057)` for after-selection-or-restored/after-descending. QML bounds were `(0,257,1447,1060)` for before/after-sort, `(0,224,1447,1060)` for before/after-descending, `(0,224,1471,1060)` for the other before/later comparisons, `(0,224,1471,316)` for after-sort/after-selection and after-sort/after-restored, `(8,224,1447,1060)` for after-sort/after-descending, and `(0,267,1471,1060)` for after-selection-or-restored/after-descending. After-selection/after-restored RGB difference bounds were null in both implementations.
+
+Independent validation checked both records' exact five-click/eleven-route sequences, executable hashes, visual-review flags, clean exits, capture modes/dimensions/byte counts, all ten pairwise-distinctness fields, exact-restoration fields, and SHA-256 values: 10 clicks, 22 Browser 1 readbacks, and 20 recorded PNGs. Before/after-sort/after-selection/after-descending/after-restored review SHA-256 values were Slint `f06fcdc4f4ef7e2e2c21cae58d827cf7f01ced90f599227291227984e328d902`, `6d4452fd92e584919af866ba100878d296a9a141d8a1a057f4f0af512d008f22`, `50c82d4779b18bb91a123e11e975575f3e96551fc3ac6f1c95fdf54d5341430e`, `286b7089ba773f442e64b7b7d49f42bbc6087b08ff6b8b3bc70493450bc9bee4`, and `50c82d4779b18bb91a123e11e975575f3e96551fc3ac6f1c95fdf54d5341430e`; QML `d71441207f2be6ddd8cc4dccb312db9fecce8acbd2741925161da228b92dedba`, `5ab56f197267360012548aa67184becc38475238ef19accbba0131878c1b95a7`, `15c07962870bb0802db6f499e87d598e82e387260e304843804bb0f51a28b35e`, `00c4e394939e75f89d7d2ef56840823b1942950df494f2bfb3b55f3321baa712`, and `15c07962870bb0802db6f499e87d598e82e387260e304843804bb0f51a28b35e`. JSONL SHA-256 values were Slint `7a1222cef1e28dc57ef18bd6ead30ce3e728c7bbf21ff7ad8161ab2987350842` and QML `3fc42248024dbd106ca9dea6c5bfa1ae3ebd3206272a9331d20b0bfc23201e36`.
+
+This establishes one stable-selection-through-resorting sequence for each of Slint and QML: `AAR` remained selected while descending order moved it offscreen, and the third Symbol click restored the exact selected ascending capture. It does not establish canonical-source-row repeated-click behavior, modified/disjoint selection, repeated-run reliability, Bevy + egui behavior, other sorted columns, editing, scrolling, drag, touch, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, or scenario acceptance. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
+
 ### Bevy + egui Export View pointer and application capture (2026-11-22)
 
 A development-only `/tmp/run_bevy_export_view_pointer.py` driver launched the unchanged Bevy + egui Release executable at native light/100% with a fresh `/tmp` working directory. It used the existing stable-ID adapter only for initial/final route readback and acknowledged quit, never route selection. Two same-route Browser-primary clicks established focus, followed by one real Export View toolbar click. The accepted invocation was:
