@@ -1248,6 +1248,37 @@ Independent validation checked both records' exact four-click/nine-route sequenc
 
 This establishes one complete sorted-view select/deselect cycle for each of Slint and QML, including exact post-sort pixel restoration after the second click. It does not establish a canonical-source-row repeated-click cycle, repeated-run reliability, modified/multi-selection, Bevy + egui behavior, other sorted columns, editing, scrolling, drag, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, or scenario acceptance. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
 
+### Browser 1 sorted-row multi-selection pointer captures (2026-11-22)
+
+A Slint/QML-only follow-up tested retained membership across two different sorted rows. Slint inserts each clicked source-row identity without clearing existing membership (`src/browser1.rs:146-160`); QML independently toggles each delegate's stable `rowId` (`Browser1Page.qml:21-38,176-219`). After ascending Price, the limited oracle was to select leading `NHP`, then second-row `MJC`, and retain both. Bevy + egui remained excluded because its basic row selection is unverified.
+
+The development-only `/tmp/run_browser1_sorted_multi_selection_pointer.py` driver used one fresh native light/100% process per implementation. Its accepted invocation used the driver's 60-second default timeout:
+
+```bash
+python3 /tmp/run_browser1_sorted_multi_selection_pointer.py \
+  --implementation "$IMPLEMENTATION" \
+  --work-root "/tmp/ui-framework-browser1-sorted-multi-selection-pointer-2026-11-22-01/$IMPLEMENTATION" \
+  --jsonl "/tmp/ui-framework-browser1-sorted-multi-selection-pointer-2026-11-22-01/$IMPLEMENTATION.jsonl" \
+  --settle 2
+```
+
+Focus and Price targets were unchanged from the preceding sorted-row runs. Slint's 26 px row height (`ui/grid.slint:344-345,734-735`) puts the second-row Company target at review/logical `(200,299)` / `(1209,526.8)`, 26 review pixels below the first-row `(200,273)` / `(1209,511.2)`. QML's 28 px delegate plus 1 px row spacing (`Browser1Page.qml:170-171,176-185`) puts its second-row target at `(200,331)` / `(1209,546)`, below its first-row `(200,302)` / `(1209,528.6)`. These remain setup-specific coordinates, not resolution-independent application geometry.
+
+Each process attempted focus, Price, first-row, and second-row clicks. It parked at logical `(100,100)` before every capture, passed nine Browser 1 readbacks, acknowledged `quit`, and exited with status 0 without keyboard input or programmatic route selection. Desktop PNGs are 5120×2160 and review PNGs are 1600×1060 from `(1815,579,3415,1639)`.
+
+Procedural `status=passed` means only that all four clicks were attempted, the route remained unchanged, before/after-sort, after-sort/after-first-selection, and after-first/after-second-selection review pairs were distinct, and clean exit completed. All six review pairs were in fact distinct for both records. Both JSONL records retain `price_sort_visually_verified=false`, `sorted_first_row_selection_visually_verified=false`, `sorted_two_row_selection_visually_verified=false`, and `capture_pixel_content_reviewed=false`; subsequent assistant inspection of the labeled contact sheet is the page-content oracle.
+
+| Implementation | After Price | After first row click | After second row click | Clean exit |
+|---|---|---|---|---|
+| Slint | Ascending Price with leading `NHP 2.39`, then `MJC 4.33` | Only leading `NHP` highlighted | Both `NHP` and `MJC` highlighted; selection status identifies both | Acknowledged quit, status 0 |
+| QML | Ascending Price with leading `NHP $2.39`, then `MJC $4.33` | Only leading `NHP` highlighted | Both `NHP` and `MJC` highlighted; selected-row status identifies both | Acknowledged quit, status 0 |
+
+Independent RGB comparison measured Slint bounds `(1,202,1460,1057)` for before/after-sort and both before/after-selection comparisons, `(1,202,1460,286)` for after-sort/after-first-selection, and `(1,202,1460,312)` for after-sort/after-second-selection and after-first/after-second-selection. QML bounds were `(8,257,1447,1060)` for before/after-sort, `(0,224,1471,1060)` for both before/after-selection comparisons, `(0,224,1471,316)` for after-sort/after-first-selection, and `(0,224,1471,345)` for after-sort/after-second-selection and after-first/after-second-selection.
+
+Independent validation checked both records' exact four-click/nine-route sequences, executable hashes, visual-review flags, clean exits, capture modes/dimensions/byte counts, all six pairwise-distinctness fields, and SHA-256 values: 8 clicks, 18 Browser 1 readbacks, and 16 recorded PNGs. Before/after-sort/after-first-selection/after-second-selection review SHA-256 values were Slint `61d9e6f188ebd9f3088acfabb191ab6278410e5de7b697f47c1fc10c2404e534`, `b4b97239631b1256cc27bc363a862f2b446290efe9c24d4af097f8ed1716fe79`, `7ff3d947ef920531abf2dfbb389e650f48a235163bee96fff6581bc832d56f83`, and `24ec8d2f2b172b6f3a0db75566c67d6aa30ec8823f82843a9d66c62d2ca6f82a`; QML `fb999c1308fecfde1dedacabc97b5bec43ed568de89250eac1ceec8ad872fc4c`, `0fe0892c756cc998d6a74ea261914f6cf47712d72d0cfc373954b60aeaf996ea`, `1c92aadf922b3535eded263be4a8871ab875cdf5641d3d5ee33ef5359ac9086e`, and `da46296cfaa595a6b3392ce108e7b08a86afee9752e54f39c98f5a94f9f8a80c`. JSONL SHA-256 values were Slint `8b4cf47cf566d79533f6969c0875805b97b109e22b323dac4c2d3e1efe87692c` and QML `45b9dcd84e9ec3a734a23436c3eca933452b2d0075dca9dbd5703c4c501379e9`.
+
+This establishes one unmodified two-row sorted-view selection sequence for each of Slint and QML: clicking `MJC` added it without clearing `NHP`. It does not establish canonical-source-row multi-selection, modified/disjoint selection, repeated-run reliability, Bevy + egui behavior, other sorted columns, editing, scrolling, drag, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, or scenario acceptance. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
+
 ### Bevy + egui Export View pointer and application capture (2026-11-22)
 
 A development-only `/tmp/run_bevy_export_view_pointer.py` driver launched the unchanged Bevy + egui Release executable at native light/100% with a fresh `/tmp` working directory. It used the existing stable-ID adapter only for initial/final route readback and acknowledged quit, never route selection. Two same-route Browser-primary clicks established focus, followed by one real Export View toolbar click. The accepted invocation was:
