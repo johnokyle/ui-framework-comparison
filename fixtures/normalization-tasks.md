@@ -1642,6 +1642,35 @@ Independent validation checked both records' exact three-click/seven-route seque
 
 This establishes one real ascending-then-descending numeric RSI-sort sequence for Slint. QML adds another ascending observation but not direction toggling; its descending RSI sort remains unverified. Bevy + egui RSI sorting, null placement, sort ties, other headers/directions, repeated-run reliability, editing, scrolling, drag, touch, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, and scenario acceptance remain unestablished. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
 
+### Browser 1 Volatility-header page-content pointer captures (2026-11-22)
+
+A new-target Browser 1 run tested one fresh-state Volatility header click in each implementation. Volatility is a numeric column with typed comparison (`src/data.rs:238-274`, `Browser1Page.qml:40-52`, `browser1sortproxymodel.cpp:11-56`, and Bevy + egui `src/ui/tabs/browser/browser_1_model.rs:5-24`). First activation requests ascending order. Sorting the executable parent generator's `browser1_rows()` by raw `volatility` gives expected leaders `PVG 5.075718614873341`, `KFXU 5.089445313988742`, `YT 5.092290531345817`, `ECQU 5.109003819701236`, and `BC 5.14107879943242`. No raw-value tie occurs among those leaders; rounded displayed values do not claim tie-oracle coverage. This was a new target, not a retry of earlier unsuccessful headers.
+
+The development-only `/tmp/run_browser1_volatility_pointer.py` driver used one fresh native light/100% process per implementation. Its accepted invocation used the driver's 60-second timeout and 2-second settle defaults:
+
+```bash
+python3 /tmp/run_browser1_volatility_pointer.py \
+  --implementation "$IMPLEMENTATION" \
+  --work-root "/tmp/ui-framework-browser1-volatility-pointer-2026-11-22-01/$IMPLEMENTATION" \
+  --jsonl "/tmp/ui-framework-browser1-volatility-pointer-2026-11-22-01/$IMPLEMENTATION.jsonl"
+```
+
+The shared widths before Volatility are 90+220+140+100+100+120+130+80 px and its own width is 110 px, placing its center at review x=1035 (`src/data.rs:42-54`, `Browser1Page.qml:24-25`, and `fixtures/manifests/browser1.json:49-53`). Volatility targets were therefore Slint review/logical `(1035,243)` / `(1710,493.2)`, QML `(1035,271)` / `(1710,510)`, and Bevy + egui `(1035,263)` / `(1710,505.2)`. Browser-primary focus targets were unchanged. Every process attempted one focus click and one Volatility-header click, parked at logical `(100,100)` before each capture, passed five Browser 1 readbacks, acknowledged `quit`, and exited with status 0 without keyboard input or programmatic route selection. Desktop PNGs are 5120×2160 and review PNGs are 1600×1060 from `(1815,579,3415,1639)`.
+
+Procedural `status=passed` for all three records means only that both clicks were attempted, the route remained unchanged, distinct decodable before/after review captures were produced, and clean exit completed. Every JSONL retains `volatility_sort_visually_verified=false`, `capture_pixel_content_reviewed=false`, `rendered_frame_verified=false`, and `equivalence_established=false`; subsequent assistant inspection of labeled detail sheets is the sorting oracle.
+
+| Implementation | Before | After Volatility click | Clean exit |
+|---|---|---|---|
+| Slint | Canonical source order beginning `IM`, `BEDD`, `AZFF`, `MTM`, `UI` | Ascending marker/status and numeric leaders `PVG 5.08%`, `KFXU 5.09%`, `YT 5.09%`, `ECQU 5.11%`, `BC 5.14%` | Acknowledged quit, status 0 |
+| QML | Canonical source order beginning `IM`, `BEDD`, `AZFF`, `MTM`, `UI` | Ascending marker and numeric leaders `PVG 5.1%`, `KFXU 5.1%`, `YT 5.1%`, `ECQU 5.1%`, `BC 5.1%` | Acknowledged quit, status 0 |
+| Bevy + egui | Canonical source order beginning `IM`, `BEDD`, `AZFF`, `MTM`, `UI` | Original order retained; no ascending marker or sorted rows observed | Acknowledged quit, status 0 |
+
+Independent RGB comparison measured difference bounds Slint `(6,202,1425,1057)` and QML `(8,257,1447,1060)`, including their headers and row changes. Bevy + egui's differences were confined to `(8,64,1144,224)`, above the data rows, despite its procedural distinct-capture pass. This unsuccessful new-target interaction does not distinguish input delivery, hit targeting, focus, and application causes and does not establish a defect. No attempt was retried.
+
+Independent validation checked all three records' exact two-click/five-route sequences, target x-coordinates, executable hashes, expected leaders and values, visual-review flags, clean exits, capture modes/dimensions/byte counts, distinctness fields, and SHA-256 values: 6 clicks, 15 Browser 1 readbacks, and 12 recorded PNGs. Before/after review SHA-256 values were Slint `4c5bad6dd14baf6fc675aba7a9dac8504ee692455d335337fddee864c988e0fd` and `b685455b8b7215eef31b4b7a13631d927cf7f74e0a54fbe567798f891194e236`; QML `3065b7f56609253b5aaee96be0ced242bcd471c8dfd9946b944e490aa0941be2` and `5aaf7fb38ccdf7b6e9f76bad1fbd8cdc0b003afc2ae7608691f5160de5542b6b`; and Bevy + egui `11abc028e348cd1fa043c3fa622a916f97017296d85f6b7d66ab1cdd50a28dc3` and `279d140cf004d553edad666ce2d8587eb2bbca18e41bc84fd85fb7ee9cd6f7a6`. JSONL SHA-256 values were Slint `579a1513692df6aae4e7c160391ac79d6d7da298aa84002e0df7ead85d093cef`, QML `94c99b32d411b403c64d4d4d80ee06b19571bcbfda650d7932a5cd901bf8dc26`, and Bevy + egui `4f89ee84d50ffabf7c97b06b8150984002eb0f4b17597bf5dcebdab2b161dc6c`.
+
+This establishes one real ascending numeric Volatility-sort interaction for Slint and QML. Bevy + egui Volatility sorting remains unverified after one preserved unsuccessful new-target attempt. Sort ties, the descending direction, other headers, repeated-run reliability, editing, scrolling, drag, touch, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, and scenario acceptance remain unestablished. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
+
 ### Bevy + egui Export View pointer and application capture (2026-11-22)
 
 A development-only `/tmp/run_bevy_export_view_pointer.py` driver launched the unchanged Bevy + egui Release executable at native light/100% with a fresh `/tmp` working directory. It used the existing stable-ID adapter only for initial/final route readback and acknowledged quit, never route selection. Two same-route Browser-primary clicks established focus, followed by one real Export View toolbar click. The accepted invocation was:
