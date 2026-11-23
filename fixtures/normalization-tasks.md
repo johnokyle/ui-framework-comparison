@@ -1403,6 +1403,36 @@ Independent validation checked both records' exact five-click/eleven-route seque
 
 This establishes one stable-selection-through-resorting sequence for each of Slint and QML: `AAR` remained selected while descending order moved it offscreen, and the third Symbol click restored the exact selected ascending capture. It does not establish canonical-source-row repeated-click behavior, modified/disjoint selection, repeated-run reliability, Bevy + egui behavior, other sorted columns, editing, scrolling, drag, touch, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, or scenario acceptance. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
 
+### Browser 1 Change %-header page-content pointer captures (2026-11-22)
+
+A new-target Browser 1 run tested one fresh-state Change % header click in each implementation. Change % is a non-null signed numeric column with typed comparison (`src/data.rs:238-274`, `Browser1Page.qml:40-52`, `browser1sortproxymodel.cpp:11-56`, and Bevy + egui `src/ui/tabs/browser/browser_1_model.rs:5-24`). First activation requests ascending order. Sorting the executable parent generator's `browser1_rows()` by raw `change_pct` gives expected leaders `GUO -5.999998936`, `MSRU -5.999034552`, `TJH -5.997427117`, `IZN -5.997093220`, and `OQNH -5.982578783`. This was a new target, not a retry of QML Company or Bevy + egui Price/Company/Symbol.
+
+The development-only `/tmp/run_browser1_change_percent_pointer.py` driver used one fresh native light/100% process per implementation. Its accepted invocation used the driver's 60-second default timeout:
+
+```bash
+python3 /tmp/run_browser1_change_percent_pointer.py \
+  --implementation "$IMPLEMENTATION" \
+  --work-root "/tmp/ui-framework-browser1-change-percent-pointer-2026-11-22-01/$IMPLEMENTATION" \
+  --jsonl "/tmp/ui-framework-browser1-change-percent-pointer-2026-11-22-01/$IMPLEMENTATION.jsonl" \
+  --settle 2
+```
+
+The shared widths before Change % are 90+220+140+100 px and its own width is 100 px, placing its center at review x=600 (`src/data.rs:42-54`, `Browser1Page.qml:24-25`, and `fixtures/manifests/browser1.json:49-53`). Change % targets were therefore Slint review/logical `(600,243)` / `(1449,493.2)`, QML `(600,271)` / `(1449,510)`, and Bevy + egui `(600,263)` / `(1449,505.2)`. Browser-primary focus targets were unchanged. Every process attempted one focus click and one Change %-header click, parked at logical `(100,100)` before each capture, passed five Browser 1 readbacks, acknowledged `quit`, and exited with status 0 without keyboard input or programmatic route selection. Desktop PNGs are 5120×2160 and review PNGs are 1600×1060 from `(1815,579,3415,1639)`.
+
+Procedural `status=passed` for all three records means only that both clicks were attempted, the route remained unchanged, distinct decodable before/after review captures were produced, and clean exit completed. Every JSONL retains `change_percent_sort_visually_verified=false` and `capture_pixel_content_reviewed=false`; subsequent assistant inspection of labeled detail sheets is the sorting oracle.
+
+| Implementation | Before | After Change % click | Clean exit |
+|---|---|---|---|
+| Slint | Canonical source order beginning `IM`, `BEDD`, `AZFF`, `MTM`, `UI` | Ascending marker/status and numeric leaders `GUO`, `MSRU`, `TJH`, `IZN`, `OQNH`, displayed as `-6.00%`, `-6.00%`, `-6.00%`, `-6.00%`, `-5.98%` | Acknowledged quit, status 0 |
+| QML | Canonical source order beginning `IM`, `BEDD`, `AZFF`, `MTM`, `UI` | Ascending marker and the same numeric leaders and displayed values | Acknowledged quit, status 0 |
+| Bevy + egui | Canonical source order beginning `IM`, `BEDD`, `AZFF`, `MTM`, `UI` | Original order retained; no ascending marker or sorted rows observed | Acknowledged quit, status 0 |
+
+Independent RGB comparison measured difference bounds Slint `(6,202,1425,1057)` and QML `(8,257,1447,1060)`, including their headers and row changes. Bevy + egui's differences were confined to `(13,64,690,276)`, above the data rows, despite its procedural distinct-capture pass. This unsuccessful new-target interaction does not distinguish input delivery, hit targeting, focus, and application causes and does not establish a defect. No attempt was retried.
+
+Independent validation checked all three records' exact two-click/five-route sequences, target x-coordinates, executable hashes, expected leaders, visual-review flags, clean exits, capture modes/dimensions/byte counts, and SHA-256 values: 6 clicks, 15 Browser 1 readbacks, and 12 recorded PNGs. Before/after review SHA-256 values were Slint `4c5bad6dd14baf6fc675aba7a9dac8504ee692455d335337fddee864c988e0fd` and `15f13a16c88a5c82af772e0dfc7fa8c02840685aa444a08bb733750323dac5d4`; QML `f81d156a79d013f75f6e4cc2bcc4b2a0dad8e6966232b1f029a95ec0ca8811d9` and `283793b9d9879a5dc5db5dcccdac49343ace6b5867c07d5471fa1c332c54cb51`; and Bevy + egui `d21591e9744a59edbb7a46f835f8ef488a098745c47f6f1762acfa86ca790650` and `b3af73f36c81e61b75051a686c447196fa042cb456b84502c1360d5f2330b842`. JSONL SHA-256 values were Slint `ca5ea2c296028643d42cc9e00098e7ec1fa46ea06d247bfc3f250a3ec1127a71`, QML `2ac98ab8798215c8696bf449d283e771a66b2c3d7f4e4e31e117ea90379a2e25`, and Bevy + egui `ddd9e0801b4644c0f49fff6dd452277fbed87724365b1a712ff67baab9eb5317`.
+
+This establishes one real ascending signed-numeric Change %-sort interaction for Slint and QML. Bevy + egui Change % sorting remains unverified after one preserved unsuccessful new-target attempt. Other headers and directions, repeated-run reliability, editing, scrolling, drag, touch, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, and scenario acceptance remain unestablished. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
+
 ### Bevy + egui Export View pointer and application capture (2026-11-22)
 
 A development-only `/tmp/run_bevy_export_view_pointer.py` driver launched the unchanged Bevy + egui Release executable at native light/100% with a fresh `/tmp` working directory. It used the existing stable-ID adapter only for initial/final route readback and acknowledged quit, never route selection. Two same-route Browser-primary clicks established focus, followed by one real Export View toolbar click. The accepted invocation was:
