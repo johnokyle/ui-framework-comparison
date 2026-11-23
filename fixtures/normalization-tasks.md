@@ -1612,6 +1612,36 @@ Independent validation checked all three records' exact two-click/five-route seq
 
 This establishes one real ascending numeric RSI-sort interaction for Slint and QML. Bevy + egui RSI sorting remains unverified after one preserved unsuccessful new-target attempt. Null placement, sort ties, other headers and directions, repeated-run reliability, editing, scrolling, drag, touch, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, and scenario acceptance remain unestablished. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
 
+### Browser 1 RSI-toggle pointer captures (2026-11-22)
+
+A Slint/QML follow-up tested a second fresh-state RSI header activation. The existing repeated-header paths toggle ascending/descending direction (`src/browser1.rs:175-188` and `Browser1Page.qml:40-52`), with nullable numeric comparison in `src/data.rs:238-274` and `browser1sortproxymodel.cpp:11-56`. The executable parent generator's raw-value oracle expects ascending `PPGL 15.129161334052545`, `JRT 15.177493020612673`, `GSOJ 15.246760958110844`, `RX 15.299249460019816`, `IA 15.325847358754949` and descending `TLQA 84.99524884210588`, `TEGO 84.99084144523718`, `ODW 84.96463089614423`, `ZFC 84.94180959198277`, `TSED 84.93342399216044`. No tie occurs among those leaders. Null placement and tie behavior are not claimed from these leading rows. Bevy + egui remained excluded because its first RSI activation is unverified.
+
+The development-only `/tmp/run_browser1_rsi_toggle_pointer.py` driver used one fresh native light/100% process per implementation. Its accepted invocation used the driver's 60-second default timeout:
+
+```bash
+python3 /tmp/run_browser1_rsi_toggle_pointer.py \
+  --implementation "$IMPLEMENTATION" \
+  --work-root "/tmp/ui-framework-browser1-rsi-toggle-pointer-2026-11-22-01/$IMPLEMENTATION" \
+  --jsonl "/tmp/ui-framework-browser1-rsi-toggle-pointer-2026-11-22-01/$IMPLEMENTATION.jsonl" \
+  --settle 2
+```
+
+RSI targets exactly reused the preceding fresh-state run: Slint review/logical `(940,243)` / `(1653,493.2)` and QML `(940,271)` / `(1653,510)`. Browser-primary focus targets were unchanged. Each process attempted one focus click and two RSI-header clicks, parked at logical `(100,100)` before every capture, passed seven Browser 1 readbacks, acknowledged `quit`, and exited with status 0 without keyboard input or programmatic route selection. Desktop PNGs are 5120×2160 and review PNGs are 1600×1060 from `(1815,579,3415,1639)`.
+
+Procedural `status=passed` means only that all three clicks were attempted, the route remained unchanged, all three review-capture pairs were distinct, and clean exit completed. Both JSONL records retain `ascending_rsi_sort_visually_verified=false`, `descending_rsi_sort_visually_verified=false`, `capture_pixel_content_reviewed=false`, `rendered_frame_verified=false`, and `equivalence_established=false`; subsequent assistant inspection of labeled detail sheets is the page-content oracle. In particular, QML's procedural pass does not establish its requested direction sequence.
+
+| Capture | Slint visual review | QML visual review |
+|---|---|---|
+| Before | Canonical source leaders `IM`, `BEDD`, `AZFF`, `MTM`, `UI` | Canonical source leaders `IM`, `BEDD`, `AZFF`, `MTM`, `UI` |
+| After first RSI click | Ascending marker/status and numeric leaders `PPGL 15.1`, `JRT 15.2`, `GSOJ 15.2`, `RX 15.3`, `IA 15.3` | Original order retained with no ascending marker |
+| After second RSI click | Descending marker/status and numeric leaders `TLQA 85.0`, `TEGO 85.0`, `ODW 85.0`, `ZFC 84.9`, `TSED 84.9` | Ascending marker and numeric leaders `PPGL 15.1`, `JRT 15.2`, `GSOJ 15.2`, `RX 15.3`, `IA 15.3`; no descending sequence observed |
+
+Independent RGB comparison measured Slint difference bounds `(6,202,1425,1057)` for all three capture pairs. QML before/after-first bounds were `(0,770,52,877)`, confined to the left edge rather than the headers or data rows; before/after-second and after-first/after-second bounds were `(0,257,1507,1060)`. Capture inequality alone was not treated as sorting evidence. QML's first-click non-activation does not distinguish input delivery, hit targeting, focus, and application causes and does not establish a defect. The sequence was not retried.
+
+Independent validation checked both records' exact three-click/seven-route sequences, target x-coordinates, executable hashes, expected leaders and values, visual-review flags, clean exits, capture modes/dimensions/byte counts, pairwise-distinctness fields, and SHA-256 values: 6 clicks, 14 Browser 1 readbacks, and 12 recorded PNGs. Before/after-first/after-second review SHA-256 values were Slint `4c5bad6dd14baf6fc675aba7a9dac8504ee692455d335337fddee864c988e0fd`, `85fb542df6f2bab8859684c45a25efc14eb9bdc39842d3b2e526e0bf15d4539e`, and `5df7fdae4869836c0fd398c52fd76f3d9b3dd4755dcb7b8015ceac493a943a6a`; QML `07032357d2a99e166ce5cb2eb9f30b9a698b41a570ad5589cfaff0817326e895`, `e3639f5c0bf35afaa9040f300c43e5aea266177c03a4b6043650e18c444d46c4`, and `ad3470cf3b1ba75ce0a9fbe98d0a5e3a10a8a873b0270e54bce6d00fad852d7c`. JSONL SHA-256 values were Slint `a4b492d104ef2bb8b187ace89d76a07f508424d9bd66118347705c5b3add77cc` and QML `6abb1f6a1f040be62b7168da0c6e82827e2ab0886f33b29c9941b364486243f6`.
+
+This establishes one real ascending-then-descending numeric RSI-sort sequence for Slint. QML adds another ascending observation but not direction toggling; its descending RSI sort remains unverified. Bevy + egui RSI sorting, null placement, sort ties, other headers/directions, repeated-run reliability, editing, scrolling, drag, touch, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, and scenario acceptance remain unestablished. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
+
 ### Bevy + egui Export View pointer and application capture (2026-11-22)
 
 A development-only `/tmp/run_bevy_export_view_pointer.py` driver launched the unchanged Bevy + egui Release executable at native light/100% with a fresh `/tmp` working directory. It used the existing stable-ID adapter only for initial/final route readback and acknowledged quit, never route selection. Two same-route Browser-primary clicks established focus, followed by one real Export View toolbar click. The accepted invocation was:
