@@ -1463,6 +1463,36 @@ Independent validation checked both records' exact three-click/seven-route seque
 
 This establishes one real ascending-then-descending signed-numeric Change %-sort sequence for each of Slint and QML. It does not establish Bevy + egui Change % sorting, other headers/directions, repeated-run reliability, editing, scrolling, drag, touch, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, or scenario acceptance. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
 
+### Browser 1 Volume-header page-content pointer captures (2026-11-22)
+
+A new-target Browser 1 run tested one fresh-state Volume header click in each implementation. Volume is a non-null integer column with typed comparison (`src/data.rs:238-274`, `Browser1Page.qml:40-52`, `browser1sortproxymodel.cpp:11-56`, and Bevy + egui `src/ui/tabs/browser/browser_1_model.rs:5-24`). First activation requests ascending order. Sorting the executable parent generator's `browser1_rows()` by raw integer `volume` gives expected leaders `CMXC 12007`, `XU 118794`, `FZ 126771`, `TTF 173752`, and `FQ 174734`. No tie occurs among those leaders, so this run does not claim tie-oracle coverage. This was a new target, not a retry of earlier unsuccessful headers.
+
+The development-only `/tmp/run_browser1_volume_pointer.py` driver used one fresh native light/100% process per implementation. Its accepted invocation used the driver's 60-second default timeout:
+
+```bash
+python3 /tmp/run_browser1_volume_pointer.py \
+  --implementation "$IMPLEMENTATION" \
+  --work-root "/tmp/ui-framework-browser1-volume-pointer-2026-11-22-01/$IMPLEMENTATION" \
+  --jsonl "/tmp/ui-framework-browser1-volume-pointer-2026-11-22-01/$IMPLEMENTATION.jsonl" \
+  --settle 2
+```
+
+The shared widths before Volume are 90+220+140+100+100 px and its own width is 120 px, placing its center at review x=710 (`src/data.rs:42-54`, `Browser1Page.qml:24-25`, and `fixtures/manifests/browser1.json:49-53`). Volume targets were therefore Slint review/logical `(710,243)` / `(1515,493.2)`, QML `(710,271)` / `(1515,510)`, and Bevy + egui `(710,263)` / `(1515,505.2)`. Browser-primary focus targets were unchanged. Every process attempted one focus click and one Volume-header click, parked at logical `(100,100)` before each capture, passed five Browser 1 readbacks, acknowledged `quit`, and exited with status 0 without keyboard input or programmatic route selection. Desktop PNGs are 5120×2160 and review PNGs are 1600×1060 from `(1815,579,3415,1639)`.
+
+Procedural `status=passed` for all three records means only that both clicks were attempted, the route remained unchanged, distinct decodable before/after review captures were produced, and clean exit completed. Every JSONL retains `volume_sort_visually_verified=false` and `capture_pixel_content_reviewed=false`; subsequent assistant inspection of labeled detail sheets is the sorting oracle.
+
+| Implementation | Before | After Volume click | Clean exit |
+|---|---|---|---|
+| Slint | Canonical source order beginning `IM`, `BEDD`, `AZFF`, `MTM`, `UI` | Ascending marker/status and integer leaders `CMXC 12,007`, `XU 118,794`, `FZ 126,771`, `TTF 173,752`, `FQ 174,734` | Acknowledged quit, status 0 |
+| QML | Canonical source order beginning `IM`, `BEDD`, `AZFF`, `MTM`, `UI` | Ascending marker and the same integer leaders and values | Acknowledged quit, status 0 |
+| Bevy + egui | Canonical source order beginning `IM`, `BEDD`, `AZFF`, `MTM`, `UI` | Original order retained; no ascending marker or sorted rows observed | Acknowledged quit, status 0 |
+
+Independent RGB comparison measured difference bounds Slint `(6,202,1425,1057)` and QML `(8,257,1447,1060)`, including their headers and row changes. Bevy + egui's differences were confined to `(13,64,818,276)`, above the data rows, despite its procedural distinct-capture pass. This unsuccessful new-target interaction does not distinguish input delivery, hit targeting, focus, and application causes and does not establish a defect. No attempt was retried.
+
+Independent validation checked all three records' exact two-click/five-route sequences, target x-coordinates, executable hashes, expected leaders and values, visual-review flags, clean exits, capture modes/dimensions/byte counts, and SHA-256 values: 6 clicks, 15 Browser 1 readbacks, and 12 recorded PNGs. Before/after review SHA-256 values were Slint `4c5bad6dd14baf6fc675aba7a9dac8504ee692455d335337fddee864c988e0fd` and `0bd4c4e4a8e6fcb76914b07cf5039b0ba1c5ee1b910494596eb4be5c6d7cb827`; QML `e0a95de7cf94079fbb3480ad5d99b64b2dc3ba66b59b2a3c8c39fa7ec61e50d6` and `9baa91f3a7585393d29b82e0e5e464c75201f69cdf20617e27ebdbd57b9b353a`; and Bevy + egui `d21591e9744a59edbb7a46f835f8ef488a098745c47f6f1762acfa86ca790650` and `bf2d49caa134879b34aeab1f411f575b89f5c71abc6f17688299d57805cf2430`. JSONL SHA-256 values were Slint `b3cd6cfdc67fb2063be55e6597ae7f1457ec6ebfa07d10f8af3929164a94fd02`, QML `de8942672b56247bacd48e3569cdbf72d75e53e1373b6abb88171777e7d364ff`, and Bevy + egui `8e2739ca9a1add4d085b572b7b4d1adc646ced85099a5fd43e9d36548959d12c`.
+
+This establishes one real ascending integer Volume-sort interaction for Slint and QML. Bevy + egui Volume sorting remains unverified after one preserved unsuccessful new-target attempt. Other headers and directions, sort ties, repeated-run reliability, editing, scrolling, drag, touch, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, and scenario acceptance remain unestablished. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
+
 ### Bevy + egui Export View pointer and application capture (2026-11-22)
 
 A development-only `/tmp/run_bevy_export_view_pointer.py` driver launched the unchanged Bevy + egui Release executable at native light/100% with a fresh `/tmp` working directory. It used the existing stable-ID adapter only for initial/final route readback and acknowledged quit, never route selection. Two same-route Browser-primary clicks established focus, followed by one real Export View toolbar click. The accepted invocation was:
