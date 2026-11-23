@@ -1433,6 +1433,36 @@ Independent validation checked all three records' exact two-click/five-route seq
 
 This establishes one real ascending signed-numeric Change %-sort interaction for Slint and QML. Bevy + egui Change % sorting remains unverified after one preserved unsuccessful new-target attempt. Other headers and directions, repeated-run reliability, editing, scrolling, drag, touch, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, and scenario acceptance remain unestablished. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
 
+### Browser 1 Change %-toggle pointer captures (2026-11-22)
+
+A Slint/QML-only follow-up tested a second fresh-state Change % header activation. The existing repeated-header paths toggle ascending/descending direction (`src/browser1.rs:175-188` and `Browser1Page.qml:40-52`), with signed numeric comparison in `src/data.rs:238-274` and `browser1sortproxymodel.cpp:11-56`. The executable parent generator's raw-value oracle expects ascending `GUO`, `MSRU`, `TJH`, `IZN`, `OQNH` and descending `TTZ`, `QTR`, `UJQ`, `PSQY`, `OFDC`. Bevy + egui remained excluded because its first Change % activation is unverified.
+
+The development-only `/tmp/run_browser1_change_percent_toggle_pointer.py` driver used one fresh native light/100% process per implementation. Its accepted invocation used the driver's 60-second default timeout:
+
+```bash
+python3 /tmp/run_browser1_change_percent_toggle_pointer.py \
+  --implementation "$IMPLEMENTATION" \
+  --work-root "/tmp/ui-framework-browser1-change-percent-toggle-pointer-2026-11-22-01/$IMPLEMENTATION" \
+  --jsonl "/tmp/ui-framework-browser1-change-percent-toggle-pointer-2026-11-22-01/$IMPLEMENTATION.jsonl" \
+  --settle 2
+```
+
+Change % targets exactly reused the preceding fresh-state run: Slint review/logical `(600,243)` / `(1449,493.2)` and QML `(600,271)` / `(1449,510)`. Browser-primary focus targets were unchanged. Each process attempted one focus click and two Change %-header clicks, parked at logical `(100,100)` before every capture, passed seven Browser 1 readbacks, acknowledged `quit`, and exited with status 0 without keyboard input or programmatic route selection. Desktop PNGs are 5120×2160 and review PNGs are 1600×1060 from `(1815,579,3415,1639)`.
+
+Procedural `status=passed` means only that all three clicks were attempted, the route remained unchanged, all three review-capture pairs were distinct, and clean exit completed. Both JSONL records retain `ascending_change_percent_sort_visually_verified=false`, `descending_change_percent_sort_visually_verified=false`, `capture_pixel_content_reviewed=false`, `rendered_frame_verified=false`, and `equivalence_established=false`; subsequent assistant inspection of labeled detail sheets and the Slint descending review capture is the page-content oracle.
+
+| Capture | Slint visual review | QML visual review |
+|---|---|---|
+| Before | Canonical source leaders `IM`, `BEDD`, `AZFF`, `MTM`, `UI` | Canonical source leaders `IM`, `BEDD`, `AZFF`, `MTM`, `UI` |
+| After first Change % click | Ascending marker/status and numeric leaders `GUO`, `MSRU`, `TJH`, `IZN`, `OQNH` | Ascending marker and the same numeric leaders |
+| After second Change % click | Descending marker/status and numeric leaders `TTZ`, `QTR`, `UJQ`, `PSQY`, `OFDC` | Descending marker and the same numeric leaders |
+
+Independent RGB comparison measured Slint difference bounds `(6,202,1425,1057)` for all three capture pairs. QML bounds were `(8,257,1447,1060)` for before/after-first and before/after-second, and `(8,267,1447,1060)` for after-first/after-second. Capture inequality alone was not treated as sorting evidence.
+
+Independent validation checked both records' exact three-click/seven-route sequences, target x-coordinates, executable hashes, expected leaders, visual-review flags, clean exits, capture modes/dimensions/byte counts, pairwise-distinctness fields, and SHA-256 values: 6 clicks, 14 Browser 1 readbacks, and 12 recorded PNGs. Before/after-first/after-second review SHA-256 values were Slint `4c5bad6dd14baf6fc675aba7a9dac8504ee692455d335337fddee864c988e0fd`, `15f13a16c88a5c82af772e0dfc7fa8c02840685aa444a08bb733750323dac5d4`, and `905834aabc2c53d7b9c48cd0d37c326480e8ac7912340c3fdc8ede44f6d349e9`; QML `8de5ff3df53172ac5ee3549a4c3779d8c8aec1ad629a69d3f1ceddf75ae1d0fc`, `862268db7ebe9b51786c7ec5a19b3cf8a24c0c78d850a93d2975f1c1d8aa1ca5`, and `5b79a283798f3e2cf22069c6583351b07081448d6880c36e70108a7a976b6bf3`. JSONL SHA-256 values were Slint `b647ec1c4937b564310d1b3b27027b08fed38cadfdc6a63a8e410c42400be023` and QML `9d892b9dd60681630fd795227222f627737d800fddfdefcdfd234253f3ce86d5`.
+
+This establishes one real ascending-then-descending signed-numeric Change %-sort sequence for each of Slint and QML. It does not establish Bevy + egui Change % sorting, other headers/directions, repeated-run reliability, editing, scrolling, drag, touch, rendered-frame timing, human-reviewed equivalence, durable artifact attachment, controlled results, or scenario acceptance. All 82 parent discovery tests, repository validation, and `git diff --check` passed after documentation. No application source, scenario, controlled result, fixture, or large/on-demand variant changed or was constructed.
+
 ### Bevy + egui Export View pointer and application capture (2026-11-22)
 
 A development-only `/tmp/run_bevy_export_view_pointer.py` driver launched the unchanged Bevy + egui Release executable at native light/100% with a fresh `/tmp` working directory. It used the existing stable-ID adapter only for initial/final route readback and acknowledged quit, never route selection. Two same-route Browser-primary clicks established focus, followed by one real Export View toolbar click. The accepted invocation was:
